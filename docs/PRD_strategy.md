@@ -227,14 +227,23 @@ project documents which is active here and why:
    final decision and still emits a free-language message; the suggestion only grounds its
    reasoning and reduces obviously-bad moves on a tiny grid.
 
-**Chosen default and rationale.** We default to **strategy-as-suggestion**: the LLM remains the
-authority (preserving the natural-language, autonomous-agent character the grade rewards), while
-the cheap heuristic keeps moves sane within free-tier rate limits and short conversations. The
-LLM is explicitly permitted to **override** the suggestion — e.g. when the NL evidence suggests
-the opponent bluffed and the geometric estimate is unreliable. We do **not** let the strategy
-silently dictate moves, because that would hollow out the orchestration the assignment is
-actually grading. This choice, and the override behaviour, is mirrored in the agent prompt
-construction (`agents/base.py`, Phase 4) and re-stated in the README.
+**Chosen mode and rationale.** When consulted, the strategy runs in **strategy-as-suggestion**
+mode: the LLM remains the authority (preserving the natural-language, autonomous-agent character
+the grade rewards), while the cheap heuristic keeps moves sane within free-tier rate limits and
+short conversations. The LLM is explicitly permitted to **override** the suggestion — e.g. when
+the NL evidence suggests the opponent bluffed and the geometric estimate is unreliable. We do
+**not** let the strategy silently dictate moves, because that would hollow out the orchestration
+the assignment is actually grading.
+
+**Config gate and default.** The integration is gated behind `strategy.enabled` in
+`config/config.yaml` and ships **DEFAULT-OFF** (`strategy.enabled: false`). With the flag off the
+per-turn prompt is byte-identical to the Phase-4 prompt — the autonomous LLM-direct loop — so
+existing behaviour and tests are unchanged. Flipping the flag on appends the heuristic's suggested
+action to the prompt as a HINT (via the optional `suggestion=` argument of
+`BaseAgent.build_prompt`, `agents/base.py`); the suggestion itself is produced by
+`strategy.heuristic.suggest_cop_action` / `suggest_thief_action` against the agent's **estimate**.
+This choice and the override behaviour are mirrored in the agent prompt construction and re-stated
+in the README.
 
 ---
 
