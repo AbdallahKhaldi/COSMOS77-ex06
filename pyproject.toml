@@ -90,6 +90,13 @@ show_missing = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+# The graded run is the FULL suite: `uv run pytest -q -m 'not live'` (>=85% over src/).
+# To run a single phase in isolation, scope coverage to that package so unrelated
+# modules are not counted, e.g. Phase 3 (override addopts so the default src-wide
+# --cov is replaced, not appended):
+#   uv run pytest tests/unit/test_mcp/ -m 'not live' \
+#     -o addopts="--strict-markers --cov-fail-under=85" \
+#     --cov=cosmos77_ex06.mcp_servers --cov-report=term-missing
 addopts = "-v --cov=src/cosmos77_ex06 --cov-report=term-missing --cov-report=xml --strict-markers --cov-fail-under=85"
 markers = [
     "live: hits a real Gemini / MCP server / Gmail / network — excluded from CI, run manually",
