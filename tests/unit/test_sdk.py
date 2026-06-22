@@ -68,7 +68,7 @@ def test_run_full_game_validates_saves_and_returns(
         "totals": {"cop": 20, "thief": 5},
     }
 
-    async def _fake_runner(cfg, gk, client_factory, *, gui=False):  # noqa: ANN001, ANN202
+    async def _fake_runner(cfg, gk, client_factory, *, gui=False, **kw):  # noqa: ANN001, ANN202
         return {"report": report, "transcript": [{"turn": 1}]}
 
     monkeypatch.setattr("cosmos77_ex06.orchestrator.runner.run_full_game", _fake_runner)
@@ -85,7 +85,7 @@ def test_run_sanity_ladder_saves_a_transcript_per_size(
     """The ladder runs 4 rungs and writes one transcript file per grid size."""
     calls: list[list[int]] = []
 
-    def _fake_full_game(self, *, cloud=False, client_factory=None, gui=False):  # noqa: ANN001, ANN202
+    def _fake_full_game(self, *, cloud=False, client_factory=None, gui=False, **kw):  # noqa: ANN001, ANN202
         calls.append(list(self.config.get("grid_size")))
         return {"report": {"sub_games": [{}, {}]}, "transcript": [{"turn": 1}]}
 
@@ -104,7 +104,7 @@ def test_run_local_game_drives_orchestrator(
 ) -> None:
     """SDK.run_local_game delegates to the orchestrator and returns its result dict."""
 
-    async def _fake_run(cfg, gk, client_factory, *, gui=False):  # noqa: ANN001, ANN202
+    async def _fake_run(cfg, gk, client_factory, *, gui=False, **kw):  # noqa: ANN001, ANN202
         return {"sub_games": [{}], "totals": {"cop": 20, "thief": 5}, "messages": ["hi"]}
 
     monkeypatch.setattr("cosmos77_ex06.orchestrator.local.run_local_game", _fake_run)
