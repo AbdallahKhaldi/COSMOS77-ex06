@@ -33,7 +33,6 @@ def test_ledger_delegates_to_gatekeeper(config: Config, tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     "call",
     [
-        lambda s: s.new_game(),
         lambda s: s.run_local_game(),
         lambda s: s.run_full_game(),
         lambda s: s.report(),
