@@ -33,8 +33,34 @@ def _assert_scope(role: str) -> None:
         raise ValueError(f"token scope does not authorize role {role!r}")
 
 
+def _assert_orchestrator() -> None:
+    """Gate ``sync_state`` to the orchestrator token (carries BOTH role scopes; E6).
+
+    Only the authoritative orchestrator may overwrite a server's ground truth. On an
+    HTTP request the bearer token must carry both ``cop`` and ``thief`` scopes (the
+    orchestrator token does; a single-role token does not). Outside an HTTP context
+    (in-memory transport) ``get_access_token`` returns ``None`` and the gate is a
+    no-op, matching ``_assert_scope``'s in-process behaviour.
+    """
+    token = get_access_token()
+    if token is not None and not {"cop", "thief"} <= set(token.scopes):
+        raise ValueError("sync_state requires the orchestrator token")
+
+
 def register_tools(mcp: FastMCP, tools: GameTools) -> None:
     """Register the shared tool surface, plus ``place_barrier`` for the cop only."""
+
+    @mcp.tool
+    def sync_state(state: dict[str, Any]) -> dict[str, Any]:
+        """Mirror the orchestrator's canonical board into this server (orchestrator-only, E6)."""
+        _assert_orchestrator()
+        return tools.sync_state(state)
+
+    @mcp.tool
+    def get_full_state() -> dict[str, Any]:
+        """Return the full ground truth for cloud mirroring (orchestrator-only, E6)."""
+        _assert_orchestrator()
+        return tools.get_full_state()
 
     @mcp.tool
     def send_message(role: str, content: str) -> dict[str, Any]:

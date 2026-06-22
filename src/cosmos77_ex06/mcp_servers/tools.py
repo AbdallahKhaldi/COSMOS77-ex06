@@ -17,6 +17,7 @@ from cosmos77_ex06.game.board import Board
 from cosmos77_ex06.game.moves import IllegalMoveError, apply_move, place_barrier
 from cosmos77_ex06.game.state import Cell, GameState
 from cosmos77_ex06.mcp_servers.observation import build_observation, confirm_position
+from cosmos77_ex06.mcp_servers.state_mirror import full_state, overwrite_state
 from cosmos77_ex06.shared.config import Config
 
 
@@ -106,6 +107,14 @@ class GameTools:
             "captured": captured,
             "reason": None,
         }
+
+    def sync_state(self, state: dict[str, Any]) -> dict[str, Any]:
+        """Overwrite ground truth from the orchestrator's canonical board (cloud, E6)."""
+        return overwrite_state(self.state, state)
+
+    def get_full_state(self) -> dict[str, Any]:
+        """Return the FULL ground truth for cloud mirroring (orchestrator-only, E6)."""
+        return full_state(self.state)
 
     def place_barrier(self, role: str, x: int, y: int) -> dict[str, Any]:
         """Place a cop-only barrier impassable to both agents (PRD §4.6)."""
