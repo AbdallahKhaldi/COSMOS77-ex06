@@ -30,16 +30,11 @@ def test_ledger_delegates_to_gatekeeper(config: Config, tmp_path: Path) -> None:
     assert "subgame_1" in sdk.ledger()
 
 
-@pytest.mark.parametrize(
-    "call",
-    [
-        lambda s: s.report(),
-    ],
-)
-def test_unimplemented_stages_raise(config: Config, tmp_path: Path, call) -> None:
+def test_report_without_file_raises(config: Config, tmp_path: Path) -> None:
+    """SDK.report() with no prior report on disk raises a clear FileNotFoundError."""
     sdk = SDK(config=config, results_dir=tmp_path)
-    with pytest.raises(NotImplementedError):
-        call(sdk)
+    with pytest.raises(FileNotFoundError):
+        sdk.report()
 
 
 def test_run_full_game_validates_saves_and_returns(

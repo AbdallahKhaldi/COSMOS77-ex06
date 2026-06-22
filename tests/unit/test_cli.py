@@ -70,9 +70,17 @@ def test_run_ladder_routes_to_sanity_ladder(
     assert "ladder" in capsys.readouterr().out
 
 
-def test_report_command_routes_to_sdk_stub() -> None:
-    with pytest.raises(NotImplementedError):
-        main(["report", "--send"])
+def test_report_command_routes_to_sdk(monkeypatch: pytest.MonkeyPatch) -> None:
+    """`report --send` routes to SDK.report(send=True) (no disk / Gmail touched)."""
+    called: dict[str, bool] = {}
+
+    def fake_report(self, *, send: bool = False, sender=None) -> dict[str, bool]:
+        called["send"] = send
+        return {"sent": send}
+
+    monkeypatch.setattr("cosmos77_ex06.sdk.sdk.SDK.report", fake_report)
+    main(["report", "--send"])
+    assert called["send"] is True
 
 
 def test_bonus_parser_accepts_partner_flag() -> None:
