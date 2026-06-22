@@ -69,15 +69,9 @@ class SDK:
         board = Board(state.grid_size, state.allow_diagonal, set(state.barriers))
         pos = state.cop_pos if role == "cop" else state.thief_pos
         if kind == "barrier":
-            state.barriers_used = place_barrier(
-                role,
-                tuple(payload),
-                board,
-                state.barriers_used,
-                int(self.config.get("max_barriers")),
-                state.cop_pos,
-                state.thief_pos,
-            )
+            cap = int(self.config.get("max_barriers"))
+            args = (board, state.barriers_used, cap, state.cop_pos, state.thief_pos)
+            state.barriers_used = place_barrier(role, tuple(payload), *args)
             state.barriers = sorted(board.barriers)
         else:
             new_pos = apply_move(pos, payload, board)
@@ -105,12 +99,14 @@ class SDK:
         return self.repo_root / self.config.paths().get("reports", "reports")
 
     def run_full_game(
-        self, *, cloud: bool = False, client_factory: Any = None, gui: bool = False
+        self, *, cloud: bool = False, client_factory: Any = None, gui: bool = False, **kw: Any
     ) -> dict[str, Any]:
         """Run an autonomous full game (6 valid sub-games), validate + save the report.
 
         Re-runs Technical-Losses until ``num_games`` valid sub-games exist (E5, E13);
-        validates the §9.1 report before writing it; ``client_factory`` mocks genai.
+        ``client_factory`` mocks genai. ``cloud=True`` targets the config HTTPS MCP
+        URLs with the orchestrator token (E6); the ``mcp_client_factory`` kwarg mocks
+        those FastMCP clients in tests (no network).
         """
         import asyncio
 
@@ -118,7 +114,8 @@ class SDK:
         from cosmos77_ex06.report import output
         from cosmos77_ex06.report.schema import validate_internal_game
 
-        outcome = asyncio.run(run_full_game(self.config, self.gatekeeper, client_factory, gui=gui))
+        kwargs = {"cloud": cloud, "gui": gui, "mcp_client_factory": kw.get("mcp_client_factory")}
+        outcome = asyncio.run(run_full_game(self.config, self.gatekeeper, client_factory, **kwargs))
         report = outcome["report"]
         validate_internal_game(report)
         path = output.save_report(self.reports_dir, report)
