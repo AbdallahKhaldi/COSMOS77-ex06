@@ -54,6 +54,14 @@ class Transcript:
         self.entries.append(entry)
         return entry
 
+    def mark(self) -> int:
+        """Return the current entry count (a checkpoint to truncate back to)."""
+        return len(self.entries)
+
+    def truncate(self, mark: int) -> None:
+        """Drop turn entries appended after ``mark`` (a voided attempt's turns; E13)."""
+        del self.entries[mark:]
+
     def note_void(self, sub_game: int, reason: str) -> None:
         """Record a Technical-Loss void (the sub-game is not scored; E13)."""
         self.voids.append({"sub_game": sub_game, "reason": reason})
