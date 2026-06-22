@@ -49,7 +49,7 @@ def test_run_local_game_drives_orchestrator(
 ) -> None:
     """SDK.run_local_game delegates to the orchestrator and returns its result dict."""
 
-    async def _fake_run(cfg, gk, client_factory):  # noqa: ANN001, ANN202
+    async def _fake_run(cfg, gk, client_factory, *, gui=False):  # noqa: ANN001, ANN202
         return {"sub_games": [{}], "totals": {"cop": 20, "thief": 5}, "messages": ["hi"]}
 
     monkeypatch.setattr("cosmos77_ex06.orchestrator.local.run_local_game", _fake_run)
