@@ -33,7 +33,6 @@ def test_ledger_delegates_to_gatekeeper(config: Config, tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     "call",
     [
-        lambda s: s.run_local_game(),
         lambda s: s.run_full_game(),
         lambda s: s.report(),
         lambda s: s.bonus(),
@@ -43,3 +42,17 @@ def test_unimplemented_stages_raise(config: Config, tmp_path: Path, call) -> Non
     sdk = SDK(config=config, results_dir=tmp_path)
     with pytest.raises(NotImplementedError):
         call(sdk)
+
+
+def test_run_local_game_drives_orchestrator(
+    config: Config, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """SDK.run_local_game delegates to the orchestrator and returns its result dict."""
+
+    async def _fake_run(cfg, gk, client_factory):  # noqa: ANN001, ANN202
+        return {"sub_games": [{}], "totals": {"cop": 20, "thief": 5}, "messages": ["hi"]}
+
+    monkeypatch.setattr("cosmos77_ex06.orchestrator.local.run_local_game", _fake_run)
+    sdk = SDK(config=config, results_dir=tmp_path)
+    out = sdk.run_local_game()
+    assert out["totals"] == {"cop": 20, "thief": 5}
