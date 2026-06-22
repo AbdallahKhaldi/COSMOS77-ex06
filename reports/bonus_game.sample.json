@@ -1,0 +1,99 @@
+{
+  "bonus_claim": {
+    "COSMOS77": 10,
+    "PARTNER77": 7
+  },
+  "github_repo_group_1": "https://github.com/AbdallahKhaldi/COSMOS77-ex06",
+  "github_repo_group_2": "https://github.com/PARTNER/PARTNER-ex06",
+  "groups": {
+    "group_1": "COSMOS77",
+    "group_2": "PARTNER77"
+  },
+  "mcp_url_group_1_cop": "https://cosmos77-cop.fastmcp.app/mcp",
+  "mcp_url_group_1_thief": "https://cosmos77-thief.fastmcp.app/mcp",
+  "mcp_url_group_2_cop": "https://partner-cop.fastmcp.app/mcp",
+  "mcp_url_group_2_thief": "https://partner-thief.fastmcp.app/mcp",
+  "mutual_agreement": true,
+  "report_type": "bonus_game",
+  "students_group_1": [
+    {
+      "id": "212389712",
+      "name": "Abdallah Khaldi"
+    },
+    {
+      "id": "323118794",
+      "name": "Tasneem Natour"
+    }
+  ],
+  "students_group_2": [
+    {
+      "id": "111111111",
+      "name": "Partner One"
+    },
+    {
+      "id": "222222222",
+      "name": "Partner Two"
+    }
+  ],
+  "sub_games": [
+    {
+      "cop_group": "group_1",
+      "cop_score": 20,
+      "index": 1,
+      "moves": 14,
+      "result": "capture",
+      "thief_group": "group_2",
+      "thief_score": 5
+    },
+    {
+      "cop_group": "group_1",
+      "cop_score": 5,
+      "index": 2,
+      "moves": 25,
+      "result": "survival",
+      "thief_group": "group_2",
+      "thief_score": 10
+    },
+    {
+      "cop_group": "group_1",
+      "cop_score": 20,
+      "index": 3,
+      "moves": 9,
+      "result": "capture",
+      "thief_group": "group_2",
+      "thief_score": 5
+    },
+    {
+      "cop_group": "group_2",
+      "cop_score": 20,
+      "index": 4,
+      "moves": 17,
+      "result": "capture",
+      "thief_group": "group_1",
+      "thief_score": 5
+    },
+    {
+      "cop_group": "group_2",
+      "cop_score": 5,
+      "index": 5,
+      "moves": 25,
+      "result": "survival",
+      "thief_group": "group_1",
+      "thief_score": 10
+    },
+    {
+      "cop_group": "group_2",
+      "cop_score": 5,
+      "index": 6,
+      "moves": 25,
+      "result": "survival",
+      "thief_group": "group_1",
+      "thief_score": 10
+    }
+  ],
+  "timezone": "Asia/Jerusalem",
+  "totals_by_group": {
+    "COSMOS77": 70,
+    "PARTNER77": 50
+  }
+}
