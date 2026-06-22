@@ -10,6 +10,7 @@ num_games: 6             # sub-games per full game
 max_barriers: 5          # barriers the cop may place per sub-game (impassable for both)
 allow_diagonal: true     # diagonal moves permitted
 turn_order: ["thief", "cop"]   # the thief moves first each turn
+vision_radius: 1         # partial-observability window (cells) the MCP servers expose; enforces the Dec-POMDP observation function O
 
 # Scoring table (spec): cop capture vs thief survival.
 scoring:
