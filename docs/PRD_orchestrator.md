@@ -35,7 +35,7 @@ This is the embodiment of **Dec-POMDP control**: a centralized engine that nonet
 | `agents/cop.py` / `agents/thief.py` | `CopAgent` / `ThiefAgent`: role-specific system framing + goal. Subclass `BaseAgent` (rule 3, no duplication). |
 | `orchestrator/engine.py` | `GameEngine`: owns the two FastMCP Clients, the `GameState`, and the sub-game/game loop. |
 | `orchestrator/turn.py` | `play_turn(...)`: a single agent's turn (prompt → Gemini → NL message + tool call → board update → record). Split out to keep `engine.py` ≤ 150 lines. |
-| `orchestrator/gemini_client.py` | `GeminiClient`: thin wrapper over `google-genai`; native MCP tool-calling; routes every call through the **Gatekeeper**; handles free-tier rate limits. |
+| `orchestrator/gemini_client.py` | `GeminiClient`: thin wrapper over `google-genai`; **structured-output JSON decisions** executed by the engine via the MCP server tools; routes every call through the **Gatekeeper**; retries free-tier 429/5xx with backoff. |
 | `orchestrator/transcript.py` | Append-only transcript recorder (NL message + tool call + board snapshot per turn). |
 | `orchestrator/runner.py` | (Phase 7) full-game driver: `num_games` sub-games + Technical-Loss reruns + report assembly. |
 
@@ -102,31 +102,42 @@ transcript.append(turn=k, role=thief, msg, tool, args, board, url)
 
 ---
 
-## 4. Gemini native MCP tool-calling (the LLM call lives here)
+## 4. Gemini structured-output decisions, engine-routed MCP execution (the LLM call lives here)
 
-The engine uses the `google-genai` SDK's **native MCP integration**: a live FastMCP session is passed straight into the generation config as a tool source, so Gemini sees the server's `@mcp.tool` functions as callable tools.
+We use **structured-output decisions executed via the MCP server tools by the engine** (Server/Client separation + MCP tool use preserved), **not** the SDK's `tools=[session]` native-MCP mechanism. Reason: **google-genai 2.9.0 deep-copies the `GenerateContentConfig` for every request, and a live FastMCP `ClientSession` holds an `_asyncio.Future` that cannot be deep-copied** (`TypeError: cannot pickle '_asyncio.Future' object`). So a live MCP session in `tools=[...]` is unusable in this SDK version.
+
+Instead, the engine asks Gemini for a single JSON object via `response_mime_type="application/json"` + a role-conditional `response_schema`: a free natural-language `message` plus an `action` (the COP's action enum allows `["move", "barrier"]`; the THIEF's allows `["move"]` only). The engine then logs, validates, and executes that action against the correct server (`apply_move` / `place_barrier`). MCP tool use is therefore still real — the engine routes every decision through the FastMCP tools — and every tool decision passes through `turn.py` (recorded in the transcript, attributed to the right MCP URL) for full observability. The coordinate guard (`guard.py`) still scans every outgoing `message`.
 
 ```python
-from google import genai
 from google.genai import types
 
-# player_client is a connected fastmcp.Client; .session is the live MCP session.
+action = types.Schema(
+    type=types.Type.OBJECT,
+    properties={
+        "type": types.Schema(type=types.Type.STRING, enum=role_actions),   # cop: move|barrier; thief: move
+        "direction": types.Schema(type=types.Type.STRING, enum=DIRECTIONS),
+        "x": types.Schema(type=types.Type.INTEGER),
+        "y": types.Schema(type=types.Type.INTEGER),
+    },
+    required=["type"],
+)
+schema = types.Schema(
+    type=types.Type.OBJECT,
+    properties={"message": types.Schema(type=types.Type.STRING), "action": action},
+    required=["message", "action"],
+)
 config = types.GenerateContentConfig(
-    tools=[player_client.session],              # native MCP tool-calling
     temperature=cfg.llm.temperature,            # from config (default 0.2)
-    # automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
+    response_mime_type="application/json",
+    response_schema=schema,                      # NO tools, NO live session, NO AFC field
 )
-response = client.models.generate_content(
-    model=cfg.llm.model,                        # "gemini-2.5-flash" from config
-    contents=prompt,
-    config=config,
+response = await client.aio.models.generate_content(
+    model=cfg.llm.model, contents=prompt, config=config,
 )
+decision = json.loads(response.text)            # {"message": ..., "action": {"type", "direction"|"x","y"}}
 ```
 
-Two modes, both supported, selected by config:
-
-- **Automatic function calling (default).** Gemini autonomously invokes the MCP tool through the session; the SDK round-trips the tool result back into the model. Simplest path; the model both speaks and acts.
-- **Auto-calling disabled (engine-routed).** We set `AutomaticFunctionCallingConfig(disable=True)` so the model *proposes* a tool call (name + args) which the **engine** then logs, validates, and executes against the correct server. This is preferred for grading because it makes every tool decision pass through `turn.py` where it is recorded in the transcript, validated against `game/moves.legal_moves`, and attributed to the right MCP URL — giving us full observability of the orchestration and a clean place to enforce legality.
+The async path (`client.aio.models.generate_content`) is retained, with config-driven retries (`llm.max_retries`, `llm.retry_base_seconds`) for transient free-tier 429/5xx errors. The free-language `message` is recorded and relayed to the opponent next turn (E4); the engine maps `action` → `apply_move`/`place_barrier` and routes it through the agent's MCP server.
 
 **Server/Client separation (restated):** this `generate_content` call — the only LLM call in the system — sits in `gemini_client.py` inside the orchestrator. The MCP servers never call it; they only expose the tools Gemini chooses among.
 
