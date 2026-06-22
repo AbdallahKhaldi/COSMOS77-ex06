@@ -34,7 +34,6 @@ def test_ledger_delegates_to_gatekeeper(config: Config, tmp_path: Path) -> None:
     "call",
     [
         lambda s: s.report(),
-        lambda s: s.bonus(),
     ],
 )
 def test_unimplemented_stages_raise(config: Config, tmp_path: Path, call) -> None:

@@ -75,6 +75,32 @@ def test_report_command_routes_to_sdk_stub() -> None:
         main(["report", "--send"])
 
 
-def test_bonus_command_routes_to_sdk_stub() -> None:
-    with pytest.raises(NotImplementedError):
-        main(["bonus"])
+def test_bonus_parser_accepts_partner_flag() -> None:
+    args = build_parser().parse_args(["bonus", "--partner", "config/"])
+    assert args.command == "bonus"
+    assert args.partner == "config/"
+
+
+def test_bonus_command_routes_to_sdk(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`bonus` builds an SDK and runs the series; the report summary is printed."""
+    captured: dict[str, object] = {}
+
+    class _FakeSDK:
+        def __init__(self, config: object = None) -> None:
+            captured["config"] = config
+
+        def bonus(self) -> dict[str, object]:
+            report = {
+                "totals_by_group": {"COSMOS77": 90, "PARTNER77": 30},
+                "bonus_claim": {"COSMOS77": 10, "PARTNER77": 7},
+            }
+            return {"report": report, "json": "{}", "path": "reports/bonus_game.json"}
+
+    monkeypatch.setattr("cosmos77_ex06.sdk.sdk.SDK", _FakeSDK)
+    rc = main(["bonus"])
+    assert rc == 0
+    assert captured["config"] is None  # no --partner -> default config
+    out = capsys.readouterr().out
+    assert "totals_by_group" in out and "reports/bonus_game.json" in out
