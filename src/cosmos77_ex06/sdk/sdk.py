@@ -36,9 +36,64 @@ class SDK:
         """The repository root (the parent of the ``config/`` directory)."""
         return self.config.config_dir.parent
 
-    def new_game(self) -> Any:
-        """Build a fresh :class:`GameState` from config (Phase 2)."""
-        raise NotImplementedError("game state-machine lands in Phase 2")
+    def new_game(self, *, cop_start: Any = None, thief_start: Any = None) -> Any:
+        """Build a fresh :class:`GameState` from config (Phase 2).
+
+        Start positions default to opposite corners of the grid. The fresh state
+        is recorded through the gatekeeper ledger so every transcript rests on one
+        ledger.
+        """
+        from cosmos77_ex06.game.state import GameState
+
+        grid = list(self.config.get("grid_size"))
+        cop = tuple(cop_start) if cop_start is not None else (grid[0] - 1, grid[1] - 1)
+        thief = tuple(thief_start) if thief_start is not None else (0, 0)
+        turn_order = list(self.config.get("turn_order"))
+        state = GameState(
+            grid_size=grid,
+            cop_pos=cop,
+            thief_pos=thief,
+            max_moves=int(self.config.get("max_moves")),
+            allow_diagonal=bool(self.config.get("allow_diagonal")),
+            turn_order=turn_order,
+            current_role=turn_order[0],
+        )
+        self.gatekeeper.record("new_game", {"state": state.to_dict()})
+        return state
+
+    def step(self, state: Any, role: str, action: Any) -> Any:
+        """Apply one ``(action, payload)`` for ``role`` and return the new state.
+
+        ``action`` is ``("move", direction)`` or ``("barrier", cell)``. Movement
+        and barrier rules are enforced; an illegal action raises
+        :class:`~cosmos77_ex06.game.moves.IllegalMoveError`.
+        """
+        from cosmos77_ex06.game import rules
+        from cosmos77_ex06.game.board import Board
+        from cosmos77_ex06.game.moves import apply_move, place_barrier
+
+        kind, payload = action
+        board = Board(state.grid_size, state.allow_diagonal, set(state.barriers))
+        pos = state.cop_pos if role == "cop" else state.thief_pos
+        if kind == "barrier":
+            state.barriers_used = place_barrier(
+                role,
+                tuple(payload),
+                board,
+                state.barriers_used,
+                int(self.config.get("max_barriers")),
+                state.cop_pos,
+                state.thief_pos,
+            )
+            state.barriers = sorted(board.barriers)
+        else:
+            new_pos = apply_move(pos, payload, board)
+            if role == "cop":
+                state.cop_pos = new_pos
+            else:
+                state.thief_pos = new_pos
+        state.current_role = rules.next_role(role, list(state.turn_order))
+        return state
 
     def run_local_game(self, *, gui: bool = False) -> dict[str, Any]:
         """Run a full game against the LOCAL MCP servers (Phase 4/6)."""
