@@ -79,16 +79,20 @@ class GameEngine:
     def board_snapshot(self) -> dict[str, Any]:
         """A minimal board snapshot for the transcript."""
         s = self.state
+        bars = [list(b) for b in sorted(s.barriers)]
         return {
             "cop": list(s.cop_pos),
             "thief": list(s.thief_pos),
-            "barriers": [list(b) for b in sorted(s.barriers)],
+            "barriers": bars,
             "move": s.move_number,
         }
 
     async def play_sub_game(self, index: int) -> SubGameResult:
         """Run one sub-game (thief -> cop each move) until capture or the limit."""
         self._reset_state_in_place()
+        sync = getattr(self, "state_sync", None)
+        if sync is not None:
+            await sync.push(self.state)
         while self.state.move_number < self.max_moves:
             captured = await self._play_full_move(index)
             if captured:
@@ -96,11 +100,7 @@ class GameEngine:
         return self._result()
 
     async def _play_full_move(self, index: int) -> bool:
-        """Play one full move (each role once); return True on capture.
-
-        A barrier action does not move an agent, so the engine guarantees forward
-        progress after each full move so the loop always terminates at max_moves.
-        """
+        """Play one full move (each role once); force progress so the loop terminates."""
         start = self.state.move_number
         for role in self.turn_order:
             outcome = await play_turn(

@@ -34,6 +34,19 @@ async def _call_tool(client: Any, name: str, args: dict[str, Any]) -> dict[str, 
     return data if isinstance(data, dict) else {"raw": data}
 
 
+async def _reconcile_state(engine: Any, role: str) -> None:
+    """Mirror the acting server's truth to all servers (cloud state-sync; no-op local).
+
+    Looks up the engine's optional ``state_sync`` (set only by the cloud builder);
+    when present it pulls ``role``'s server board into the engine's canonical state
+    and pushes it to both servers so observations stay consistent (E6). Local runs
+    share one in-process state and have no ``state_sync``, so this is a no-op.
+    """
+    state_sync = getattr(engine, "state_sync", None)
+    if state_sync is not None:
+        await state_sync.reconcile(engine.state, role)
+
+
 def _normalize_action(decision: dict[str, Any], role: str) -> tuple[str, dict[str, Any]]:
     """Map the LLM's proposed tool/args onto a legal game action (default STAY)."""
     tool = decision.get("tool")
@@ -68,6 +81,7 @@ async def play_turn(
     coord_flagged = engine.guard.is_flagged(message)
     tool_name, tool_args = _normalize_action(decision, role)
     action_result = await _call_tool(client, tool_name, tool_args)
+    await _reconcile_state(engine, role)
     captured = bool(action_result.get("captured", False))
     board = engine.board_snapshot()
     entry = engine.transcript.append(

@@ -15,6 +15,7 @@ from typing import Any
 
 from cosmos77_ex06.game.match import TechnicalLoss
 from cosmos77_ex06.game.state import SubGameResult
+from cosmos77_ex06.orchestrator import cloud as cloud_mod
 from cosmos77_ex06.orchestrator.local import build_engine
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
@@ -63,21 +64,52 @@ def build_report(
     }
 
 
+def _build(
+    config: Config,
+    gatekeeper: Gatekeeper,
+    client_factory: Any,
+    *,
+    cloud: bool,
+    gui: bool,
+    mcp_client_factory: Any,
+) -> Any:
+    """Build the engine + clients for a LOCAL (shared in-memory) or CLOUD run (E6).
+
+    LOCAL shares one in-process state via ``_StateProxy``; CLOUD opens authenticated
+    clients to the config URLs and attaches a :class:`ClientStateSync` so the two
+    separate-process servers stay consistent. ``mcp_client_factory`` mocks the cloud
+    FastMCP clients in tests (no real network in CI; Rule 6).
+    """
+    if cloud:
+        return cloud_mod.build_engine(config, gatekeeper, client_factory, mcp_client_factory)
+    return build_engine(config, gatekeeper, client_factory, gui=gui)
+
+
 async def run_full_game(
     config: Config,
     gatekeeper: Gatekeeper,
     client_factory: Any = None,
     *,
+    cloud: bool = False,
     gui: bool = False,
+    mcp_client_factory: Any = None,
 ) -> dict[str, Any]:
     """Run a full autonomous game and return ``{report, transcript, totals, reruns}``.
 
-    Opens the in-memory cop/thief FastMCP clients once and reuses the engine for
-    every (valid or voided) sub-game attempt. Technical-Losses are re-run until
-    ``num_games`` valid sub-games are recorded (E13); ``client_factory`` injects a
-    mock genai client for tests (omit for a live run).
+    Opens the cop/thief FastMCP clients once and reuses the engine for every (valid
+    or voided) sub-game attempt. Technical-Losses are re-run until ``num_games``
+    valid sub-games are recorded (E13); ``client_factory`` injects a mock genai
+    client for tests. ``cloud=True`` targets the public HTTPS URLs from config with
+    the orchestrator token (E6); ``mcp_client_factory`` mocks those clients in CI.
     """
-    engine, clients = build_engine(config, gatekeeper, client_factory, gui=gui)
+    engine, clients = _build(
+        config,
+        gatekeeper,
+        client_factory,
+        cloud=cloud,
+        gui=gui,
+        mcp_client_factory=mcp_client_factory,
+    )
     num_games = int(config.get("num_games"))
     sub_games: list[dict[str, Any]] = []
     totals = {"cop": 0, "thief": 0}
