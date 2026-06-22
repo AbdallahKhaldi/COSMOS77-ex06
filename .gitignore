@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets — GEMINI_API_KEY + the MCP tokens live in .env (never committed; CLAUDE.md rule 9).
+# Gmail OAuth files (credentials.json / token.json) are gitignored — never committed.
+.env
+credentials.json
+token.json
+*.token
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.cache/
+
+# Linters / formatters
+.ruff_cache/
+.mypy_cache/
+
+# OS / IDE / local tooling
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Runtime logs
+logs/*.log
+!logs/.gitkeep
+
+# Cover-sheet artifacts (the cover PDF is generated OUTSIDE the repo in Phase 13)
+*.filled.docx
+uoh-rl07-ex01.docx
+COSMOS77-ex06.pdf
+
+# KEEP the assets (GUI screenshots / learning curves), the sample reports, and config.
+!assets/*
+!reports/*.json
+!config/config.yaml
+
+# uv cache (the lock file IS committed)
+.uv-cache/
