@@ -200,8 +200,10 @@ returns a `SubGameResult` (winner, per-role score, move count, final `GameState`
 A **full game** is **`num_games` = 6** sub-games. `game/match.py`'s `Game` runs the six
 sub-games and **accumulates per-role totals** by summing the per-sub-game scores from the
 scoring table (§7). Because each sub-game contributes to exactly one of `{cop_win, thief_win}`
-and each side also takes its corresponding loss/penalty value, the per-game totals fall in the
-spec's expected band (game max **90** / min **30** across the six sub-games). The accumulated
+and each side also takes its corresponding loss/penalty value, the per-game totals fall within
+each role's own band across the six sub-games: the **cop** ranges **30** (all survivals,
+`6 × 5`) to **120** (all captures, `6 × 20`), and the **thief** ranges **30** (all captures,
+`6 × 5`) to **60** (all survivals, `6 × 10`). The accumulated
 totals `{cop: int, thief: int}` are exactly what the internal-game JSON report (`§9.1` schema,
 see `docs/PRD_report.md`) carries.
 
@@ -232,9 +234,10 @@ Notes:
   (`thief_loss`) — losing is not zero.
 - A survival is worth **10** to the thief and the cop banks a **5** consolation (`cop_loss`).
 - Per sub-game the combined payout is either `20 + 5 = 25` (capture) or `5 + 10 = 15`
-  (survival); across six sub-games totals therefore range from `6 × 15 = 90` (all-survival is
-  not the max — see below) … the spec's stated **game band is max 90 / min 30**, consistent
-  with mixing the two outcome payouts across the six sub-games.
+  (survival). Each role accumulates within its own band across the six sub-games: the **cop**
+  spans `6 × 5 = 30` (all survivals) to `6 × 20 = 120` (all captures), and the **thief** spans
+  `6 × 5 = 30` (all captures) to `6 × 10 = 60` (all survivals). The bands follow directly from
+  the scoring table above.
 - `subgame_result → score` is a pure config lookup in `rules.py`; `Game` sums per role into
   `totals = {"cop": Σcop, "thief": Σthief}`.
 
@@ -341,7 +344,7 @@ Deterministic unit tests (seed `random`), all I/O-free:
 - `place_barrier` rejects: a thief caller, the `max_barriers + 1`-th barrier, an out-of-bounds
   cell, an occupied cell, and a re-block.
 - Scoring matches the table for both outcomes; a full 6-sub-game `Game` accumulates correct
-  totals within the 30–90 band.
+  totals within each role's band (cop 30–120, thief 30–60).
 - A Technical-Loss sub-game is voided and flagged for re-run; it does not count toward the six.
 - `GameState.to_dict()/from_dict()` round-trips losslessly and serializes deterministically
   (sorted barriers/messages → byte-stable JSON).
