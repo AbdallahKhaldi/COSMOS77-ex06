@@ -1,8 +1,7 @@
 """The single business-logic entry point (CLAUDE.md rule 2).
 
-The CLI, the GUI, and the orchestrator all go through ``class SDK`` — one audited
-surface, one method per pipeline stage. The Gatekeeper (LLM meter + result ledger)
-is created once over ``results/`` so every transcript + report rests on ONE ledger.
+The CLI, GUI, and orchestrator all go through ``class SDK`` — one audited surface,
+one method per pipeline stage, over ONE Gatekeeper ledger in ``results/``.
 """
 
 from __future__ import annotations
@@ -35,6 +34,11 @@ class SDK:
         """The repository root (the parent of the ``config/`` directory)."""
         return self.config.config_dir.parent
 
+    @property
+    def reports_dir(self) -> Path:
+        """The repo-rooted ``reports/`` output directory."""
+        return self.repo_root / self.config.paths().get("reports", "reports")
+
     def new_game(self, *, cop_start: Any = None, thief_start: Any = None) -> Any:
         """Build a fresh :class:`GameState` from config (opposite corners; Phase 2)."""
         from cosmos77_ex06.game.state import GameState
@@ -56,10 +60,9 @@ class SDK:
         return state
 
     def step(self, state: Any, role: str, action: Any) -> Any:
-        """Apply one ``(action, payload)`` for ``role`` and return the new state.
+        """Apply one ``("move", direction)`` / ``("barrier", cell)`` for ``role``.
 
-        ``action`` is ``("move", direction)`` or ``("barrier", cell)``; an illegal
-        action raises :class:`~cosmos77_ex06.game.moves.IllegalMoveError`.
+        An illegal action raises :class:`~cosmos77_ex06.game.moves.IllegalMoveError`.
         """
         from cosmos77_ex06.game import rules
         from cosmos77_ex06.game.board import Board
@@ -83,30 +86,21 @@ class SDK:
         return state
 
     def run_local_game(self, *, gui: bool = False, client_factory: Any = None) -> dict[str, Any]:
-        """Run a full game vs the LOCAL MCP servers (E3/E4/E5); return transcript + totals.
-
-        ``client_factory`` injects a mock genai client for tests.
-        """
+        """Run a full game vs the LOCAL MCP servers (E3/E4/E5); ``client_factory`` mocks genai."""
         import asyncio
 
         from cosmos77_ex06.orchestrator.local import run_local_game
 
         return asyncio.run(run_local_game(self.config, self.gatekeeper, client_factory, gui=gui))
 
-    @property
-    def reports_dir(self) -> Path:
-        """The repo-rooted ``reports/`` output directory."""
-        return self.repo_root / self.config.paths().get("reports", "reports")
-
     def run_full_game(
-        self, *, cloud: bool = False, client_factory: Any = None, gui: bool = False, **kw: Any
+        self, *, cloud: bool = False, gui: bool = False, sender: Any = None, **kw: Any
     ) -> dict[str, Any]:
         """Run an autonomous full game (6 valid sub-games), validate + save the report.
 
-        Re-runs Technical-Losses until ``num_games`` valid sub-games exist (E5, E13);
-        ``client_factory`` mocks genai. ``cloud=True`` targets the config HTTPS MCP
-        URLs with the orchestrator token (E6); the ``mcp_client_factory`` kwarg mocks
-        those FastMCP clients in tests (no network).
+        Re-runs Technical-Losses to ``num_games`` valid sub-games (E5, E13); ``cloud=True``
+        targets the config HTTPS MCP URLs (E6); ``report.auto_send`` true makes the COP email
+        the JSON at game end (E7). ``client_factory``/``mcp_client_factory``/``sender`` mock in tests.
         """
         import asyncio
 
@@ -114,12 +108,17 @@ class SDK:
         from cosmos77_ex06.report import output
         from cosmos77_ex06.report.schema import validate_internal_game
 
+        client_factory = kw.get("client_factory")
         kwargs = {"cloud": cloud, "gui": gui, "mcp_client_factory": kw.get("mcp_client_factory")}
         outcome = asyncio.run(run_full_game(self.config, self.gatekeeper, client_factory, **kwargs))
         report = outcome["report"]
         validate_internal_game(report)
         path = output.save_report(self.reports_dir, report)
         self.gatekeeper.record("full_game", {"totals": report["totals"], "report_path": str(path)})
+        if bool(self.config.get("report.auto_send", default=False)):
+            from cosmos77_ex06.report import dispatch
+
+            dispatch.auto_send(self.config, self.gatekeeper, report, sender)
         return {"report": report, "transcript": outcome["transcript"]}
 
     def run_sanity_ladder(self, client_factory: Any = None) -> list[dict[str, Any]]:
@@ -130,9 +129,13 @@ class SDK:
             self.config, self.reports_dir, self.run_full_game, client_factory
         )
 
-    def report(self, *, send: bool = False) -> Any:
-        """Build (and optionally Gmail-send) the internal-game JSON report (Phase 9)."""
-        raise NotImplementedError("the report builder + Gmail sender land in Phase 9")
+    def report(self, *, send: bool = False, sender: Any = None) -> dict[str, Any]:
+        """Load + validate the latest report JSON; optionally Gmail-send it (E7, ``report --send``)."""
+        from cosmos77_ex06.report import dispatch
+
+        return dispatch.send_latest(
+            self.config, self.gatekeeper, self.reports_dir, send=send, sender=sender
+        )
 
     def bonus(self, *, client_factory: Any = None, save: bool = True) -> dict[str, Any]:
         """Run the inter-group bonus role-swap series + byte-stable bonus_game JSON (E12)."""
