@@ -30,6 +30,19 @@ nl_guard:
     - '\[\s*\d+\s*,\s*\d+\s*\]'    # "[3, 4]" bracketed pairs
     - '\(\s*\d+\s*,\s*\d+\s*\)'    # "(3,4)" parenthesized pairs
 
+# --- Decision strategy (E9): heuristic core + optional tabular Q-Table ---
+strategy:
+  enabled: false          # DEFAULT-OFF: when true the heuristic's suggested action
+                          # is appended to the agent prompt as a HINT the LLM may
+                          # accept or override (Phase-4 behaviour is unchanged off).
+
+# Tabular Q-Learning hyper-parameters (Bellman update; offline self-play only).
+qlearning:
+  learning_rate: 0.1      # alpha — temporal-difference step size
+  discount_factor: 0.9    # gamma — future-reward discount
+  epsilon: 0.1            # epsilon-greedy exploration probability
+  episodes: 200           # training episodes logged for the learning curve
+
 # --- LLM (orchestrator only — never inside the MCP servers; E3) ---
 llm:
   provider: gemini
