@@ -28,6 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--gui", action="store_true", help="show the pygame viewer")
     run.add_argument("--games", type=int, default=None, help="override the sub-game count")
     run.add_argument("--grid", type=int, default=None, help="override the (square) grid size")
+    run.add_argument(
+        "--log-file", default=None, help="tee the structured per-turn comms log to PATH (E10)"
+    )
 
     rep = sub.add_parser("report", help="build / send the JSON report")
     rep.add_argument("--send", action="store_true", help="email the JSON report via Gmail")
@@ -57,6 +60,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     sdk = SDK()
     if args.command == "run":
         _apply_run_overrides(sdk, args)
+        _add_log_file(getattr(args, "log_file", None))
         if getattr(args, "local", False):
             result = sdk.run_local_game(gui=args.gui)
             print(f"totals: {result['totals']} ({len(result['sub_games'])} sub-games)")
@@ -67,6 +71,21 @@ def _dispatch(args: argparse.Namespace) -> int:
     elif args.command == "bonus":
         sdk.bonus()
     return 0
+
+
+def _add_log_file(path: str | None) -> None:
+    """Attach a file handler so the structured per-turn comms log is captured (E10)."""
+    if not path:
+        return
+    import logging
+    from pathlib import Path
+
+    Path(path).expanduser().parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.FileHandler(path, encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s | %(levelname)-7s | %(message)s"))
+    logger = logging.getLogger("cosmos77_ex06")
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
 
 def _apply_run_overrides(sdk: object, args: argparse.Namespace) -> None:

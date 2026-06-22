@@ -106,7 +106,7 @@ class SDK:
 
         from cosmos77_ex06.orchestrator.local import run_local_game
 
-        return asyncio.run(run_local_game(self.config, self.gatekeeper, client_factory))
+        return asyncio.run(run_local_game(self.config, self.gatekeeper, client_factory, gui=gui))
 
     def run_full_game(self, *, cloud: bool = False) -> dict[str, Any]:
         """Run an autonomous game (6 valid sub-games) and assemble the report (Phase 7/8)."""

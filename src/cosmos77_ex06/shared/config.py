@@ -66,6 +66,10 @@ class Config:
         """The ``paths`` section (results, reports, assets)."""
         return dict(self.get("paths", default={}))
 
+    def repo_assets(self) -> Path:
+        """The repo-rooted ``assets`` directory (GUI screenshots; E10/E11)."""
+        return self._config_dir.parent / self.paths().get("assets", "assets")
+
     @property
     def version(self) -> str:
         """The ``config.yaml`` version string (e.g. ``"1.00"``)."""

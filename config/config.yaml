@@ -69,6 +69,32 @@ group:
   name: COSMOS77
   github_repo: "https://github.com/AbdallahKhaldi/COSMOS77-ex06"
 
+# --- GUI (E10): pygame real-time viewer; config-driven, never hardcoded ---
+gui:
+  enabled: false          # default off; --gui or SDK gui=True requests it; headless probe has final say
+  cell_size: 96           # pixels per grid cell
+  panel_height: 132       # message/scoreboard strip height (pixels)
+  fps: 2                  # turn-paced; one frame per turn, slow enough to watch
+  caption: "COSMOS77-ex06 — Cops & Robbers over MCP"
+  screenshot_key: "s"
+  quit_key: "q"
+  message_lines: 2        # wrapped lines per agent message in the panel
+  colors:                 # theme resolved into render.py (no literals in code)
+    background: [18, 18, 24]
+    grid_line: [60, 60, 70]
+    cell: [30, 30, 38]
+    cop: [60, 130, 240]
+    thief: [230, 70, 70]
+    barrier: [40, 40, 40]
+    capture: [250, 210, 60]
+    text: [235, 235, 235]
+
+# --- Structured CLI comms logs (E10/E6): one record per turn ---
+logging:
+  format: "human"         # "human" | "jsonl"
+  show_server_url: true   # MUST be true so cloud-MCP comms are provable (E10/E6)
+  show_full_message: true # never truncate the NL message in the log (only the GUI panel truncates)
+
 # --- Output directories ---
 paths:
   results: results
