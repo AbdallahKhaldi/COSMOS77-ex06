@@ -1,16 +1,16 @@
 """The GameEngine — MCP Client + game engine in one (E3, E4, E5).
 
-Owns the two FastMCP ``Client`` sessions (cop + thief, token auth), the
-authoritative :class:`GameState`, the two agents, the :class:`GeminiClient`, and
-the turn loop (thief -> cop, capture/limit checks) for up to ``max_moves``,
-running ``num_games`` sub-games and recording the full transcript. The LLM call
-lives HERE (via ``gemini_client``); the MCP servers only execute tools. The engine
-is the E4 message RELAY (holds the transcript, feeds the opponent's last NL message
-into the active prompt), so the NL channel is process-independent. Turn execution
-is split into ``turn.py``."""
+Owns the cop + thief FastMCP ``Client`` sessions (token auth), the authoritative
+:class:`GameState`, the agents, the :class:`GeminiClient`, and the turn loop
+(thief -> cop, capture/limit checks) over ``num_games`` sub-games, recording the
+full transcript. The LLM call lives HERE; the servers only execute tools. The
+engine is the E4 message RELAY (the transcript feeds the opponent's last NL line
+into the active prompt), so the NL channel is process-independent. An optional
+``on_turn`` hook feeds the live GUI (E10); turn execution is split into ``turn.py``."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from cosmos77_ex06.agents.base import make_agent
@@ -33,10 +33,9 @@ class GameEngine:
         gemini: GeminiClient,
         urls: dict[str, str] | None = None,
         state: GameState | None = None,
+        on_turn: Callable[[GameState], None] | None = None,
     ) -> None:
-        self.config = config
-        self.clients = clients
-        self.gemini = gemini
+        self.config, self.clients, self.gemini, self.on_turn = config, clients, gemini, on_turn
         self.urls = urls or {r: str(config.get(f"mcp.{r}_url")) for r in ("cop", "thief")}
         self.turn_order = list(config.get("turn_order"))
         self.num_games = int(config.get("num_games"))
@@ -80,11 +79,10 @@ class GameEngine:
     def board_snapshot(self) -> dict[str, Any]:
         """A minimal board snapshot for the transcript."""
         s = self.state
-        barriers = [list(b) for b in sorted(s.barriers)]
         return {
             "cop": list(s.cop_pos),
             "thief": list(s.thief_pos),
-            "barriers": barriers,
+            "barriers": [list(b) for b in sorted(s.barriers)],
             "move": s.move_number,
         }
 
@@ -111,6 +109,8 @@ class GameEngine:
                 sub_game=index,
                 opponent_message=self.transcript.last_from_opponent(role),
             )
+            if self.on_turn is not None:
+                self.on_turn(self.state)
             if outcome["captured"]:
                 return True
         if self.state.move_number == start:

@@ -32,11 +32,15 @@ def build_engine(
     config: Config,
     gatekeeper: Gatekeeper,
     client_factory: Any = None,
+    *,
+    gui: bool = False,
 ) -> tuple[GameEngine, dict[str, Client]]:
     """Construct a :class:`GameEngine` wired to in-memory cop/thief servers.
 
     ``client_factory`` (optional) injects a mock genai client into
     :class:`GeminiClient`; when omitted the real SDK client is used (live only).
+    ``gui=True`` attaches a headless-safe :class:`GameViewer` via an ``on_turn``
+    callback (no-op when no display is available, so the pipeline never blocks).
     Returns the engine and the two unentered FastMCP clients (open them with
     ``async with`` before calling :meth:`GameEngine.play_game`).
     """
@@ -47,8 +51,19 @@ def build_engine(
     kwargs = {} if client_factory is None else {"client_factory": client_factory}
     gemini = GeminiClient(config, gatekeeper, **kwargs)
     engine = GameEngine(config, clients, gemini)
+    if gui:
+        _attach_viewer(engine, config)
     engine_holder["state"] = engine.state
     return engine, clients
+
+
+def _attach_viewer(engine: GameEngine, config: Config) -> None:
+    """Wire a headless-safe pygame viewer onto the engine's per-turn hook (E10)."""
+    from cosmos77_ex06.gui.driver import build_on_turn
+    from cosmos77_ex06.gui.viewer import GameViewer
+
+    viewer = GameViewer(config)
+    engine.on_turn = build_on_turn(engine, viewer)
 
 
 class _StateProxy:
@@ -77,8 +92,10 @@ async def run_local_game(
     config: Config,
     gatekeeper: Gatekeeper,
     client_factory: Any = None,
+    *,
+    gui: bool = False,
 ) -> dict[str, Any]:
     """Open the in-memory clients and run a full local game; return the result dict."""
-    engine, clients = build_engine(config, gatekeeper, client_factory)
+    engine, clients = build_engine(config, gatekeeper, client_factory, gui=gui)
     async with clients["cop"], clients["thief"]:
         return await engine.play_game()

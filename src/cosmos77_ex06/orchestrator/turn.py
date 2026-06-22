@@ -11,7 +11,20 @@ from __future__ import annotations
 
 from typing import Any
 
+from cosmos77_ex06.orchestrator import turn_log
+from cosmos77_ex06.shared.logging_setup import get_logger
+
 _MOVE_NAMES = {"N", "S", "E", "W", "NE", "NW", "SE", "SW", "STAY"}
+_LOG = get_logger("cosmos77_ex06.orchestrator.turn")
+
+
+def _emit_turn_log(engine: Any, entry: dict[str, Any]) -> None:
+    """Emit the structured per-turn comms record (E10/E6); additive, no state change."""
+    config = getattr(engine, "config", None)
+    fmt = str(config.get("logging.format", default="human")) if config else "human"
+    show_url = bool(config.get("logging.show_server_url", default=True)) if config else True
+    record = turn_log.build_record(entry, show_server_url=show_url)
+    _LOG.info(turn_log.format_record(record, fmt))
 
 
 async def _call_tool(client: Any, name: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -69,4 +82,5 @@ async def play_turn(
         coord_flagged=coord_flagged,
         estimate=estimate,
     )
+    _emit_turn_log(engine, entry)
     return {"message": message, "captured": captured, "board": board, "entry": entry}
