@@ -49,6 +49,9 @@ Thumbs.db
 logs/*.log
 !logs/.gitkeep
 
+# Runtime gatekeeper ledger (token/cost metering — regenerated each run)
+results/
+
 # Cover-sheet artifacts (the cover PDF is generated OUTSIDE the repo in Phase 13)
 *.filled.docx
 uoh-rl07-ex01.docx
