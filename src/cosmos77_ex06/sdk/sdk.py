@@ -58,9 +58,8 @@ class SDK:
     def step(self, state: Any, role: str, action: Any) -> Any:
         """Apply one ``(action, payload)`` for ``role`` and return the new state.
 
-        ``action`` is ``("move", direction)`` or ``("barrier", cell)``. Movement
-        and barrier rules are enforced; an illegal action raises
-        :class:`~cosmos77_ex06.game.moves.IllegalMoveError`.
+        ``action`` is ``("move", direction)`` or ``("barrier", cell)``; an illegal
+        action raises :class:`~cosmos77_ex06.game.moves.IllegalMoveError`.
         """
         from cosmos77_ex06.game import rules
         from cosmos77_ex06.game.board import Board
@@ -90,9 +89,8 @@ class SDK:
         return state
 
     def run_local_game(self, *, gui: bool = False, client_factory: Any = None) -> dict[str, Any]:
-        """Run a full game against the LOCAL MCP servers; return transcript + totals.
+        """Run a full game vs the LOCAL MCP servers (E3/E4/E5); return transcript + totals.
 
-        Drives :class:`GameEngine` against in-memory FastMCP clients (E3/E4/E5);
         ``client_factory`` injects a mock genai client for tests.
         """
         import asyncio
@@ -111,10 +109,8 @@ class SDK:
     ) -> dict[str, Any]:
         """Run an autonomous full game (6 valid sub-games), validate + save the report.
 
-        Re-runs Technical-Losses until ``num_games`` valid sub-games exist (E5,
-        E13); validates the §9.1 report against the pydantic schema BEFORE writing
-        ``reports/internal_game.json``; returns ``{report, transcript}``.
-        ``client_factory`` injects a mock genai client; ``cloud`` is CLI symmetry.
+        Re-runs Technical-Losses until ``num_games`` valid sub-games exist (E5, E13);
+        validates the §9.1 report before writing it; ``client_factory`` mocks genai.
         """
         import asyncio
 
@@ -141,9 +137,13 @@ class SDK:
         """Build (and optionally Gmail-send) the internal-game JSON report (Phase 9)."""
         raise NotImplementedError("the report builder + Gmail sender land in Phase 9")
 
-    def bonus(self) -> Any:
-        """Run the inter-group bonus series + build the bonus_game JSON (Phase 11)."""
-        raise NotImplementedError("the inter-group bonus harness lands in Phase 11")
+    def bonus(self, *, client_factory: Any = None, save: bool = True) -> dict[str, Any]:
+        """Run the inter-group bonus role-swap series + byte-stable bonus_game JSON (E12)."""
+        from cosmos77_ex06.bonus.run import run_bonus
+
+        return run_bonus(
+            self.config, self.gatekeeper, self.reports_dir, client_factory=client_factory, save=save
+        )
 
     def ledger(self) -> dict[str, Any]:
         """Return the aggregated result ledger (all results/*.json)."""

@@ -40,7 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
     rep = sub.add_parser("report", help="build / send the JSON report")
     rep.add_argument("--send", action="store_true", help="email the JSON report via Gmail")
 
-    sub.add_parser("bonus", help="run the inter-group bonus series")
+    bonus = sub.add_parser("bonus", help="run the inter-group bonus series (E12)")
+    bonus.add_argument(
+        "--partner",
+        default=None,
+        metavar="CONFIG",
+        help="path to a config DIR (or config.yaml) holding the filled-in bonus block",
+    )
     return parser
 
 
@@ -79,8 +85,29 @@ def _dispatch(args: argparse.Namespace) -> int:
     elif args.command == "report":
         sdk.report(send=args.send)
     elif args.command == "bonus":
-        sdk.bonus()
+        _run_bonus(getattr(args, "partner", None))
     return 0
+
+
+def _run_bonus(partner: str | None) -> None:
+    """Run the bonus series against the (optionally partner-supplied) config (E12)."""
+    from pathlib import Path
+
+    from cosmos77_ex06.sdk.sdk import SDK
+    from cosmos77_ex06.shared.config import Config
+
+    config = None
+    if partner:
+        path = Path(partner).expanduser()
+        config = Config(path if path.is_dir() else path.parent)
+    sdk = SDK(config=config)
+    out = sdk.bonus()
+    report = out["report"]
+    print(
+        f"bonus totals_by_group: {report['totals_by_group']} | bonus_claim: {report['bonus_claim']}"
+    )
+    if out["path"]:
+        print(f"wrote {out['path']}")
 
 
 def _add_log_file(path: str | None) -> None:

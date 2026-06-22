@@ -105,6 +105,28 @@ logging:
   show_server_url: true   # MUST be true so cloud-MCP comms are provable (E10/E6)
   show_full_message: true # never truncate the NL message in the log (only the GUI panel truncates)
 
+# --- Inter-group BONUS (E12, ready-to-activate; spec §12 / PRD_bonus.md) ---
+# Flip `enabled` and fill the placeholders ONLY after a partner group is secured.
+# The four MCP URLs + the shared bonus token are exchanged at coordination time;
+# group_1 = OUR group (COSMOS77), group_2 = the partner. The shared bonus token
+# lives in .env as BONUS_MCP_TOKEN (Rule 9 — never in the repo; rotation revokes it).
+bonus:
+  enabled: false                            # flip to true once a partner is secured
+  group_1: "COSMOS77"                        # orientation, fixed at coordination time
+  group_2: "PARTNER_GROUP_CODE"              # placeholder — the partner's group code
+  github_repo_group_2: "https://github.com/PARTNER/PARTNER-repo"  # placeholder
+  students_group_2: []                       # [{id: "<id>", name: "<name>"}, ...]
+  mcp:                                        # the FOUR public HTTPS MCP URLs (placeholders)
+    group_1_cop: "https://OUR-cop.example/mcp"
+    group_1_thief: "https://OUR-thief.example/mcp"
+    group_2_cop: "https://THEIR-cop.example/mcp"
+    group_2_thief: "https://THEIR-thief.example/mcp"
+  engine_runner: "group_1"                    # who runs the orchestrator (single-engine)
+  claim:                                      # bonus_claim schedule (Rule 4 — never hardcoded)
+    win: 10
+    lose: 7
+    tie: 5
+
 # --- Output directories ---
 paths:
   results: results
