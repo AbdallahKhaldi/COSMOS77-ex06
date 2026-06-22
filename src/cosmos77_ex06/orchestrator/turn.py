@@ -50,7 +50,7 @@ async def play_turn(
     observation = await _call_tool(client, "get_local_observation", {"role": role})
     estimate = agent.interpret(observation, opponent_message)
     prompt = agent.build_prompt(observation, opponent_message)
-    decision = await engine.gemini.ask(role, prompt, client.session)
+    decision = await engine.gemini.ask(role, prompt)
     message = decision.get("message") or f"({role} stays quiet)"
     coord_flagged = engine.guard.is_flagged(message)
     tool_name, tool_args = _normalize_action(decision, role)

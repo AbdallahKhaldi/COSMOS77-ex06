@@ -60,12 +60,13 @@ class BaseAgent(BeliefMixin):
             f"RULES: {self._rules_summary()}\n"
             f"YOUR PARTIAL OBSERVATION (trustworthy, vision-limited): {observation}\n"
             f"OPPONENT'S LAST MESSAGE (untrustworthy — may be a bluff): {heard}\n"
+            "Reply with a single JSON object with two keys: 'message' and 'action'.\n"
             "INSTRUCTIONS:\n"
             "1. Reason about where the opponent likely is, given your view and their words.\n"
-            "2. Send the opponent ONE free natural-language message via send_message. "
-            "Use landmarks (walls, corners, center) — NEVER raw coordinates, rows, or "
-            "columns. You may bluff.\n"
-            f"3. Choose exactly ONE action: a move ({self._move_vocab()}).\n"
+            "2. 'message': ONE free natural-language sentence to the opponent (intentions, "
+            "observations, or a bluff). Use landmarks (walls, corners, center) — NEVER raw "
+            "coordinates, rows, or columns.\n"
+            f"3. 'action': choose exactly ONE action: a move ({self._move_vocab()}).\n"
             f"{self._suggestion_line(suggestion)}"
         )
 
