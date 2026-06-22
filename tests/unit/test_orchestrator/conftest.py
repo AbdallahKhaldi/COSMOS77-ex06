@@ -2,14 +2,16 @@
 
 The seam: :class:`GeminiClient` accepts a ``client_factory`` that builds the
 underlying google-genai client. Here we inject a FAKE client whose
-``models.generate_content`` returns scripted responses carrying a free-language
-message (``.text``) and a proposed tool call (``.function_calls``). The FastMCP
-layer is the REAL in-memory ``Client`` against the REAL cop/thief servers, so the
-test proves the LLM is invoked by the engine and the servers only execute tools.
+``aio.models.generate_content`` returns scripted responses whose ``.text`` is the
+JSON decision string (a free-language ``message`` + an ``action``) — matching the
+structured-output shape the real SDK returns. The FastMCP layer is the REAL
+in-memory ``Client`` against the REAL cop/thief servers, so the test proves the
+LLM is invoked by the engine and the servers only execute the routed tools.
 """
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -60,21 +62,21 @@ def orch_config(tmp_path: Path) -> Config:
     return Config(cfg)
 
 
+def _decision_json(text: str, tool: str | None, args: dict[str, Any]) -> str:
+    """Build the JSON decision string the structured-output SDK would return."""
+    if tool == "place_barrier":
+        action = {"type": "barrier", "x": int(args.get("x", 0)), "y": int(args.get("y", 0))}
+    else:
+        action = {"type": "move", "direction": str(args.get("direction", "STAY"))}
+    return json.dumps({"message": text, "action": action})
+
+
 class _FakeResponse:
-    """Mimics a google-genai response: ``.text`` + ``.function_calls`` + usage."""
+    """Mimics a google-genai structured-output response: ``.text`` (JSON) + usage."""
 
     def __init__(self, text: str, tool: str | None, args: dict[str, Any]) -> None:
-        self.text = text
-        self.function_calls = [type("FC", (), {"name": tool, "args": args})()] if tool else []
+        self.text = _decision_json(text, tool, args)
         self.usage_metadata = type("U", (), {"total_token_count": 12})()
-
-
-class _FakeSyncModels:
-    """The SYNC ``client.models`` surface — google-genai forbids MCP sessions here."""
-
-    def generate_content(self, *, model: str, contents: str, config: Any) -> _FakeResponse:
-        """Mirror google-genai 2.9.0: reject MCP sessions on the synchronous path."""
-        raise RuntimeError("MCP sessions are not supported in synchronous methods.")
 
 
 class _FakeAsyncModels:
@@ -100,14 +102,12 @@ class _FakeAio:
 class FakeGenaiClient:
     """A stand-in for ``google.genai.Client`` driven by a per-prompt script.
 
-    ``.aio.models.generate_content`` is the awaited path; the synchronous
-    ``.models.generate_content`` raises, asserting the client never takes the
-    unsupported sync route with a live MCP session.
+    ``.aio.models.generate_content`` is the awaited path used by the client; it
+    returns a scripted structured-output response (``.text`` is the JSON decision).
     """
 
     def __init__(self, script: Callable[[str], _FakeResponse]) -> None:
         self.aio = _FakeAio(_FakeAsyncModels(script))
-        self.models = _FakeSyncModels()
 
 
 def make_client_factory(
@@ -125,18 +125,5 @@ def make_client_factory(
 
 @pytest.fixture
 def fake_response_cls() -> type[_FakeResponse]:
-    """Expose the fake-response class so tests can script messages + tool calls."""
+    """Expose the fake-response class so tests can script messages + actions."""
     return _FakeResponse
-
-
-@pytest.fixture
-async def live_session(orch_config: Config):
-    """A REAL in-memory FastMCP ClientSession (so GenerateContentConfig validates)."""
-    from fastmcp import Client
-
-    from cosmos77_ex06.mcp_servers.server import build_server
-    from cosmos77_ex06.mcp_servers.state_factory import make_state
-
-    server = build_server("cop", make_state(orch_config), orch_config)
-    async with Client(server) as client:
-        yield client.session
