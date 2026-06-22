@@ -45,6 +45,12 @@ class GameTools:
 
         ``content`` is opaque prose — intentions, claims, bluffs. The server is a
         transport + ledger only; it never parses or "understands" the message.
+
+        NOTE (cloud-safety): this server-side log is LOCAL-ONLY — across separate
+        processes the cop's stored message would not reach the thief's reader. The
+        AUTHORITATIVE NL relay is the engine-held :class:`Transcript`
+        (``last_from_opponent``), which is process-independent. This tool remains
+        for native MCP tool-calling completeness and standalone server runs.
         """
         self._check_role(role)
         turn = int(self.state.move_number)
@@ -54,9 +60,10 @@ class GameTools:
     def receive_messages(self, role: str, since: int = 0) -> dict[str, Any]:
         """Return the *opponent's* natural-language messages with id ``>= since`` (PRD §4.2).
 
-        This is the only channel through which ``role`` learns about the opponent —
-        and it is prose the opponent chose to send, which may mislead. The caller's
-        own prior messages are filtered out so a role never receives its own echo.
+        Prose the opponent chose to send, which may mislead. The caller's own prior
+        messages are filtered out so a role never receives its own echo. LOCAL-ONLY
+        (same caveat as :meth:`send_message`): the engine relays the opponent's last
+        NL message via its own transcript, so the engine never depends on this tool.
         """
         self._check_role(role)
         msgs = [
