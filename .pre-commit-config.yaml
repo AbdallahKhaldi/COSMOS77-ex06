@@ -1,0 +1,33 @@
+# Pre-commit hooks for COSMOS77-ex06.
+# Install once with `uv run pre-commit install`. Every commit thereafter runs
+# the same gates as CI, catching issues before they reach GitHub.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.18  # keep in lockstep with the ruff version in uv.lock / CI
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: line-cap-150
+        name: enforce 150-line cap on every Python file
+        entry: uv run python scripts/check_line_cap.py
+        language: system
+        types: [python]
+        pass_filenames: false
