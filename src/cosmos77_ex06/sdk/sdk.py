@@ -95,9 +95,18 @@ class SDK:
         state.current_role = rules.next_role(role, list(state.turn_order))
         return state
 
-    def run_local_game(self, *, gui: bool = False) -> dict[str, Any]:
-        """Run a full game against the LOCAL MCP servers (Phase 4/6)."""
-        raise NotImplementedError("the orchestrator loop lands in Phase 4")
+    def run_local_game(self, *, gui: bool = False, client_factory: Any = None) -> dict[str, Any]:
+        """Run a full game against the LOCAL MCP servers and return transcript + totals.
+
+        Drives the orchestrator (:class:`GameEngine`) against in-memory FastMCP
+        clients bound to the cop + thief servers (E3/E4/E5). ``client_factory``
+        injects a mock google-genai client for tests; omit it for a live run.
+        """
+        import asyncio
+
+        from cosmos77_ex06.orchestrator.local import run_local_game
+
+        return asyncio.run(run_local_game(self.config, self.gatekeeper, client_factory))
 
     def run_full_game(self, *, cloud: bool = False) -> dict[str, Any]:
         """Run an autonomous game (6 valid sub-games) and assemble the report (Phase 7/8)."""
