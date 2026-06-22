@@ -16,18 +16,17 @@ ResourceExhausted / 5xx) retry with exponential backoff (config-driven; Rule 4).
 
 from __future__ import annotations
 
-import asyncio
 import json
 from collections.abc import Callable
 from typing import Any
 
+from cosmos77_ex06.orchestrator.llm_retry import RetryPolicy
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
 
 _DIRECTIONS = ["N", "S", "E", "W", "NE", "NW", "SE", "SW", "STAY"]
 _ROLE_ACTIONS = {"cop": ["move", "barrier"], "thief": ["move"]}
 _FALLBACK = {"message": "", "action": {"type": "move", "direction": "STAY"}}
-_RETRY_MARKERS = ("429", "resourceexhausted", "rate limit", "rate_limit", "unavailable")
 
 
 def _default_client_factory(api_key: str | None) -> Any:  # pragma: no cover - real SDK
@@ -35,15 +34,6 @@ def _default_client_factory(api_key: str | None) -> Any:  # pragma: no cover - r
     from google import genai
 
     return genai.Client(api_key=api_key)
-
-
-def _is_transient(exc: Exception) -> bool:  # pragma: no cover - exercised live only
-    """True for HTTP 429 / ResourceExhausted / 5xx-style transient SDK errors."""
-    text = f"{type(exc).__name__} {exc}".lower()
-    code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
-    if isinstance(code, int) and (code == 429 or 500 <= code < 600):
-        return True
-    return any(marker in text for marker in _RETRY_MARKERS)
 
 
 class GeminiClient:
@@ -61,6 +51,11 @@ class GeminiClient:
         self.temperature = float(config.get("llm.temperature"))
         self.max_retries = int(config.get("llm.max_retries", default=4))
         self.retry_base_seconds = float(config.get("llm.retry_base_seconds", default=2.0))
+        self.retry = RetryPolicy(
+            self.max_retries,
+            self.retry_base_seconds,
+            float(config.get("llm.min_call_interval_seconds", default=0.0)),
+        )
         self._client_factory = client_factory
         self._client: Any = None
         self._meter: dict[str, dict[str, int]] = {}
@@ -108,17 +103,15 @@ class GeminiClient:
         return self._parse_and_meter(role, await self._generate_with_retry(role, prompt))
 
     async def _generate_with_retry(self, role: str, prompt: str) -> Any:
-        """Await the async generate call, retrying transient 429/5xx with backoff."""
+        """Await the async generate call, retrying transient 429/5xx (RetryPolicy)."""
         client, cfg = self._client_obj(), self._build_config(role)
-        for attempt in range(self.max_retries + 1):
-            try:
-                return await client.aio.models.generate_content(
-                    model=self.model, contents=prompt, config=cfg
-                )
-            except Exception as exc:  # pragma: no cover - retry path is live-only
-                if attempt >= self.max_retries or not _is_transient(exc):
-                    raise
-                await asyncio.sleep(self.retry_base_seconds * (2**attempt))
+
+        async def _call() -> Any:
+            return await client.aio.models.generate_content(
+                model=self.model, contents=prompt, config=cfg
+            )
+
+        return await self.retry.run(_call)
 
     def _parse_and_meter(self, role: str, response: Any) -> dict[str, Any]:
         """Parse the JSON decision into ``{role, message, tool, args}`` and record cost."""
