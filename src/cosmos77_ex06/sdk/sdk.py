@@ -1,9 +1,8 @@
 """The single business-logic entry point (CLAUDE.md rule 2).
 
 The CLI, the GUI, and the orchestrator all go through ``class SDK`` — one audited
-surface, one method per pipeline stage. Each stage lands in its phase (a
-``NotImplementedError`` until then). The Gatekeeper (LLM meter + result ledger) is
-created once over ``results/`` so every transcript and report rests on ONE ledger.
+surface, one method per pipeline stage. The Gatekeeper (LLM meter + result ledger)
+is created once over ``results/`` so every transcript + report rests on ONE ledger.
 """
 
 from __future__ import annotations
@@ -37,12 +36,7 @@ class SDK:
         return self.config.config_dir.parent
 
     def new_game(self, *, cop_start: Any = None, thief_start: Any = None) -> Any:
-        """Build a fresh :class:`GameState` from config (Phase 2).
-
-        Start positions default to opposite corners of the grid. The fresh state
-        is recorded through the gatekeeper ledger so every transcript rests on one
-        ledger.
-        """
+        """Build a fresh :class:`GameState` from config (opposite corners; Phase 2)."""
         from cosmos77_ex06.game.state import GameState
 
         grid = list(self.config.get("grid_size"))
@@ -96,11 +90,10 @@ class SDK:
         return state
 
     def run_local_game(self, *, gui: bool = False, client_factory: Any = None) -> dict[str, Any]:
-        """Run a full game against the LOCAL MCP servers and return transcript + totals.
+        """Run a full game against the LOCAL MCP servers; return transcript + totals.
 
-        Drives the orchestrator (:class:`GameEngine`) against in-memory FastMCP
-        clients bound to the cop + thief servers (E3/E4/E5). ``client_factory``
-        injects a mock google-genai client for tests; omit it for a live run.
+        Drives :class:`GameEngine` against in-memory FastMCP clients (E3/E4/E5);
+        ``client_factory`` injects a mock genai client for tests.
         """
         import asyncio
 
@@ -108,9 +101,41 @@ class SDK:
 
         return asyncio.run(run_local_game(self.config, self.gatekeeper, client_factory, gui=gui))
 
-    def run_full_game(self, *, cloud: bool = False) -> dict[str, Any]:
-        """Run an autonomous game (6 valid sub-games) and assemble the report (Phase 7/8)."""
-        raise NotImplementedError("the autonomous runner lands in Phase 7")
+    @property
+    def reports_dir(self) -> Path:
+        """The repo-rooted ``reports/`` output directory."""
+        return self.repo_root / self.config.paths().get("reports", "reports")
+
+    def run_full_game(
+        self, *, cloud: bool = False, client_factory: Any = None, gui: bool = False
+    ) -> dict[str, Any]:
+        """Run an autonomous full game (6 valid sub-games), validate + save the report.
+
+        Re-runs Technical-Losses until ``num_games`` valid sub-games exist (E5,
+        E13); validates the §9.1 report against the pydantic schema BEFORE writing
+        ``reports/internal_game.json``; returns ``{report, transcript}``.
+        ``client_factory`` injects a mock genai client; ``cloud`` is CLI symmetry.
+        """
+        import asyncio
+
+        from cosmos77_ex06.orchestrator.runner import run_full_game
+        from cosmos77_ex06.report import output
+        from cosmos77_ex06.report.schema import validate_internal_game
+
+        outcome = asyncio.run(run_full_game(self.config, self.gatekeeper, client_factory, gui=gui))
+        report = outcome["report"]
+        validate_internal_game(report)
+        path = output.save_report(self.reports_dir, report)
+        self.gatekeeper.record("full_game", {"totals": report["totals"], "report_path": str(path)})
+        return {"report": report, "transcript": outcome["transcript"]}
+
+    def run_sanity_ladder(self, client_factory: Any = None) -> list[dict[str, Any]]:
+        """Run the 2x2->5x5 sanity ladder, saving a transcript per size (spec §4.5)."""
+        from cosmos77_ex06.report import output
+
+        return output.run_sanity_ladder(
+            self.config, self.reports_dir, self.run_full_game, client_factory
+        )
 
     def report(self, *, send: bool = False) -> Any:
         """Build (and optionally Gmail-send) the internal-game JSON report (Phase 9)."""

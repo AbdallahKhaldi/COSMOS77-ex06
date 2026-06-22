@@ -29,6 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--games", type=int, default=None, help="override the sub-game count")
     run.add_argument("--grid", type=int, default=None, help="override the (square) grid size")
     run.add_argument(
+        "--ladder",
+        action="store_true",
+        help="run the 2x2->3x3->4x4->5x5 sanity ladder, saving a transcript per size",
+    )
+    run.add_argument(
         "--log-file", default=None, help="tee the structured per-turn comms log to PATH (E10)"
     )
 
@@ -61,11 +66,16 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == "run":
         _apply_run_overrides(sdk, args)
         _add_log_file(getattr(args, "log_file", None))
-        if getattr(args, "local", False):
-            result = sdk.run_local_game(gui=args.gui)
-            print(f"totals: {result['totals']} ({len(result['sub_games'])} sub-games)")
+        if getattr(args, "ladder", False):
+            for rung in sdk.run_sanity_ladder():
+                print(
+                    f"ladder {rung['grid']}: {rung['sub_games']} sub-games "
+                    f"-> {rung['transcript_path']}"
+                )
         else:
-            sdk.run_full_game(cloud=args.cloud)
+            out = sdk.run_full_game(cloud=getattr(args, "cloud", False), gui=args.gui)
+            report = out["report"]
+            print(f"totals: {report['totals']} ({len(report['sub_games'])} valid sub-games)")
     elif args.command == "report":
         sdk.report(send=args.send)
     elif args.command == "bonus":

@@ -48,8 +48,9 @@ llm:
   provider: gemini
   model: gemini-2.5-flash
   temperature: 0.2
-  max_retries: 4           # transient 429/5xx retries (Phase-7 full game makes hundreds of free-tier calls)
-  retry_base_seconds: 2.0  # exponential backoff base: sleep = base * 2**(attempt-1)
+  max_retries: 6           # transient 429/5xx retries (Phase-7 full game makes hundreds of free-tier calls; raised for the long live run)
+  retry_base_seconds: 2.0  # exponential backoff base when the server suggests no delay
+  min_call_interval_seconds: 6.5  # inter-call pacing (s): ~9 RPM, under the gemini free-tier 10 RPM cap for the live Phase-7 run (the mocked suite overrides to 0.0)
 
 # --- MCP servers (E2/E6): two FastMCP servers on separate ports, token auth ---
 mcp:
@@ -68,6 +69,15 @@ report:
 group:
   name: COSMOS77
   github_repo: "https://github.com/AbdallahKhaldi/COSMOS77-ex06"
+
+# --- Roster (E7 report §9.1 students[]): each {id, name_en, name_he} ---
+students:
+  - id: "212389712"
+    name_en: "Abdallah Khaldi"
+    name_he: "עבדאללה ח'אלדי"
+  - id: "323118794"
+    name_en: "Tasneem Natour"
+    name_he: "תסנים נאטור"
 
 # --- GUI (E10): pygame real-time viewer; config-driven, never hardcoded ---
 gui:
