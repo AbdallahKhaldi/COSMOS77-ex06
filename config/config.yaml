@@ -27,6 +27,7 @@ llm:
 
 # --- MCP servers (E2/E6): two FastMCP servers on separate ports, token auth ---
 mcp:
+  host: "0.0.0.0"          # bind interface for both FastMCP servers (override per deployment)
   cop_url: "http://localhost:8001/mcp"
   thief_url: "http://localhost:8002/mcp"
   cop_port: 8001
