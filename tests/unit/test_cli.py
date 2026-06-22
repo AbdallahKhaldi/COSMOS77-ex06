@@ -33,7 +33,7 @@ def test_parser_has_local_and_grid_flags() -> None:
     assert args.local is True and args.games == 2 and args.grid == 3
 
 
-def test_run_local_routes_to_sdk_and_applies_overrides(
+def test_run_local_routes_to_full_game_and_applies_overrides(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     captured: dict[str, object] = {}
@@ -42,10 +42,10 @@ def test_run_local_routes_to_sdk_and_applies_overrides(
         def __init__(self) -> None:
             self.config = type("C", (), {"_data": {"num_games": 6, "grid_size": [5, 5]}})()
 
-        def run_local_game(self, *, gui: bool = False) -> dict[str, object]:
+        def run_full_game(self, *, cloud: bool = False, gui: bool = False) -> dict[str, object]:
             captured["data"] = dict(self.config._data)
             captured["gui"] = gui
-            return {"totals": {"cop": 0, "thief": 20}, "sub_games": [{}, {}]}
+            return {"report": {"totals": {"cop": 0, "thief": 20}, "sub_games": [{}, {}]}}
 
     monkeypatch.setattr("cosmos77_ex06.sdk.sdk.SDK", _FakeSDK)
     rc = main(["run", "--local", "--games", "2", "--grid", "3"])
@@ -54,10 +54,20 @@ def test_run_local_routes_to_sdk_and_applies_overrides(
     assert "totals" in capsys.readouterr().out
 
 
-def test_run_command_routes_to_sdk_stub() -> None:
-    # The SDK stage is not wired yet, so dispatch surfaces NotImplementedError.
-    with pytest.raises(NotImplementedError):
-        main(["run"])
+def test_run_ladder_routes_to_sanity_ladder(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    class _FakeSDK:
+        def __init__(self) -> None:
+            self.config = type("C", (), {"_data": {"num_games": 6, "grid_size": [5, 5]}})()
+
+        def run_sanity_ladder(self) -> list[dict[str, object]]:
+            return [{"grid": [2, 2], "sub_games": 6, "transcript_path": "reports/ladder_2x2.json"}]
+
+    monkeypatch.setattr("cosmos77_ex06.sdk.sdk.SDK", _FakeSDK)
+    rc = main(["run", "--local", "--ladder"])
+    assert rc == 0
+    assert "ladder" in capsys.readouterr().out
 
 
 def test_report_command_routes_to_sdk_stub() -> None:

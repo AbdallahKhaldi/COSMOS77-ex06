@@ -139,7 +139,7 @@ def test_transient_retry_then_success(
     async def _no_sleep(_seconds: float) -> None:
         return None
 
-    monkeypatch.setattr("cosmos77_ex06.orchestrator.gemini_client.asyncio.sleep", _no_sleep)
+    monkeypatch.setattr("cosmos77_ex06.orchestrator.llm_retry.asyncio.sleep", _no_sleep)
     gc = GeminiClient(orch_config, _gk(tmp_path), client_factory=lambda _k: FakeGenaiClient(script))
     out = asyncio.run(gc.ask("cop", "p"))
     assert out["message"] == "recovered"
