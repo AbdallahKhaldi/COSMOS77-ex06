@@ -19,6 +19,17 @@ scoring:
   cop_loss: 5
   thief_loss: 5
 
+# --- NL channel guard (E4, PRD §7.5/§10): flag coordinate-shaped leaks ---
+# Every OUTGOING agent message is scanned against these regexes; a match sets
+# coord_flagged=true on the transcript entry (graded proof the channel is prose).
+nl_guard:
+  coord_patterns:
+    - '\d+\s*[,;]\s*\d+'           # "3,4" / "3; 4" pairs
+    - '\brow\s*\d'                 # "row 3"
+    - '\bcol\s*\d'                 # "col 4"
+    - '\[\s*\d+\s*,\s*\d+\s*\]'    # "[3, 4]" bracketed pairs
+    - '\(\s*\d+\s*,\s*\d+\s*\)'    # "(3,4)" parenthesized pairs
+
 # --- LLM (orchestrator only — never inside the MCP servers; E3) ---
 llm:
   provider: gemini
