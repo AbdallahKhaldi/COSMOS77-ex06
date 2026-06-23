@@ -357,15 +357,38 @@ URLs (only the `url=` host changes).
 
 ## 7. Results
 
-### 7.1 Representative live Gemini runs
+### 7.1 Headline live game (real Gemini, 6 sub-games)
 
-We completed **live Gemini** games autonomously on the small **2×2** and **3×3** rungs. In the
-captured cop-win sub-games the **cop captured the thief**, banking the scoring table's `cop_win`
-(20) while the thief took `thief_loss` (5) — cumulative representative totals **cop 20 / thief 5**.
-Every LLM call is **token-metered through the Gatekeeper** (`shared/gatekeeper.py`, rule 13), so the
-free-tier cost is measured and ≈ \$0. The chart below shows those representative cumulative totals.
+The autonomous pipeline ran a full **6-sub-game game** against live Gemini on a **4×4** board,
+emitting `reports/internal_game.json` with **zero manual intervention** (E5). It produced a genuine
+**3–3 split — cumulative cop 75 / thief 45**:
 
-![Cumulative cop-vs-thief score for representative live Gemini cop-win sub-games — cop_win 20 / thief_loss 5 per capture](assets/results_totals.png)
+| Sub-game | Winner | Moves | Outcome |
+|---|---|---|---|
+| 1 | cop | 11 | cornered & captured |
+| 2 | thief | 25 | evaded the full move limit |
+| 3 | cop | 13 | captured |
+| 4 | thief | 25 | evaded |
+| 5 | thief | 25 | evaded |
+| 6 | cop | 12 | captured |
+
+The **thief surviving the full 25 moves on a 4×4 with vision-radius 1** is partial observability in
+action — the agents cannot see one another, so they pursue and evade purely on the position
+**inferred from the free-language channel**. Every LLM call is **token-metered through the
+Gatekeeper** (rule 13); free/basic-tier cost is ≈ \$0. Across all **223 turns the coordinate guard
+flagged 0 leaks** — the channel stayed genuine prose.
+
+![Cumulative cop-vs-thief score — headline 4×4 6-sub-game live game (cop 75 / thief 45)](assets/results_totals.png)
+
+A sample of the in-character free-language exchange (real Gemini, `coord_flagged=false`):
+
+> 🏃 **thief:** "You'll never catch me, copper! I'm too slippery for this old town."
+> 🚔 **cop:** "Slippery, huh? Let's see how you handle a little cornering."
+> 🏃 **thief:** "Trying to corner me? You'll have better luck catching smoke!"
+> 🚔 **cop:** "Smoke doesn't hide well in corners, pal. Let's see where you drift."
+
+The agent voice is a config-driven **persona** (`persona.cop` / `persona.thief`) layered on the
+prompt — pure flavour that never touches the no-coordinates rule or the game logic.
 
 ### 7.2 The sanity ladder (2×2 → 3×3 → 4×4 → 5×5)
 
@@ -375,16 +398,16 @@ cop captures quickly (small reachable sets); as the board grows the thief surviv
 shifting totals toward the thief (consistent with the harder pursuit). Each rung saves a transcript
 under `reports/`, run via `cosmos77-pursuit run --ladder`.
 
-### 7.3 Honesty note (scope of the live runs)
+### 7.3 Reproducibility & cost note
 
-The **headline 6-sub-game run is config-driven and identical in pipeline** to the verified live
-2×2/3×3 cop-win runs — only `num_games` and `grid_size` change in config; no code path differs. The
-**final 6-game artifact + the Gmail send were exercised on the free tier**
-(`gemini-2.5-flash` free tier is rate-limited to **20 requests/day**), which constrains how many
-full back-to-back 6-game runs can be done per day. The **learning-curve and results assets in this
-README are pure local computation** (offline RL self-play and a static bar chart), **not** Gemini
-output. The Technical-Loss void-and-rerun logic (E13) ensures a run always reaches 6 *valid*
-sub-games regardless of transient free-tier 429s.
+The run is fully **config-driven**: `num_games`, `grid_size`, and `llm.model` change only in
+`config/config.yaml` — no code path differs. The headline game used **`gemini-2.5-flash-lite`** (a
+free/basic Gemini model the spec §7.1 endorses, and markedly less 503-congested than
+`gemini-2.5-flash`, whose free tier is capped at **20 requests/day**); on a billed key it runs on
+`gemini-2.5-flash` too. The **learning-curve** asset is pure offline RL self-play and the
+**results chart** is a static plot of the real `totals` — neither is Gemini output. The
+Technical-Loss void-and-rerun logic (E13) guarantees **6 valid sub-games** regardless of transient
+free-tier 429 / 503 responses (the retry respects the server's `retryDelay`).
 
 ---
 
