@@ -96,11 +96,9 @@ class SDK:
     def run_full_game(
         self, *, cloud: bool = False, gui: bool = False, sender: Any = None, **kw: Any
     ) -> dict[str, Any]:
-        """Run an autonomous full game (6 valid sub-games), validate + save the report.
+        """Run an autonomous full game (6 valid sub-games), validate + save it (E5/E6/E13).
 
-        Re-runs Technical-Losses to ``num_games`` valid sub-games (E5, E13); ``cloud=True``
-        targets the config HTTPS MCP URLs (E6); ``report.auto_send`` true makes the COP email
-        the JSON at game end (E7). ``client_factory``/``mcp_client_factory``/``sender`` mock in tests.
+        ``cloud=True`` targets config HTTPS URLs; ``report.auto_send`` emails at game end (E7).
         """
         import asyncio
 
@@ -129,12 +127,14 @@ class SDK:
             self.config, self.reports_dir, self.run_full_game, client_factory
         )
 
-    def report(self, *, send: bool = False, sender: Any = None) -> dict[str, Any]:
-        """Load + validate the latest report JSON; optionally Gmail-send it (E7, ``report --send``)."""
+    def report(
+        self, *, send: bool = False, sender: Any = None, to: str | None = None
+    ) -> dict[str, Any]:
+        """Load+validate the latest report; optionally Gmail-send it (``to`` overrides recipient, E7)."""
         from cosmos77_ex06.report import dispatch
 
         return dispatch.send_latest(
-            self.config, self.gatekeeper, self.reports_dir, send=send, sender=sender
+            self.config, self.gatekeeper, self.reports_dir, send=send, sender=sender, to=to
         )
 
     def bonus(self, *, client_factory: Any = None, save: bool = True) -> dict[str, Any]:

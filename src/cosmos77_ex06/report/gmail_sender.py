@@ -6,11 +6,10 @@ The email BODY *is* the canonical report JSON — no prose, no HTML, no attachme
 MIME message whose payload is the JSON string, base64**url**-encodes it, and calls
 ``service.users().messages().send(userId="me", body={"raw": raw})``.
 
-Everything (recipient, scope, file paths) is config-driven (rule 4 / E8). All
-``google.*`` / ``googleapiclient`` imports are LAZY (inside methods, marked
-``# pragma: no cover``) so the test suite needs no network and no credentials
-(rule 6); tests inject fake ``service_factory`` / ``creds_loader`` / ``consent``
-callables instead, which also exercise the no-browser token-refresh branch.
+Everything (recipient, scope, paths) is config-driven (rule 4 / E8); an optional
+``to`` override lets you test-send to your own address without touching the
+submission config. All ``google.*`` imports are LAZY + ``# pragma: no cover`` so
+the suite needs no network/credentials; tests inject fake factory callables.
 """
 
 from __future__ import annotations
@@ -32,22 +31,24 @@ DEFAULT_SUBJECT = "COSMOS77-ex06 internal_game report"
 class GmailSender:
     """Send ONE JSON-body email via the Gmail API (dependency-injectable for tests).
 
-    The three optional factory callables let tests drive every branch without real
-    OAuth, network, or a browser (rule 6): ``service_factory(creds)`` returns a fake
-    Gmail service; ``creds_loader(token_path, scope)`` returns stored credentials (or
-    ``None``); ``consent(credentials_path, scope)`` returns freshly-authorized
-    credentials. In production all three default to the real lazy-imported google flow.
+    ``to`` overrides the config recipient (handy for a self-test); the three factory
+    callables let tests drive every branch without real OAuth, network, or a browser:
+    ``service_factory(creds)`` returns a fake service; ``creds_loader(token, scope)``
+    returns stored credentials (or ``None``); ``consent(creds_path, scope)`` returns
+    freshly-authorized credentials. In production all default to the real google flow.
     """
 
     def __init__(
         self,
         config: Config,
         *,
+        to: str | None = None,
         service_factory: Callable[[Any], Any] | None = None,
         creds_loader: Callable[[Path, str], Any] | None = None,
         consent: Callable[[Path, str], Any] | None = None,
     ) -> None:
         self.config = config
+        self._to_override = to
         root = config.config_dir.parent
         self._credentials_path = root / str(
             config.get("report.credentials_file", "credentials.json")
@@ -60,8 +61,8 @@ class GmailSender:
 
     @property
     def to(self) -> str:
-        """The configured recipient (``rmisegal+uoh26b@gmail.com``)."""
-        return str(self.config.get("report.to"))
+        """The recipient: the ``to`` override if given, else config ``report.to``."""
+        return str(self._to_override or self.config.get("report.to"))
 
     def _build_raw(self, body: str) -> str:
         """Wrap ``body`` (the canonical JSON) in a MIME text part, base64url-encoded.

@@ -52,6 +52,7 @@ def send_latest(
     *,
     send: bool = False,
     sender: Any = None,
+    to: str | None = None,
 ) -> dict[str, Any]:
     """Load + validate the latest ``reports/internal_game.json``; optionally send it.
 
@@ -68,7 +69,7 @@ def send_latest(
     validate_internal_game(report)
     result: dict[str, Any] = {"report": report, "path": str(path), "sent": False}
     if send:
-        active = sender or GmailSender(config)
+        active = sender or GmailSender(config, to=to)
         result["response"] = active.send(output.canonical_json(report))
         result["sent"] = True
         gatekeeper.record("report_send", {"sent": True, "to": active.to})

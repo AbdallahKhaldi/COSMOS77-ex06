@@ -39,6 +39,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     rep = sub.add_parser("report", help="build / send the JSON report")
     rep.add_argument("--send", action="store_true", help="email the JSON report via Gmail")
+    rep.add_argument(
+        "--to",
+        default=None,
+        metavar="EMAIL",
+        help="override the recipient for a self-test (config report.to stays the submission address)",
+    )
 
     bonus = sub.add_parser("bonus", help="run the inter-group bonus series (E12)")
     bonus.add_argument(
@@ -83,7 +89,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             report = out["report"]
             print(f"totals: {report['totals']} ({len(report['sub_games'])} valid sub-games)")
     elif args.command == "report":
-        sdk.report(send=args.send)
+        sdk.report(send=args.send, to=getattr(args, "to", None))
     elif args.command == "bonus":
         _run_bonus(getattr(args, "partner", None))
     return 0
