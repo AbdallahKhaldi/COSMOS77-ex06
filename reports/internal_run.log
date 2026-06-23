@@ -1,0 +1,669 @@
+2026-06-23 10:56:41,290 | INFO    | [sub 1 | turn 000 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like we're starting in the corner, officer. Don't expect me to stay put!"
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 10:56:54,766 | INFO    | [sub 1 | turn 001 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered, huh? Don't worry, I've got all the time in the world... or at least 25 moves."
+  tool=apply_move(direction=NW) -> pos=(2, 2)
+2026-06-23 10:56:58,282 | INFO    | [sub 1 | turn 001 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I always find a way out!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:56:59,799 | INFO    | [sub 1 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A way out? In this maze? Don't make me laugh."
+  tool=apply_move(direction=SW) -> pos=(1, 3)
+2026-06-23 10:57:03,341 | INFO    | [sub 1 | turn 002 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're cornered, copper! Nowhere to run now."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:14,683 | INFO    | [sub 1 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? That's a new one. I've seen more desperate characters than you try to make a break for it."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:57:16,834 | INFO    | [sub 1 | turn 003 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornered? Nah, just admiring the view from this cozy little spot. You'll never catch me, copper!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:18,778 | INFO    | [sub 1 | turn 003 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cozy spot? Looks more like a dead end, pal. Let's see if that view is as good from the inside."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:57:27,622 | INFO    | [sub 1 | turn 004 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this old town."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:31,994 | INFO    | [sub 1 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:57:35,688 | INFO    | [sub 1 | turn 005 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Trying to corner me? You'll have better luck catching smoke!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:37,918 | INFO    | [sub 1 | turn 005 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke doesn't hide well in corners, pal. Let's see where you drift."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:57:39,599 | INFO    | [sub 1 | turn 006 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this grid."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:43,881 | INFO    | [sub 1 | turn 006 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how slick you are when you hit a dead end."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:57:48,818 | INFO    | [sub 1 | turn 007 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to corner me, but I've got a few more tricks up my sleeve!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:52,510 | INFO    | [sub 1 | turn 007 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Tricks, huh? I've heard that one before. Let's see if your 'tricks' can outrun me."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:57:54,657 | INFO    | [sub 1 | turn 008 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to corner me, but I'm too slippery for you!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:57:55,930 | INFO    | [sub 1 | turn 008 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? We'll see about that. I'll cut off your escape route."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:58:04,487 | INFO    | [sub 1 | turn 009 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:58:09,308 | INFO    | [sub 1 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. I've got all day and then some."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:58:22,839 | INFO    | [sub 1 | turn 010 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit slow on the uptake, copper. You'll never catch me this close to the edge!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:58:36,268 | INFO    | [sub 1 | turn 010 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="The edge, huh? Funny, I don't see any cliffs around here, just a 4x4 box."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:58:40,225 | INFO    | [sub 1 | turn 011 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're cornered, officer! I'm heading for the open road."
+  tool=apply_move(direction=SE) -> pos=(1, 3)
+2026-06-23 10:58:44,046 | INFO    | [sub 2 | turn 000 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like we're both stuck in this little box, officer. Maybe you should try looking in the corners?"
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 10:58:54,846 | INFO    | [sub 2 | turn 001 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Corners, huh? Heard that one before. Let's see if you're hiding in plain sight."
+  tool=apply_move(direction=NW) -> pos=(2, 2)
+2026-06-23 10:58:57,625 | INFO    | [sub 2 | turn 001 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this little box."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:59:08,346 | INFO    | [sub 2 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="This little box is big enough for both of us, pal. Let's see how slick you are when you're cornered."
+  tool=apply_move(direction=SW) -> pos=(1, 3)
+2026-06-23 10:59:14,249 | INFO    | [sub 2 | turn 002 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I've always been good at finding the cracks, even in a tight spot like this."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:59:15,916 | INFO    | [sub 2 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cracks, huh? Let's see if you can find one when I'm breathing down your neck."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:59:19,036 | INFO    | [sub 2 | turn 003 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit further south than I expected, copper. Guess you'll have to try harder to catch me!"
+  tool=apply_move(direction=NW) -> pos=(0, 2)
+2026-06-23 10:59:21,574 | INFO    | [sub 2 | turn 003 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Trying harder is my middle name, pal. Let's see if you can keep up."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:59:28,956 | INFO    | [sub 2 | turn 004 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit cornered, officer. Maybe try looking over your shoulder?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:59:38,627 | INFO    | [sub 2 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? I'm just enjoying the view from the back alley, pal. Don't strain yourself looking for me."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:59:45,219 | INFO    | [sub 2 | turn 005 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this alley."
+  tool=apply_move(direction=NW) -> pos=(0, 2)
+2026-06-23 10:59:46,399 | INFO    | [sub 2 | turn 005 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how slippery you are when you hit a dead end."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:59:51,283 | INFO    | [sub 2 | turn 006 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Dead end? I'm practically a ghost in these streets, you'll never corner me!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 10:59:52,508 | INFO    | [sub 2 | turn 006 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A ghost, huh? More like a rat in a maze. Let's see how you like this corner."
+  tool=apply_move(direction=NW) -> pos=(1, 3)
+2026-06-23 10:59:54,260 | INFO    | [sub 2 | turn 007 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg='Cornered? Nah, just admiring the view before I slip away again.'
+  tool=apply_move(direction=NW) -> pos=(0, 2)
+2026-06-23 10:59:55,460 | INFO    | [sub 2 | turn 007 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="That view won't last, pal. I'm closing in."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 10:59:58,809 | INFO    | [sub 2 | turn 008 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I've got more moves than you've got bullets."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:00:04,988 | INFO    | [sub 2 | turn 008 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This city's got more corners than a cheap suit, and I know 'em all."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:00:11,222 | INFO    | [sub 2 | turn 009 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit cornered yourself, officer. Maybe try a different beat?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:00:14,731 | INFO    | [sub 2 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? I'm just enjoying the view from the back alley. Don't worry, I'll be out of your hair soon enough."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:00:20,483 | INFO    | [sub 2 | turn 010 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're stuck in that corner, officer. I'm heading for the open road!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:00:31,714 | INFO    | [sub 2 | turn 010 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='Open road, huh? Funny, I see you trying to sneak around the west wall. Not today, pal.'
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:00:38,156 | INFO    | [sub 2 | turn 011 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in near the west wall, but I've got a few more tricks up my sleeve!"
+  tool=apply_move(direction=NE) -> pos=(1, 1)
+2026-06-23 11:00:42,372 | INFO    | [sub 2 | turn 012 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Tricks, huh? I've heard that one before. Let's see if your 'tricks' can outrun me."
+  tool=apply_move(direction=N) -> pos=(1, 2)
+2026-06-23 11:00:47,070 | INFO    | [sub 2 | turn 012 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to corner me, but I'm a slippery one, aren't I?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:00:49,821 | INFO    | [sub 2 | turn 013 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? We'll see about that. I'm closing in."
+  tool=apply_move(direction=SE) -> pos=(2, 3)
+2026-06-23 11:00:52,164 | INFO    | [sub 2 | turn 013 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:01:05,630 | INFO    | [sub 2 | turn 013 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save the theatrics, pal. I'll be on you before you can say 'dead end'."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:01:16,247 | INFO    | [sub 2 | turn 014 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this grid."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:01:18,115 | INFO    | [sub 2 | turn 014 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. This city's got more dead ends than your alibis."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:01:22,424 | INFO    | [sub 2 | turn 015 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper. I'm too slippery for this concrete jungle!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:01:25,016 | INFO    | [sub 2 | turn 015 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little corner pocket."
+  tool=apply_move(direction=NW) -> pos=(2, 3)
+2026-06-23 11:01:27,913 | INFO    | [sub 2 | turn 016 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Corner pocket? More like the open road, copper! You'll never catch me."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:01:31,826 | INFO    | [sub 2 | turn 016 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="You think you can outrun me? I've seen tougher guys than you fold like a cheap suit."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:01:33,302 | INFO    | [sub 2 | turn 017 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:01:34,362 | INFO    | [sub 2 | turn 017 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? We'll see about that. I'm boxing you in."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:01:44,071 | INFO    | [sub 2 | turn 018 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:01:56,928 | INFO    | [sub 2 | turn 018 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This city's got more corners than a cheap suit, and I know 'em all."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:02:01,162 | INFO    | [sub 2 | turn 019 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me in this maze, copper. I've got more tricks than a street magician!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:02:52,191 | INFO    | [sub 2 | turn 019 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This maze ain't big enough for your theatrics."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:02:57,865 | INFO    | [sub 2 | turn 020 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit lost, officer. Maybe try looking behind you?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:03:34,996 | INFO    | [sub 2 | turn 020 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Behind me? That's a new one. I've got a hunch you're closer than you think, pal."
+  tool=apply_move(direction=NW) -> pos=(2, 3)
+2026-06-23 11:03:38,054 | INFO    | [sub 2 | turn 021 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:03:40,363 | INFO    | [sub 2 | turn 021 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? We'll see about that. This corner ain't big enough for the both of us."
+  tool=apply_move(direction=NW) -> pos=(2, 3)
+2026-06-23 11:03:45,282 | INFO    | [sub 2 | turn 022 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I've always been good at finding a way out!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:03:49,865 | INFO    | [sub 2 | turn 022 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A way out, huh? More like a dead end, pal. I'll cut off your escape."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:03:52,984 | INFO    | [sub 2 | turn 023 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're cornered, copper! Nowhere to run now."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:03:57,338 | INFO    | [sub 2 | turn 023 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? That's rich. I've seen tighter spots in a phone booth."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:03:58,200 | INFO    | [sub 2 | turn 024 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:03:59,796 | INFO    | [sub 2 | turn 024 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=N) -> pos=(2, 3)
+2026-06-23 11:04:04,660 | INFO    | [sub 3 | turn 000 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Trying to corner me? You'll have better luck catching smoke!"
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:04:10,626 | INFO    | [sub 3 | turn 001 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke clears, pal. Let's see where you're really hiding."
+  tool=apply_move(direction=NW) -> pos=(2, 2)
+2026-06-23 11:04:16,336 | INFO    | [sub 3 | turn 001 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this tiny box."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:04:22,663 | INFO    | [sub 3 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="You might be slick, pal, but this box ain't that big. I'll corner you soon enough."
+  tool=apply_move(direction=SW) -> pos=(1, 3)
+2026-06-23 11:04:24,134 | INFO    | [sub 3 | turn 002 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too fast for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:04:33,905 | INFO    | [sub 3 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Fast, huh? We'll see about that. I'm closing in."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:04:40,585 | INFO    | [sub 3 | turn 003 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:04:41,834 | INFO    | [sub 3 | turn 003 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how fast you are when you're cornered."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:04:44,797 | INFO    | [sub 3 | turn 004 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I always find a way out!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:04:47,377 | INFO    | [sub 3 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='A way out? In this town, the only way out is in a body bag, pal.'
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:04:50,744 | INFO    | [sub 3 | turn 005 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're cornering me, copper, but I've slipped through tighter spots than this before."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:04:52,688 | INFO    | [sub 3 | turn 005 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see if you can dance your way out of this corner."
+  tool=apply_move(direction=N) -> pos=(1, 3)
+2026-06-23 11:04:53,755 | INFO    | [sub 3 | turn 006 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg='Cornered? Nah, just admiring the view before I slip away again.'
+  tool=apply_move(direction=NE) -> pos=(1, 1)
+2026-06-23 11:04:55,157 | INFO    | [sub 3 | turn 007 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='The view from down here is pretty good too, especially when it includes a perp trying to make a break for it.'
+  tool=apply_move(direction=N) -> pos=(1, 2)
+2026-06-23 11:04:56,811 | INFO    | [sub 3 | turn 007 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're stuck in the mud, officer. I'm heading for the open road!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:05:00,374 | INFO    | [sub 3 | turn 008 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Open road, huh? More like a dead end. I'll be there before you can say 'caught'."
+  tool=apply_move(direction=SW) -> pos=(0, 3)
+2026-06-23 11:05:01,661 | INFO    | [sub 3 | turn 008 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to corner me, but I've got a few more tricks up my sleeve."
+  tool=apply_move(direction=N) -> pos=(0, 1)
+2026-06-23 11:05:02,662 | INFO    | [sub 3 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see those tricks."
+  tool=apply_move(direction=N) -> pos=(0, 2)
+2026-06-23 11:05:05,548 | INFO    | [sub 3 | turn 009 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this little box."
+  tool=apply_move(direction=NW) -> pos=(0, 1)
+2026-06-23 11:05:08,302 | INFO    | [sub 3 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how slick you are when you hit a dead end."
+  tool=apply_move(direction=N) -> pos=(0, 2)
+2026-06-23 11:05:18,188 | INFO    | [sub 3 | turn 010 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg='Dead end? More like a scenic route to freedom, copper!'
+  tool=apply_move(direction=N) -> pos=(0, 0)
+2026-06-23 11:05:39,226 | INFO    | [sub 3 | turn 011 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A scenic route, huh? Don't get lost in the pretty views, pal."
+  tool=apply_move(direction=S) -> pos=(0, 3)
+2026-06-23 11:05:42,161 | INFO    | [sub 3 | turn 011 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit turned around, officer. Maybe stick to the main roads next time."
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:05:44,353 | INFO    | [sub 3 | turn 011 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Nice try, pal. I've heard that one before. Let's see if you can outrun me."
+  tool=apply_move(direction=S) -> pos=(0, 3)
+2026-06-23 11:05:52,127 | INFO    | [sub 3 | turn 012 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit slow on the uptake, copper. I'll be long gone before you figure this out."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:06:00,562 | INFO    | [sub 3 | turn 013 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='Save your breath, pal. This little game of tag is almost over.'
+  tool=apply_move(direction=N) -> pos=(0, 2)
+2026-06-23 11:06:03,711 | INFO    | [sub 4 | turn 000 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:06:06,148 | INFO    | [sub 4 | turn 000 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering, slick."
+  tool=apply_move(direction=SW) -> pos=(3, 3)
+2026-06-23 11:06:10,250 | INFO    | [sub 4 | turn 001 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornering me? You'll have better luck catching smoke, copper!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:06:12,431 | INFO    | [sub 4 | turn 001 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke, huh? More like a dead end, pal. I'll find you."
+  tool=apply_move(direction=SW) -> pos=(3, 3)
+2026-06-23 11:06:16,943 | INFO    | [sub 4 | turn 002 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You think you've got me cornered? I'm like a ghost in these alleys, always one step ahead!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:06:23,327 | INFO    | [sub 4 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Nice try, Houdini. Let's see how you handle the pressure near the southwest corner."
+  tool=apply_move(direction=SW) -> pos=(3, 3)
+2026-06-23 11:06:37,958 | INFO    | [sub 4 | turn 003 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornered? Nah, just admiring the view. You'll never catch me this close to the edge!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:06:41,205 | INFO    | [sub 4 | turn 003 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="The view from the corner, huh? Don't worry, I'm not here to admire the scenery."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:06:44,880 | INFO    | [sub 4 | turn 004 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're stuck in that corner, officer. Maybe try a different approach?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:06:47,908 | INFO    | [sub 4 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? Nah, just enjoying the view. Don't worry, I'll get to you eventually."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:06:51,167 | INFO    | [sub 4 | turn 005 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:06:55,021 | INFO    | [sub 4 | turn 005 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=SW) -> pos=(3, 3)
+2026-06-23 11:07:05,204 | INFO    | [sub 4 | turn 006 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:07:13,509 | INFO    | [sub 4 | turn 006 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how fast you are when you're cornered."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:07:14,530 | INFO    | [sub 4 | turn 007 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this concrete jungle."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:07:17,371 | INFO    | [sub 4 | turn 007 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how slick you are when you hit a dead end."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:07:19,812 | INFO    | [sub 4 | turn 008 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:07:22,668 | INFO    | [sub 4 | turn 008 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. This city's got more dead ends than your alibis."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:07:38,569 | INFO    | [sub 4 | turn 009 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper. I'm too slippery for this concrete jungle."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:07:42,641 | INFO    | [sub 4 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:07:43,812 | INFO    | [sub 4 | turn 010 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:07:48,877 | INFO    | [sub 4 | turn 010 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how fast you are when you hit a dead end."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:07:59,483 | INFO    | [sub 4 | turn 011 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I've got more tricks up my sleeve than you have bullets."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:02,084 | INFO    | [sub 4 | turn 011 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save the theatrics, pal. I'll corner you by the east wall before you can say 'dirty laundry'."
+  tool=apply_move(direction=W) -> pos=(3, 3)
+2026-06-23 11:08:05,141 | INFO    | [sub 4 | turn 012 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for your clumsy pursuit."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:08,985 | INFO    | [sub 4 | turn 012 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering, slick."
+  tool=apply_move(direction=SW) -> pos=(3, 3)
+2026-06-23 11:08:13,227 | INFO    | [sub 4 | turn 013 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Trying to box me in? You'll have better luck catching smoke, officer!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:15,287 | INFO    | [sub 4 | turn 013 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke doesn't get caught, pal. But maybe you're not as slippery as you think, hiding near that corner."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:08:23,787 | INFO    | [sub 4 | turn 014 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:26,320 | INFO    | [sub 4 | turn 014 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how fast you are when you hit a dead end."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:08:28,127 | INFO    | [sub 4 | turn 015 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg='Dead end? More like a scenic route to freedom, copper!'
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:39,309 | INFO    | [sub 4 | turn 015 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A scenic route, huh? Looks like you're trying to lead me on a wild goose chase. Well, this goose is getting tired."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:08:43,660 | INFO    | [sub 4 | turn 016 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this concrete jungle."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:45,009 | INFO    | [sub 4 | turn 016 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="You think you're clever, hiding in the shadows? I've seen your kind before."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:08:47,684 | INFO    | [sub 4 | turn 017 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this old town."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:08:58,128 | INFO    | [sub 4 | turn 017 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? We'll see about that. This corner ain't big enough for both of us."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:08:59,202 | INFO    | [sub 4 | turn 018 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I've got a few more tricks up my sleeve!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:09:03,037 | INFO    | [sub 4 | turn 018 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This city's got more corners than a cheap suit, and I'll find you in one of 'em."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:09:17,139 | INFO    | [sub 4 | turn 019 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this concrete jungle."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:09:19,195 | INFO    | [sub 4 | turn 019 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Running in circles, huh? This little maze ain't big enough for both of us."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:09:32,836 | INFO    | [sub 4 | turn 020 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this little box."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:09:44,069 | INFO    | [sub 4 | turn 020 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how slippery you are when you hit a dead end, pal."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:09:57,497 | INFO    | [sub 4 | turn 021 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I always find a way out!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:10:35,533 | INFO    | [sub 4 | turn 021 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='A cornered rat always scurries, but this time the maze is closing in.'
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:10:37,785 | INFO    | [sub 4 | turn 022 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I've always had a knack for finding the cracks!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:10:40,622 | INFO    | [sub 4 | turn 022 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='Trying to slip through my fingers, huh? Not on my watch, pal.'
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:10:53,346 | INFO    | [sub 4 | turn 023 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit cornered, officer. Maybe try looking behind you?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:10:56,031 | INFO    | [sub 4 | turn 023 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Behind me? That's a classic. I've heard that one before, pal."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:11:16,166 | INFO    | [sub 4 | turn 024 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this little box."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:11:20,130 | INFO    | [sub 4 | turn 024 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This little box ain't big enough for both of us."
+  tool=apply_move(direction=NW) -> pos=(3, 3)
+2026-06-23 11:11:23,312 | INFO    | [sub 5 | turn 000 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit slow on the uptake, copper. You'll never catch me!"
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:11:25,633 | INFO    | [sub 5 | turn 001 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. I've heard that one before. Let's see if you can outrun me."
+  tool=apply_move(direction=NW) -> pos=(2, 2)
+2026-06-23 11:11:35,568 | INFO    | [sub 5 | turn 001 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're cornered, officer. Maybe try a different beat?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:11:37,469 | INFO    | [sub 5 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? I'm just enjoying the view from the center. Don't get your hopes up, pal."
+  tool=apply_move(direction=STAY) -> pos=(2, 2)
+2026-06-23 11:11:45,022 | INFO    | [sub 5 | turn 002 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this old town."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:12:00,155 | INFO    | [sub 5 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little corner pocket."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:12:06,734 | INFO    | [sub 5 | turn 003 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Corner pocket? More like the open road, copper! You'll never box me in."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:12:19,848 | INFO    | [sub 5 | turn 003 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save the theatrics, pal. I'll find you before this case goes cold."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:12:31,951 | INFO    | [sub 5 | turn 004 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:12:48,584 | INFO    | [sub 5 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:12:54,426 | INFO    | [sub 5 | turn 005 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornering me? You'll have better luck catching smoke, officer!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:00,714 | INFO    | [sub 5 | turn 005 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke clears, and so will this corner. Let's see how fast you can really run."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:13:04,170 | INFO    | [sub 5 | turn 006 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this side of town."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:05,227 | INFO    | [sub 5 | turn 006 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle the squeeze play."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:13:14,975 | INFO    | [sub 5 | turn 007 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Trying to box me in? You'll need more than that, copper!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:17,386 | INFO    | [sub 5 | turn 007 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Box you in? I'm just trying to keep you from skipping town, pal."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:13:22,508 | INFO    | [sub 5 | turn 008 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this little box you're trying to build."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:33,665 | INFO    | [sub 5 | turn 008 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="You think you're slick? This whole board is my oyster, and I'm about to close it on you."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:13:41,050 | INFO    | [sub 5 | turn 009 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:43,108 | INFO    | [sub 5 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Heard that one before, pal. Let's see how fast you are when you hit a wall."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:13:45,029 | INFO    | [sub 5 | turn 010 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this city."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:47,084 | INFO    | [sub 5 | turn 010 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. This city's got more dead ends than your alibis."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:13:48,682 | INFO    | [sub 5 | turn 011 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit lost, officer. Maybe try looking behind you?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:13:51,016 | INFO    | [sub 5 | turn 011 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Behind me? That's a new one. I'll stick to the plan, gumshoe."
+  tool=apply_move(direction=SE) -> pos=(2, 2)
+2026-06-23 11:13:59,988 | INFO    | [sub 5 | turn 012 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:14:08,965 | INFO    | [sub 5 | turn 012 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:14:16,208 | INFO    | [sub 5 | turn 013 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornering me? You'll have better luck catching smoke, officer!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:14:18,941 | INFO    | [sub 5 | turn 013 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke clears, and you're still cornered. Let's wrap this up."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:14:20,328 | INFO    | [sub 5 | turn 014 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're always one step behind, copper!"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:15:02,993 | INFO    | [sub 5 | turn 014 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Always one step behind? That's rich, coming from someone who's about to be cornered."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:15:16,240 | INFO    | [sub 5 | turn 015 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're always a step behind, copper. Maybe try to keep up?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:15:22,812 | INFO    | [sub 5 | turn 015 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A step behind? I'm right here, pal. You're the one running in circles."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:15:26,100 | INFO    | [sub 5 | turn 016 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I've got places to be, and you're not invited."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:15:30,834 | INFO    | [sub 5 | turn 016 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. I've heard that sob story a hundred times. Let's see how fast you can run."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:15:34,022 | INFO    | [sub 5 | turn 017 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this tiny town."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:15:42,338 | INFO    | [sub 5 | turn 017 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="This town ain't so big, pal. Nowhere to run, nowhere to hide."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:15:46,136 | INFO    | [sub 5 | turn 018 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slick for this concrete jungle."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:15:48,208 | INFO    | [sub 5 | turn 018 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save the theatrics, slick. This city's got more dead ends than your getaway plans."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:15:50,167 | INFO    | [sub 5 | turn 019 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit lost, officer. Maybe try looking behind you?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:15:53,308 | INFO    | [sub 5 | turn 019 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Behind me? That's a new one. I've got a hunch you're not as far away as you'd like me to believe."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:15:57,978 | INFO    | [sub 5 | turn 020 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too good at this."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:16:15,153 | INFO    | [sub 5 | turn 020 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. This city's got more corners than your excuses."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:16:19,684 | INFO    | [sub 5 | turn 021 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit lost, officer. Maybe try looking behind you?"
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:16:28,258 | INFO    | [sub 5 | turn 021 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Behind me? That's a new one. I'll stick to the plan, see if I can't corner you near the center."
+  tool=apply_move(direction=STAY) -> pos=(2, 2)
+2026-06-23 11:16:31,808 | INFO    | [sub 5 | turn 022 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornered? Never! I'm too slippery for your plans, officer."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:16:36,883 | INFO    | [sub 5 | turn 022 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? We'll see about that when I box you in."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:16:46,073 | INFO    | [sub 5 | turn 023 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too quick for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:16:49,729 | INFO    | [sub 5 | turn 023 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='Save it for the judge, pal. This chase is almost over.'
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:17:03,928 | INFO    | [sub 5 | turn 024 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for you."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:17:06,231 | INFO    | [sub 5 | turn 024 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering."
+  tool=apply_move(direction=SW) -> pos=(2, 2)
+2026-06-23 11:17:11,253 | INFO    | [sub 6 | turn 000 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornering me? You'll have better luck catching smoke, officer!"
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:17:16,877 | INFO    | [sub 6 | turn 001 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke, huh? I've seen your kind before, always blowing hot air. Let's see if you can blow yourself out of this corner."
+  tool=apply_move(direction=NW) -> pos=(2, 2)
+2026-06-23 11:17:45,601 | INFO    | [sub 6 | turn 001 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're cornered, officer. Don't strain yourself trying to catch me!"
+  tool=apply_move(direction=NW) -> pos=(0, 0)
+2026-06-23 11:17:49,762 | INFO    | [sub 6 | turn 002 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Cornered? That's a new one. I've seen tougher guys than you stuck in a phone booth."
+  tool=apply_move(direction=SW) -> pos=(1, 3)
+2026-06-23 11:17:52,138 | INFO    | [sub 6 | turn 002 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper. I'm too slick for this little box."
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:17:53,171 | INFO    | [sub 6 | turn 003 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This city's got more corners than a cheap suit, and I know 'em all."
+  tool=apply_move(direction=N) -> pos=(1, 2)
+2026-06-23 11:17:55,873 | INFO    | [sub 6 | turn 003 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I've got a few tricks up my sleeve."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:17:59,675 | INFO    | [sub 6 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="A few tricks, huh? Let's see if they're as good as that sob story you're about to tell."
+  tool=apply_move(direction=SW) -> pos=(0, 3)
+2026-06-23 11:18:01,554 | INFO    | [sub 6 | turn 004 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit further south than I expected, copper. You'll never catch me this way!"
+  tool=apply_move(direction=NW) -> pos=(0, 2)
+2026-06-23 11:18:08,040 | INFO    | [sub 6 | turn 004 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. I've heard that sob story a hundred times. You're cornered."
+  tool=apply_move(direction=N) -> pos=(0, 3)
+2026-06-23 11:18:13,329 | INFO    | [sub 6 | turn 005 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're a bit further south than I thought, copper. You'll never catch me this way!"
+  tool=apply_move(direction=NW) -> pos=(0, 2)
+2026-06-23 11:18:16,663 | INFO    | [sub 6 | turn 005 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save it, pal. I've heard that one before. Let's see how fast you are when you're cornered."
+  tool=apply_move(direction=N) -> pos=(0, 3)
+2026-06-23 11:18:19,167 | INFO    | [sub 6 | turn 006 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in near the south wall, but I'm too slippery for you!"
+  tool=apply_move(direction=N) -> pos=(0, 1)
+2026-06-23 11:18:32,562 | INFO    | [sub 6 | turn 007 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little pressure from the west."
+  tool=apply_move(direction=E) -> pos=(1, 3)
+2026-06-23 11:18:38,275 | INFO    | [sub 6 | turn 007 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="West, you say? I'm already halfway to the east coast, copper!"
+  tool=apply_move(direction=E) -> pos=(1, 1)
+2026-06-23 11:18:42,030 | INFO    | [sub 6 | turn 008 | COP] url=http://localhost:8001/mcp auth=ok
+  msg='Halfway to the east coast, huh? Sounds like a long walk from this corner.'
+  tool=apply_move(direction=N) -> pos=(1, 2)
+2026-06-23 11:18:54,153 | INFO    | [sub 6 | turn 008 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Looks like you're trying to box me in, but I've always been good at slipping through the cracks."
+  tool=apply_move(direction=NW) -> pos=(0, 0)
+2026-06-23 11:18:56,605 | INFO    | [sub 6 | turn 009 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slipping through cracks, huh? We'll see about that, Houdini."
+  tool=apply_move(direction=SW) -> pos=(0, 3)
+2026-06-23 11:18:59,639 | INFO    | [sub 6 | turn 009 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too slippery for this old town."
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:19:02,195 | INFO    | [sub 6 | turn 010 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Slippery, huh? Let's see how you handle a little cornering, slick."
+  tool=apply_move(direction=N) -> pos=(0, 2)
+2026-06-23 11:19:16,555 | INFO    | [sub 6 | turn 010 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="Cornering me? You'll have better luck catching smoke, copper!"
+  tool=apply_move(direction=NW) -> pos=(0, 0)
+2026-06-23 11:19:19,708 | INFO    | [sub 6 | turn 010 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Smoke doesn't usually hide in the corner, pal. Let's see if you're as slippery as you think."
+  tool=apply_move(direction=SW) -> pos=(0, 2)
+2026-06-23 11:19:21,760 | INFO    | [sub 6 | turn 011 | THIEF] url=http://localhost:8002/mcp auth=ok
+  msg="You'll never catch me, copper! I'm too good for this little box."
+  tool=apply_move(direction=SE) -> pos=(1, 1)
+2026-06-23 11:19:29,119 | INFO    | [sub 6 | turn 012 | COP] url=http://localhost:8001/mcp auth=ok
+  msg="Save your breath, pal. This city's got more corners than your excuses."
+  tool=apply_move(direction=NE) -> pos=(1, 1)

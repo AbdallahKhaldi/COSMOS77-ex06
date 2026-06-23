@@ -1,0 +1,73 @@
+{
+  "cop_mcp_url": "http://localhost:8001/mcp",
+  "github_repo": "https://github.com/AbdallahKhaldi/COSMOS77-ex06",
+  "group_name": "COSMOS77",
+  "students": [
+    {
+      "id": "212389712",
+      "name_en": "Abdallah Khaldi",
+      "name_he": "עבדאללה ח'אלדי"
+    },
+    {
+      "id": "323118794",
+      "name_en": "Tasneem Natour",
+      "name_he": "תסנים נאטור"
+    }
+  ],
+  "sub_games": [
+    {
+      "capture": true,
+      "cop_score": 20,
+      "index": 1,
+      "moves": 11,
+      "thief_score": 5,
+      "winner": "cop"
+    },
+    {
+      "capture": false,
+      "cop_score": 5,
+      "index": 2,
+      "moves": 25,
+      "thief_score": 10,
+      "winner": "thief"
+    },
+    {
+      "capture": true,
+      "cop_score": 20,
+      "index": 3,
+      "moves": 13,
+      "thief_score": 5,
+      "winner": "cop"
+    },
+    {
+      "capture": false,
+      "cop_score": 5,
+      "index": 4,
+      "moves": 25,
+      "thief_score": 10,
+      "winner": "thief"
+    },
+    {
+      "capture": false,
+      "cop_score": 5,
+      "index": 5,
+      "moves": 25,
+      "thief_score": 10,
+      "winner": "thief"
+    },
+    {
+      "capture": true,
+      "cop_score": 20,
+      "index": 6,
+      "moves": 12,
+      "thief_score": 5,
+      "winner": "cop"
+    }
+  ],
+  "thief_mcp_url": "http://localhost:8002/mcp",
+  "timezone": "Asia/Jerusalem",
+  "totals": {
+    "cop": 75,
+    "thief": 45
+  }
+}
