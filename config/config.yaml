@@ -30,6 +30,14 @@ nl_guard:
     - '\[\s*\d+\s*,\s*\d+\s*\]'    # "[3, 4]" bracketed pairs
     - '\(\s*\d+\s*,\s*\d+\s*\)'    # "(3,4)" parenthesized pairs
 
+# --- Agent personas (E4 flavour): the in-character voice of the free-NL channel ---
+# Pure TONE guidance injected into the agent prompt; the no-coordinates guard and the
+# game logic are unaffected. Keep it clean (a professor reads the transcript) and on-topic.
+# Edit freely to dial the edginess up or down.
+persona:
+  thief: "Play a roguish, down-on-your-luck thief with gallows humour: wry, sympathetic one-liners (a man's gotta eat, just trying to feed my kids, the streets raised me) while taunting the cop about never catching you."
+  cop: "Play a wisecracking, world-weary noir detective: dry, witty, lightly sarcastic comebacks (heard that sob story a hundred times, pal) that stay clean and on the case."
+
 # --- Decision strategy (E9): heuristic core + optional tabular Q-Table ---
 strategy:
   enabled: false          # DEFAULT-OFF: when true the heuristic's suggested action
@@ -46,11 +54,11 @@ qlearning:
 # --- LLM (orchestrator only — never inside the MCP servers; E3) ---
 llm:
   provider: gemini
-  model: gemini-2.5-flash
+  model: gemini-2.5-flash-lite  # spec §7.1 endorses free/basic models; lite is markedly less 503-congested than flash and billing lifts its cap
   temperature: 0.2
   max_retries: 6           # transient 429/5xx retries (Phase-7 full game makes hundreds of free-tier calls; raised for the long live run)
   retry_base_seconds: 2.0  # exponential backoff base when the server suggests no delay
-  min_call_interval_seconds: 6.5  # inter-call pacing (s): ~9 RPM, under the gemini free-tier 10 RPM cap for the live Phase-7 run (the mocked suite overrides to 0.0)
+  min_call_interval_seconds: 0.5  # paid tier (billing on): no free RPM cap, so pace lightly; retry handles transient 503s
 
 # --- MCP servers (E2/E6): two FastMCP servers on separate ports, token auth ---
 mcp:
