@@ -4,7 +4,9 @@
 free natural-language message into a Gemini prompt instructing the LLM to (a)
 reason about the opponent's likely cell, (b) emit a FREE natural-language message
 (intentions / observations / bluff — never raw coordinates), and (c) choose one
-move/barrier action. No LLM call happens here (E3: the call lives in the
+move/barrier action. An optional config-driven ``persona`` gives that message an
+in-character voice (E4 flavour) without touching the game logic or the
+no-coordinates rule. No LLM call happens here (E3: the call lives in the
 orchestrator); this module only *builds* prompts and *parses* the decision.
 """
 
@@ -30,6 +32,8 @@ class BaseAgent(BeliefMixin):
         self.grid = list(config.get("grid_size"))
         self.max_moves = int(config.get("max_moves"))
         self.allow_diagonal = bool(config.get("allow_diagonal"))
+        #: Optional in-character tone for the NL message (config-driven, default empty).
+        self.persona = str(config.get(f"persona.{self.role}", default="")).strip()
 
     def _rules_summary(self) -> str:
         """A terse, config-sourced rules recap for the prompt (nothing hardcoded)."""
@@ -51,8 +55,8 @@ class BaseAgent(BeliefMixin):
 
         ``suggestion`` is an OPTIONAL heuristic action hint (E9, default-off): when
         ``strategy.enabled`` is set the orchestrator may pass a suggested action,
-        appended as a HINT the LLM may accept or override. ``None`` (the default)
-        yields the byte-identical Phase-4 prompt — existing behaviour is unchanged.
+        appended as a HINT the LLM may accept or override. With no persona configured
+        and ``suggestion=None`` this yields the byte-identical Phase-4 prompt.
         """
         heard = opponent_message or "(no message from the opponent yet)"
         return (
@@ -67,7 +71,17 @@ class BaseAgent(BeliefMixin):
             "observations, or a bluff). Use landmarks (walls, corners, center) — NEVER raw "
             "coordinates, rows, or columns.\n"
             f"3. 'action': choose exactly ONE action: a move ({self._move_vocab()}).\n"
+            f"{self._persona_line()}"
             f"{self._suggestion_line(suggestion)}"
+        )
+
+    def _persona_line(self) -> str:
+        """Optional in-character STYLE line for the message voice (config-driven, E4)."""
+        if not self.persona:
+            return ""
+        return (
+            f"STYLE: {self.persona} Keep the 'message' witty and in character, "
+            "but clean and strictly about the pursuit.\n"
         )
 
     def _suggestion_line(self, suggestion: str | None) -> str:
