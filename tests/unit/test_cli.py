@@ -76,9 +76,12 @@ def test_report_command_routes_to_sdk(monkeypatch: pytest.MonkeyPatch) -> None:
     """`report --send` routes to SDK.report(send=True) (no disk / Gmail touched)."""
     called: dict[str, Any] = {}
 
-    def fake_report(self, *, send: bool = False, sender=None, to=None) -> dict[str, Any]:
+    def fake_report(
+        self, *, send: bool = False, sender=None, to=None, final=False
+    ) -> dict[str, Any]:
         called["send"] = send
         called["to"] = to
+        called["final"] = final
         return {"sent": send}
 
     monkeypatch.setattr("cosmos77_ex06.sdk.sdk.SDK.report", fake_report)
