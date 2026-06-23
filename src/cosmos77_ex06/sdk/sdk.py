@@ -60,10 +60,7 @@ class SDK:
         return state
 
     def step(self, state: Any, role: str, action: Any) -> Any:
-        """Apply one ``("move", direction)`` / ``("barrier", cell)`` for ``role``.
-
-        An illegal action raises :class:`~cosmos77_ex06.game.moves.IllegalMoveError`.
-        """
+        """Apply one ``("move", direction)`` / ``("barrier", cell)`` for ``role`` (illegal -> IllegalMoveError)."""
         from cosmos77_ex06.game import rules
         from cosmos77_ex06.game.board import Board
         from cosmos77_ex06.game.moves import apply_move, place_barrier
@@ -96,10 +93,7 @@ class SDK:
     def run_full_game(
         self, *, cloud: bool = False, gui: bool = False, sender: Any = None, **kw: Any
     ) -> dict[str, Any]:
-        """Run an autonomous full game (6 valid sub-games), validate + save it (E5/E6/E13).
-
-        ``cloud=True`` targets config HTTPS URLs; ``report.auto_send`` emails at game end (E7).
-        """
+        """Run an autonomous full game (6 valid sub-games), validate + save it; ``cloud=True`` uses HTTPS URLs (E5/E6/E13)."""
         import asyncio
 
         from cosmos77_ex06.orchestrator.runner import run_full_game
@@ -128,13 +122,19 @@ class SDK:
         )
 
     def report(
-        self, *, send: bool = False, sender: Any = None, to: str | None = None
+        self, *, send: bool = False, sender: Any = None, to: str | None = None, final: bool = False
     ) -> dict[str, Any]:
-        """Load+validate the latest report; optionally Gmail-send it (``to`` overrides recipient, E7)."""
+        """Load+validate the latest report; Gmail-send it. ``final`` is required to email the professor; ``to`` self-tests (E7)."""
         from cosmos77_ex06.report import dispatch
 
         return dispatch.send_latest(
-            self.config, self.gatekeeper, self.reports_dir, send=send, sender=sender, to=to
+            self.config,
+            self.gatekeeper,
+            self.reports_dir,
+            send=send,
+            sender=sender,
+            to=to,
+            final=final,
         )
 
     def bonus(self, *, client_factory: Any = None, save: bool = True) -> dict[str, Any]:

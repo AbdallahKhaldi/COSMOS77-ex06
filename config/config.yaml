@@ -74,6 +74,9 @@ report:
   timezone: "Asia/Jerusalem"
   auto_send: false          # when true, run_full_game auto-emails the JSON at game end (E7/E5);
                             # default OFF so a missing credentials.json never crashes a run.
+  confirm_final: false      # SAFETY: the professor (report.to) is NEVER emailed unless this is true
+                            # (or the CLI passes --final). Keep false while testing the bonus with
+                            # other groups; flip to true (or use `report --send --final`) only to submit.
   scope: "https://www.googleapis.com/auth/gmail.send"  # minimal OAuth scope (compose+send only)
   credentials_file: "credentials.json"  # OAuth Desktop client secrets (gitignored, repo root)
   token_file: "token.json"  # cached OAuth token written after first consent (gitignored)

@@ -1,17 +1,18 @@
 """Report send/validate dispatch — the SDK delegates here (Phase 9, E7).
 
-Extracted from ``sdk.py`` to keep that file under the 150-line cap (rule 1), the
-same way ``output.run_sanity_ladder`` is. Two entry points:
+Includes a SAFETY guard so the professor's submission address is never emailed by
+accident (critical when test-running the bonus with other groups):
 
-* :func:`auto_send` — the autonomous end-of-game email (``report.auto_send`` true);
-  failures are recorded and SWALLOWED so a missing ``credentials.json`` never
-  crashes the run mid-pipeline (E5) — the JSON is already on disk regardless.
-* :func:`send_latest` — the CLI ``report --send`` path: load the latest on-disk
-  report, validate it against the pydantic schema BEFORE any send, canonically
-  serialize it, and email the JSON-only body.
+* :func:`auto_send` — the autonomous end-of-game email. Fires ONLY when
+  ``report.confirm_final`` is true, so a test/bonus game can never email the
+  professor. Failures are recorded + swallowed so a run never crashes (E5).
+* :func:`send_latest` — the CLI ``report --send`` path. Sending to the configured
+  professor address (``report.to``) REQUIRES the explicit ``--final`` flag;
+  otherwise it refuses and tells you to use ``--to <your-email>`` for a self-test.
+  A ``--to`` override (any other address) always sends.
 
-Validation always runs before transport (PRD §4): a schema-drift / short / bad
-report aborts the send rather than emailing a malformed autonomous report.
+Validation always runs before transport: a schema-drift / short / bad report
+aborts the send rather than emailing a malformed report.
 """
 
 from __future__ import annotations
@@ -26,16 +27,30 @@ from cosmos77_ex06.report.schema import validate_internal_game
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
 
+#: Shown when a send to the professor's address is blocked for safety.
+_BLOCK_MSG = (
+    "SAFETY: refusing to email the professor ({to}) without confirmation. "
+    "Use `report --send --to <your-email>` to self-test, or add `--final` to send the real submission."
+)
+
 
 def auto_send(
     config: Config, gatekeeper: Gatekeeper, report: dict[str, Any], sender: Any = None
 ) -> None:
-    """Autonomously email the validated report at game end when configured (E7).
+    """Autonomously email the validated report at game end — ONLY when confirmed (E7/E5).
 
-    The report has already been validated + saved by the runner. Any send failure
-    (e.g. missing ``credentials.json``) is recorded with an actionable message and
-    swallowed so the game never crashes after a complete run (E5).
+    Gated by ``report.confirm_final`` (default false) so a test/bonus game never emails
+    the professor. Any send failure is recorded + swallowed so the game never crashes.
     """
+    if not bool(config.get("report.confirm_final", default=False)):
+        gatekeeper.record(
+            "report_send",
+            {
+                "sent": False,
+                "blocked": "auto_send off — set report.confirm_final: true to email the professor",
+            },
+        )
+        return
     active = sender or GmailSender(config)
     try:
         response = active.send(output.canonical_json(report))
@@ -53,12 +68,12 @@ def send_latest(
     send: bool = False,
     sender: Any = None,
     to: str | None = None,
+    final: bool = False,
 ) -> dict[str, Any]:
-    """Load + validate the latest ``reports/internal_game.json``; optionally send it.
+    """Load + validate the latest report; optionally send it behind the professor-safety guard.
 
-    Validates against the pydantic schema (rejecting a malformed report BEFORE any
-    send); ``send=False`` validates only. The first send opens the OAuth consent and
-    writes ``token.json``. ``sender`` injects a mock GmailSender in tests.
+    Sending to the configured professor address (``report.to``) requires ``final=True``;
+    a ``to`` override (a self-test recipient) always sends. ``send=False`` validates only.
     """
     path = reports_dir / "internal_game.json"
     if not path.exists():
@@ -67,10 +82,18 @@ def send_latest(
         )
     report = json.loads(path.read_text(encoding="utf-8"))
     validate_internal_game(report)
-    result: dict[str, Any] = {"report": report, "path": str(path), "sent": False}
-    if send:
-        active = sender or GmailSender(config, to=to)
-        result["response"] = active.send(output.canonical_json(report))
-        result["sent"] = True
-        gatekeeper.record("report_send", {"sent": True, "to": active.to})
+    result: dict[str, Any] = {"report": report, "path": str(path), "sent": False, "blocked": None}
+    if not send:
+        return result
+    prof = str(config.get("report.to"))
+    recipient = to or prof
+    if recipient == prof and not final:
+        msg = _BLOCK_MSG.format(to=prof)
+        gatekeeper.record("report_send", {"sent": False, "blocked": msg})
+        result["blocked"] = msg
+        return result
+    active = sender or GmailSender(config, to=to)
+    result["response"] = active.send(output.canonical_json(report))
+    result["sent"] = True
+    gatekeeper.record("report_send", {"sent": True, "to": active.to})
     return result

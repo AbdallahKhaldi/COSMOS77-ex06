@@ -45,6 +45,11 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="EMAIL",
         help="override the recipient for a self-test (config report.to stays the submission address)",
     )
+    rep.add_argument(
+        "--final",
+        action="store_true",
+        help="CONFIRM the real submission send to the professor (required to email report.to)",
+    )
 
     bonus = sub.add_parser("bonus", help="run the inter-group bonus series (E12)")
     bonus.add_argument(
@@ -89,7 +94,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             report = out["report"]
             print(f"totals: {report['totals']} ({len(report['sub_games'])} valid sub-games)")
     elif args.command == "report":
-        sdk.report(send=args.send, to=getattr(args, "to", None))
+        out = sdk.report(send=args.send, to=args.to, final=args.final)
+        print(out.get("blocked") or ("emailed" if out.get("sent") else "validated (not sent)"))
     elif args.command == "bonus":
         _run_bonus(getattr(args, "partner", None))
     return 0
