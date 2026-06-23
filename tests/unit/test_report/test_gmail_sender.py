@@ -107,3 +107,9 @@ def test_no_token_runs_consent_once(config: Config) -> None:
 
 def test_credentials_path_is_repo_rooted_and_gitignored_name(config: Config) -> None:
     assert credentials_path(config).name == "credentials.json"
+
+
+def test_to_override_beats_config_recipient(config: Config) -> None:
+    """`--to` (a self-test recipient) overrides config report.to; default uses config."""
+    assert GmailSender(config).to == "rmisegal+uoh26b@gmail.com"
+    assert GmailSender(config, to="abdallahkh12@icloud.com").to == "abdallahkh12@icloud.com"
