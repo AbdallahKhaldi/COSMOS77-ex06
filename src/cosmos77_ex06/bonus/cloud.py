@@ -17,6 +17,7 @@ from typing import Any
 
 from cosmos77_ex06.orchestrator.engine import GameEngine
 from cosmos77_ex06.orchestrator.gemini_client import GeminiClient
+from cosmos77_ex06.orchestrator.sync import ClientStateSync
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
 
@@ -52,4 +53,5 @@ def build_cloud_engine(
     engine = GameEngine(
         config, clients, gemini, urls={"cop": cop_url, "thief": thief_url}, on_event=on_event
     )
+    engine.state_sync = ClientStateSync(clients)  # mirror canonical board across the 2 processes
     return engine, clients

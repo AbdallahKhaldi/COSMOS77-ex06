@@ -99,3 +99,18 @@ def test_bonus_series_live_overrides_urls_and_writes(monkeypatch: Any, tmp_path:
     assert seen["g1cop"] == "https://oc/mcp" and seen["g2thief"] == "https://tt/mcp"
     assert result["totals_by_group"] == {"COSMOS77": 60}
     assert (tmp_path / "bonus_game.json").exists()
+
+
+def test_build_cloud_engine_attaches_state_sync(monkeypatch: Any) -> None:
+    """Cross-process games need ClientStateSync or the canonical board never moves."""
+    from cosmos77_ex06.bonus import cloud
+
+    monkeypatch.setattr(cloud, "GeminiClient", lambda *a, **k: object())
+    monkeypatch.setattr(cloud, "GameEngine", lambda *a, **k: type("E", (), {})())
+    monkeypatch.setattr(cloud, "ClientStateSync", lambda clients: ("sync", clients))
+    monkeypatch.setattr("fastmcp.Client", lambda url, auth=None: ("client", url))
+    engine, clients = cloud.build_cloud_engine(
+        object(), None, cop_url="https://c/mcp", thief_url="https://t/mcp", token="tok"
+    )
+    assert engine.state_sync[0] == "sync"
+    assert set(clients) == {"cop", "thief"}
