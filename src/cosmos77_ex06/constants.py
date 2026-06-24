@@ -24,4 +24,5 @@ CLI_COMMANDS: tuple[str, ...] = (
     "run",
     "report",
     "bonus",
+    "serve",
 )

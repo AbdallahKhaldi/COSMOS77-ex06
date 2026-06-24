@@ -27,23 +27,29 @@ def build_cloud_engine(
     *,
     cop_url: str,
     thief_url: str,
+    token: str | None = None,
+    on_event: Any = None,
     client_factory: Any = None,
 ) -> tuple[GameEngine, dict[str, Any]]:
     """Construct a :class:`GameEngine` whose cop/thief clients hit the given cloud URLs.
 
-    Opens a token-authed FastMCP ``Client`` per URL (shared ``BONUS_MCP_TOKEN``) and
-    passes both — plus the per-role URLs (transcript evidence, E6) — into the engine.
-    ``client_factory`` injects a mock genai client for tests. Returns the engine and
-    the two UNENTERED clients (open them with ``async with`` before playing).
+    Opens a token-authed FastMCP ``Client`` per URL and passes both — plus the per-role
+    URLs (transcript evidence, E6) — into the engine. ``token`` overrides the default
+    ``BONUS_MCP_TOKEN`` (the web console passes the visitor-supplied token at runtime,
+    never persisted; Rule 9). ``on_event`` is the optional live per-turn hook (web
+    console). ``client_factory`` injects a mock genai client for tests. Returns the
+    engine and the two UNENTERED clients (open them with ``async with`` before playing).
     """
     from fastmcp import Client
 
-    token = config.env("BONUS_MCP_TOKEN")
+    auth = token or config.env("BONUS_MCP_TOKEN")
     clients = {
-        "cop": Client(cop_url, auth=token),
-        "thief": Client(thief_url, auth=token),
+        "cop": Client(cop_url, auth=auth),
+        "thief": Client(thief_url, auth=auth),
     }
     kwargs = {} if client_factory is None else {"client_factory": client_factory}
     gemini = GeminiClient(config, gatekeeper, **kwargs)
-    engine = GameEngine(config, clients, gemini, urls={"cop": cop_url, "thief": thief_url})
+    engine = GameEngine(
+        config, clients, gemini, urls={"cop": cop_url, "thief": thief_url}, on_event=on_event
+    )
     return engine, clients

@@ -28,14 +28,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--gui", action="store_true", help="show the pygame viewer")
     run.add_argument("--games", type=int, default=None, help="override the sub-game count")
     run.add_argument("--grid", type=int, default=None, help="override the (square) grid size")
-    run.add_argument(
-        "--ladder",
-        action="store_true",
-        help="run the 2x2->3x3->4x4->5x5 sanity ladder, saving a transcript per size",
-    )
-    run.add_argument(
-        "--log-file", default=None, help="tee the structured per-turn comms log to PATH (E10)"
-    )
+    run.add_argument("--ladder", action="store_true", help="run the 2x2->5x5 sanity ladder")
+    run.add_argument("--log-file", default=None, help="tee the per-turn comms log to PATH (E10)")
 
     rep = sub.add_parser("report", help="build / send the JSON report")
     rep.add_argument("--send", action="store_true", help="email the JSON report via Gmail")
@@ -58,6 +52,9 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="CONFIG",
         help="path to a config DIR (or config.yaml) holding the filled-in bonus block",
     )
+    serve = sub.add_parser("serve", help="launch the live web match console")
+    serve.add_argument("--host", default=None, help="override web.host")
+    serve.add_argument("--port", type=int, default=None, help="override web.port")
     return parser
 
 
@@ -86,8 +83,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         if getattr(args, "ladder", False):
             for rung in sdk.run_sanity_ladder():
                 print(
-                    f"ladder {rung['grid']}: {rung['sub_games']} sub-games "
-                    f"-> {rung['transcript_path']}"
+                    f"ladder {rung['grid']}: {rung['sub_games']} games -> {rung['transcript_path']}"
                 )
         else:
             out = sdk.run_full_game(cloud=getattr(args, "cloud", False), gui=args.gui)
@@ -98,6 +94,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         print(out.get("blocked") or ("emailed" if out.get("sent") else "validated (not sent)"))
     elif args.command == "bonus":
         _run_bonus(getattr(args, "partner", None))
+    elif args.command == "serve":
+        from cosmos77_ex06.web.server import main as serve_main
+
+        serve_main(host=getattr(args, "host", None), port=getattr(args, "port", None))
     return 0
 
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSMOS77 — Live Match Console</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header>
+  <h1>🚔 COSMOS77 — Live Match Console 🏃</h1>
+  <p class="sub">Run a live <b>Cops &amp; Robbers</b> game over MCP — our AI agents vs yours, streamed turn by turn.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>① Our live MCP servers</h2>
+    <p class="muted">Point your orchestrator at these — or just challenge us below.</p>
+    <div class="urls">
+      <div class="urlrow"><span class="tag cop">COP</span><code id="our-cop">…</code><button class="copy" data-target="our-cop">Copy</button></div>
+      <div class="urlrow"><span class="tag thief">THIEF</span><code id="our-thief">…</code><button class="copy" data-target="our-thief">Copy</button></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>② Your servers &amp; run</h2>
+    <div class="form">
+      <label>Your COP URL<input id="their-cop" type="url" placeholder="https://….trycloudflare.com/mcp"></label>
+      <label>Your THIEF URL<input id="their-thief" type="url" placeholder="https://….trycloudflare.com/mcp"></label>
+      <label>Shared token<input id="token" type="password" placeholder="the bearer token we agreed on"></label>
+      <label>Passphrase<input id="passphrase" type="password" placeholder="the run passphrase"></label>
+      <fieldset class="roles">
+        <legend>Exhibition match-up</legend>
+        <label class="radio"><input type="radio" name="role" value="our_cop" checked> Our cop 🚔 chases your thief 🏃</label>
+        <label class="radio"><input type="radio" name="role" value="their_cop"> Your cop 🚔 chases our thief 🏃</label>
+      </fieldset>
+      <div class="buttons">
+        <button id="run-exhibition" class="primary">▶ Run Exhibition Game</button>
+        <button id="run-series">▶ Run Full Bonus Series (6 games)</button>
+      </div>
+      <p id="status" class="status"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>③ Live</h2>
+    <div class="livegrid">
+      <div class="boardwrap">
+        <div id="board" class="board"></div>
+        <div id="scorebar" class="scorebar">press a button to start</div>
+      </div>
+      <div id="banter" class="banter"></div>
+    </div>
+  </section>
+</main>
+<footer>COSMOS77-ex06 · Cops &amp; Robbers over MCP · the LLM lives only in the orchestrator (E3)</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

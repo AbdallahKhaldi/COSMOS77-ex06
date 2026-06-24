@@ -27,6 +27,34 @@ def _emit_turn_log(engine: Any, entry: dict[str, Any]) -> None:
     _LOG.info(turn_log.format_record(record, fmt))
 
 
+def _emit_event(engine: Any, entry: dict[str, Any], captured: bool) -> None:
+    """Feed a structured per-turn event to the engine's optional live hook (web console).
+
+    Additive and guarded: a no-op unless ``engine.on_event`` is set, so every existing
+    run path is byte-identical. Carries positions + the NL message + capture (no score —
+    the running score is not final until the sub-game ends; the web layer adds it there).
+    """
+    on_event = getattr(engine, "on_event", None)
+    if on_event is None:
+        return
+    board = entry["board"]
+    on_event(
+        {
+            "type": "turn",
+            "sub_game": entry["sub_game"],
+            "turn": entry["turn"],
+            "role": entry["role"],
+            "message": entry["nl_message"],
+            "tool": entry.get("tool"),
+            "cop_pos": list(board.get("cop", [])),
+            "thief_pos": list(board.get("thief", [])),
+            "barriers": board.get("barriers", []),
+            "coord_flagged": bool(entry.get("coord_flagged", False)),
+            "captured": captured,
+        }
+    )
+
+
 async def _call_tool(client: Any, name: str, args: dict[str, Any]) -> dict[str, Any]:
     """Call an MCP tool through the FastMCP client and return its structured data."""
     result = await client.call_tool(name, args)
@@ -97,4 +125,5 @@ async def play_turn(
         estimate=estimate,
     )
     _emit_turn_log(engine, entry)
+    _emit_event(engine, entry, captured)
     return {"message": message, "captured": captured, "board": board, "entry": entry}

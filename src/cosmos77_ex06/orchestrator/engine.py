@@ -1,12 +1,10 @@
 """The GameEngine — MCP Client + game engine in one (E3, E4, E5).
 
 Owns the cop + thief FastMCP ``Client`` sessions (token auth), the authoritative
-:class:`GameState`, the agents, the :class:`GeminiClient`, and the turn loop
-(thief -> cop, capture/limit checks) over ``num_games`` sub-games, recording the
-full transcript. The LLM call lives HERE; the servers only execute tools. The
-engine is the E4 message RELAY (the transcript feeds the opponent's last NL line
-into the active prompt), so the NL channel is process-independent. An optional
-``on_turn`` hook feeds the live GUI (E10); turn execution is split into ``turn.py``."""
+:class:`GameState`, the agents, the :class:`GeminiClient`, and the turn loop over
+``num_games`` sub-games, recording the full transcript. The LLM call lives HERE; the
+servers only execute tools (E4 NL relay). Optional ``on_turn`` (GUI, E10) + ``on_event``
+(per-turn feed for the web console) hooks; turn loop split into ``turn.py``."""
 
 from __future__ import annotations
 
@@ -34,8 +32,10 @@ class GameEngine:
         urls: dict[str, str] | None = None,
         state: GameState | None = None,
         on_turn: Callable[[GameState], None] | None = None,
+        on_event: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self.config, self.clients, self.gemini, self.on_turn = config, clients, gemini, on_turn
+        self.on_event = on_event
         self.urls = urls or {r: str(config.get(f"mcp.{r}_url")) for r in ("cop", "thief")}
         self.turn_order = list(config.get("turn_order"))
         self.num_games = int(config.get("num_games"))

@@ -39,10 +39,15 @@ dependencies = [
     "google-auth-oauthlib",
     "google-auth-httplib2",
     "python-dotenv",
+    "starlette",
+    "uvicorn",
+    "jinja2",
+    "sse-starlette",
 ]
 
 [project.scripts]
 cosmos77-pursuit = "cosmos77_ex06.cli.main:main"
+cosmos77-web = "cosmos77_ex06.web.server:main"
 
 [project.urls]
 Homepage = "https://github.com/AbdallahKhaldi/COSMOS77-ex06"

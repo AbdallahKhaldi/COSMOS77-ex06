@@ -144,6 +144,12 @@ bonus:
     lose: 7
     tie: 5
 
+# --- Live match console (web) — standalone Starlette app on its own port (Rule 4) ---
+web:
+  host: "0.0.0.0"             # bind interface; $PORT overrides for hosted deploys
+  port: 8080                  # local dev port
+  public_url: ""             # the page DISPLAYS this if set (optional, per-deployment)
+
 # --- Output directories ---
 paths:
   results: results
