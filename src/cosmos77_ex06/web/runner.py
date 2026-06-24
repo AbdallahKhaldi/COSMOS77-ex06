@@ -17,6 +17,17 @@ from cosmos77_ex06.shared.gatekeeper import Gatekeeper
 from cosmos77_ex06.web import match
 
 
+def _meta(config: Config, mode: str) -> dict[str, Any]:
+    """The opening event — mode + board geometry the browser needs to render the radar."""
+    return {
+        "type": "meta",
+        "mode": mode,
+        "grid": list(config.get("grid_size")),
+        "vision_radius": int(config.get("vision_radius", default=1)),
+        "max_moves": int(config.get("max_moves", default=25)),
+    }
+
+
 async def run_exhibition(
     config: Config,
     gatekeeper: Gatekeeper,
@@ -28,9 +39,7 @@ async def run_exhibition(
     token: str,
 ) -> None:
     """Run ONE live game and stream it; publish the result, then ``done``."""
-    feed.publish(
-        run_id, {"type": "meta", "mode": "exhibition", "grid": list(config.get("grid_size"))}
-    )
+    feed.publish(run_id, _meta(config, "exhibition"))
     try:
         result = await match.cross_game(
             config,
@@ -61,7 +70,7 @@ async def run_series(
     token: str,
 ) -> None:
     """Run the 6-game role-swap series live and stream it; publish the result, then ``done``."""
-    feed.publish(run_id, {"type": "meta", "mode": "series", "grid": list(config.get("grid_size"))})
+    feed.publish(run_id, _meta(config, "series"))
     try:
         result = await match.bonus_series_live(
             config,

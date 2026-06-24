@@ -3,57 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COSMOS77 — Live Match Console</title>
+<title>COSMOS77 · Pursuit Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<header>
-  <h1>🚔 COSMOS77 — Live Match Console 🏃</h1>
-  <p class="sub">Run a live <b>Cops &amp; Robbers</b> game over MCP — our AI agents vs yours, streamed turn by turn.</p>
+<div class="scanlines" aria-hidden="true"></div>
+
+<header class="statusbar">
+  <span class="brand"><span class="ping" id="ping"></span>COSMOS77&nbsp;·&nbsp;<b>PURSUIT&nbsp;CONTROL</b></span>
+  <span class="statustext" id="statustext">SYSTEM READY</span>
+  <span class="clearance">DEC-POMDP&nbsp;·&nbsp;MCP&nbsp;·&nbsp;GEMINI</span>
 </header>
 
 <main>
-  <section class="card">
-    <h2>① Our live MCP servers</h2>
-    <p class="muted">Point your orchestrator at these — or just challenge us below.</p>
-    <div class="urls">
-      <div class="urlrow"><span class="tag cop">COP</span><code id="our-cop">…</code><button class="copy" data-target="our-cop">Copy</button></div>
-      <div class="urlrow"><span class="tag thief">THIEF</span><code id="our-thief">…</code><button class="copy" data-target="our-thief">Copy</button></div>
+  <section class="setup" id="setup">
+    <div class="modetabs">
+      <button class="tab active" data-mode="house">⊙ &nbsp;HOUSE MATCH</button>
+      <button class="tab" data-mode="challenge">⚔ &nbsp;CHALLENGE</button>
     </div>
+
+    <div class="panel" id="panel-house">
+      <p class="blurb">Watch our two autonomous agents hunt each other — <b class="c-cop">the Detective</b> stalking <b class="c-thief">the Rogue</b> across a fog-of-war grid, trading threats over the wire. No setup. Press engage.</p>
+      <div class="coords">
+        <div class="coord"><span class="lbl c-cop">OUR COP</span><code id="our-cop">connecting…</code></div>
+        <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code id="our-thief">connecting…</code></div>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="panel-challenge">
+      <p class="blurb">Pit your two MCP servers against ours. Drop your coordinates and the shared clearance token, then choose a single match or the full 6-game role-swap series.</p>
+      <div class="field"><label>YOUR COP URL</label><input id="their-cop" type="url" placeholder="https://….trycloudflare.com/mcp" autocomplete="off"></div>
+      <div class="field"><label>YOUR THIEF URL</label><input id="their-thief" type="url" placeholder="https://….trycloudflare.com/mcp" autocomplete="off"></div>
+      <div class="field"><label>SHARED CLEARANCE TOKEN</label><input id="token" type="password" placeholder="the bearer token we agreed on" autocomplete="off"></div>
+      <div class="opts">
+        <label class="chip"><input type="radio" name="cmode" value="match" checked> Our cop 🚔 vs your thief 🏃</label>
+        <label class="chip"><input type="radio" name="cmode" value="swap"> Your cop 🚔 vs our thief 🏃</label>
+        <label class="chip"><input type="radio" name="cmode" value="series"> Full series · 6 games</label>
+      </div>
+    </div>
+
+    <div class="launch">
+      <div class="field pass"><label>PASSPHRASE</label><input id="passphrase" type="password" placeholder="run clearance" autocomplete="off"></div>
+      <button id="engage" class="engage"><span>⚡ ENGAGE</span></button>
+    </div>
+    <p class="err" id="err"></p>
   </section>
 
-  <section class="card">
-    <h2>② Your servers &amp; run</h2>
-    <div class="form">
-      <label>Your COP URL<input id="their-cop" type="url" placeholder="https://….trycloudflare.com/mcp"></label>
-      <label>Your THIEF URL<input id="their-thief" type="url" placeholder="https://….trycloudflare.com/mcp"></label>
-      <label>Shared token<input id="token" type="password" placeholder="the bearer token we agreed on"></label>
-      <label>Passphrase<input id="passphrase" type="password" placeholder="the run passphrase"></label>
-      <fieldset class="roles">
-        <legend>Exhibition match-up</legend>
-        <label class="radio"><input type="radio" name="role" value="our_cop" checked> Our cop 🚔 chases your thief 🏃</label>
-        <label class="radio"><input type="radio" name="role" value="their_cop"> Your cop 🚔 chases our thief 🏃</label>
-      </fieldset>
-      <div class="buttons">
-        <button id="run-exhibition" class="primary">▶ Run Exhibition Game</button>
-        <button id="run-series">▶ Run Full Bonus Series (6 games)</button>
+  <section class="arena" id="arena">
+    <div class="matchup">
+      <div class="agent cop">
+        <div class="badge">🚔</div>
+        <div class="who"><span class="name" id="cop-name">THE DETECTIVE</span><span class="team" id="cop-team">COSMOS77</span></div>
+        <div class="score" id="cop-score">0</div>
       </div>
-      <p id="status" class="status"></p>
+      <div class="versus">
+        <div class="vs">VS</div>
+        <div class="subpips" id="subpips"></div>
+        <div class="movereadout" id="movereadout">standby</div>
+      </div>
+      <div class="agent thief">
+        <div class="badge">🏃</div>
+        <div class="who"><span class="name" id="thief-name">THE ROGUE</span><span class="team" id="thief-team">COSMOS77</span></div>
+        <div class="score" id="thief-score">0</div>
+      </div>
     </div>
-  </section>
 
-  <section class="card">
-    <h2>③ Live</h2>
-    <div class="livegrid">
-      <div class="boardwrap">
-        <div id="board" class="board"></div>
-        <div id="scorebar" class="scorebar">press a button to start</div>
+    <div class="boardwrap">
+      <div class="board" id="board">
+        <div class="grid" id="grid"></div>
+        <div class="overlay" id="overlay">
+          <div class="vision cop" id="vis-cop"></div>
+          <div class="vision thief" id="vis-thief"></div>
+          <div class="token cop" id="tok-cop">🚔</div>
+          <div class="token thief" id="tok-thief">🏃</div>
+        </div>
+        <div class="lockon" id="lockon">LOCK-ON</div>
       </div>
-      <div id="banter" class="banter"></div>
     </div>
+
+    <div class="comms">
+      <div class="comms-head">⦿ INTERCEPTED COMMS<span class="leakwarn" id="leakwarn"></span></div>
+      <div class="feed" id="feed"></div>
+    </div>
+
+    <div class="verdict hidden" id="verdict"></div>
+    <button class="newmatch hidden" id="newmatch">↻ &nbsp;NEW MATCH</button>
   </section>
 </main>
-<footer>COSMOS77-ex06 · Cops &amp; Robbers over MCP · the LLM lives only in the orchestrator (E3)</footer>
 <script src="/static/app.js"></script>
 </body>
 </html>

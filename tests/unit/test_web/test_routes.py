@@ -13,7 +13,7 @@ def test_index_returns_html(app_and_feed: tuple[Any, Any, Any]) -> None:
     app, _, _ = app_and_feed
     response = TestClient(app).get("/")
     assert response.status_code == 200
-    assert "Match Console" in response.text
+    assert "Pursuit Control" in response.text
 
 
 def test_our_info_returns_config_urls(app_and_feed: tuple[Any, Any, Any]) -> None:
@@ -108,5 +108,21 @@ def test_run_series_accepts_four_https_urls(
             "their_thief_url": "https://their-thief.example/mcp",
             "token": "tok",
         },
+    )
+    assert response.status_code == 200 and "run_id" in response.json()
+
+
+def test_run_solo_needs_no_visitor_inputs(
+    app_and_feed: tuple[Any, Any, Any], monkeypatch: Any
+) -> None:
+    """House Match (solo) runs our cop vs our thief — just a passphrase, no URLs/token."""
+    app, _, _ = app_and_feed
+
+    async def fake_exh(*a: Any, **k: Any) -> None:
+        return None
+
+    monkeypatch.setattr(routes.runner, "run_exhibition", fake_exh)
+    response = TestClient(app).post(
+        "/api/run", json={"action": "solo", "passphrase": "open-sesame"}
     )
     assert response.status_code == 200 and "run_id" in response.json()

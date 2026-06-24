@@ -1,121 +1,233 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
-let evtSource = null;
-let grid = [5, 5];
+let es = null;
+const G = { rows: 5, cols: 5, vision: 1, maxMoves: 25, mode: "house" };
 
+/* ---------- our coordinates ---------- */
 async function loadInfo() {
   try {
     const d = await (await fetch("/api/our-info")).json();
-    $("our-cop").textContent = d.cop_url || "(not deployed yet)";
-    $("our-thief").textContent = d.thief_url || "(not deployed yet)";
-  } catch (e) { /* leave placeholders */ }
+    $("our-cop").textContent = d.cop_url || "(servers offline — run deploy/live_tunnels.sh)";
+    $("our-thief").textContent = d.thief_url || "(servers offline)";
+  } catch (e) { /* keep placeholder */ }
 }
 
-document.querySelectorAll(".copy").forEach((b) =>
-  b.addEventListener("click", () => {
-    const text = $(b.dataset.target).textContent;
-    if (navigator.clipboard) navigator.clipboard.writeText(text);
-    b.textContent = "Copied!";
-    setTimeout(() => (b.textContent = "Copy"), 1200);
+/* ---------- mode tabs ---------- */
+document.querySelectorAll(".tab").forEach((t) =>
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+    t.classList.add("active");
+    const house = t.dataset.mode === "house";
+    $("panel-house").classList.toggle("hidden", !house);
+    $("panel-challenge").classList.toggle("hidden", house);
   }));
 
-function drawBoard(rows, cols, cop, thief, barriers) {
-  const board = $("board");
-  board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  board.innerHTML = "";
-  const bset = new Set((barriers || []).map((b) => b[0] + "," + b[1]));
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      if (cop && cop[0] === r && cop[1] === c) { cell.classList.add("cop"); cell.textContent = "🚔"; }
-      else if (thief && thief[0] === r && thief[1] === c) { cell.classList.add("thief"); cell.textContent = "🏃"; }
-      else if (bset.has(r + "," + c)) { cell.classList.add("barrier"); cell.textContent = "▦"; }
-      board.appendChild(cell);
-    }
+/* ---------- board geometry ---------- */
+function buildGrid() {
+  const grid = $("grid");
+  grid.style.gridTemplateColumns = `repeat(${G.cols},1fr)`;
+  grid.style.gridTemplateRows = `repeat(${G.rows},1fr)`;
+  grid.innerHTML = "";
+  for (let i = 0; i < G.rows * G.cols; i++) {
+    const c = document.createElement("div");
+    c.className = "cell";
+    grid.appendChild(c);
+  }
+}
+function sizeBoard() {
+  const usable = $("board").clientWidth * 0.88;
+  const cell = usable / G.cols;
+  const tk = cell * 0.8;
+  document.querySelectorAll(".token").forEach((t) => {
+    t.style.width = tk + "px"; t.style.height = tk + "px"; t.style.fontSize = tk * 0.6 + "px";
+  });
+  const vs = cell * (2 * G.vision + 1) * 0.92;
+  ["vis-cop", "vis-thief"].forEach((id) => { $(id).style.width = vs + "px"; $(id).style.height = vs + "px"; });
+}
+function place(el, row, col) {
+  el.style.left = ((col + 0.5) / G.cols) * 100 + "%";
+  el.style.top = ((row + 0.5) / G.rows) * 100 + "%";
+}
+function trail(role, row, col) {
+  const d = document.createElement("div");
+  d.className = "trail " + role;
+  place(d, row, col);
+  $("overlay").appendChild(d);
+  setTimeout(() => d.remove(), 1100);
+}
+window.addEventListener("resize", sizeBoard);
+
+function idleBoard() {
+  G.rows = 5; G.cols = 5; G.vision = 1; G.maxMoves = 25;
+  buildGrid(); sizeBoard(); buildPips(1);
+  place($("tok-cop"), 4, 4); place($("vis-cop"), 4, 4);
+  place($("tok-thief"), 0, 0); place($("vis-thief"), 0, 0);
+  $("movereadout").textContent = "standby";
+  const f = $("feed");
+  if (!f.children.length) {
+    const s = document.createElement("div");
+    s.className = "bubble sys";
+    s.textContent = "// comms channel open — awaiting engagement";
+    f.appendChild(s);
   }
 }
 
-function addBanter(role, message, flagged) {
-  const div = document.createElement("div");
-  div.className = "bubble " + (role === "cop" ? "cop" : "thief");
-  const who = document.createElement("b");
-  who.textContent = (role === "cop" ? "🚔 Cop" : "🏃 Thief") + ": ";
-  div.appendChild(who);
-  div.appendChild(document.createTextNode(message || ""));
-  if (flagged) {
-    const warn = document.createElement("span");
-    warn.className = "warn";
-    warn.textContent = " ⚠ coord leak";
-    div.appendChild(warn);
-  }
-  const box = $("banter");
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-function setStatus(msg, cls) {
-  const s = $("status");
-  s.textContent = msg;
-  s.className = "status " + (cls || "");
-}
-
-function showResult(ev) {
-  const r = ev.result || {};
-  if (ev.mode === "exhibition") {
-    const w = r.winner === "cop" ? "🚔 Cop wins (capture)" : "🏃 Thief wins (escape)";
-    setStatus(`Final: ${w} — cop ${r.cop_score} / thief ${r.thief_score} in ${r.moves} moves`, "done");
-  } else {
-    const t = r.totals_by_group || {};
-    const parts = Object.keys(t).map((k) => `${k}: ${t[k]}`).join("  ·  ");
-    setStatus(`Series complete — ${parts}` + (r.path ? `  ·  JSON saved: ${r.path}` : ""), "done");
-  }
-}
-
-function handleEvent(ev) {
-  if (ev.type === "meta") {
-    grid = ev.grid || [5, 5];
-    drawBoard(grid[0], grid[1], null, null, []);
-    $("banter").innerHTML = "";
-    setStatus("Running " + ev.mode + " — agents are talking over MCP…", "running");
-  } else if (ev.type === "turn") {
-    drawBoard(grid[0], grid[1], ev.cop_pos, ev.thief_pos, ev.barriers);
-    addBanter(ev.role, ev.message, ev.coord_flagged);
-    $("scorebar").textContent = `sub-game ${ev.sub_game} · turn ${ev.turn}` +
-      (ev.captured ? "  ·  🚔 CAPTURE!" : "");
-  } else if (ev.type === "game_end") {
-    showResult(ev);
-  } else if (ev.type === "error") {
-    setStatus("Error: " + ev.message, "error");
-  } else if (ev.type === "done") {
-    if (evtSource) { evtSource.close(); evtSource = null; }
-  }
-}
-
-async function startRun(action) {
-  if (evtSource) { evtSource.close(); evtSource = null; }
-  setStatus("Starting…", "running");
-  const body = {
-    action,
-    their_cop_url: $("their-cop").value.trim(),
-    their_thief_url: $("their-thief").value.trim(),
-    token: $("token").value,
-    passphrase: $("passphrase").value,
-    role: (document.querySelector("input[name=role]:checked") || {}).value || "our_cop",
+/* ---------- labels per mode ---------- */
+function setLabels(mode) {
+  const map = {
+    house: ["COSMOS77", "COSMOS77"],
+    match: ["COSMOS77", "RIVAL"],
+    swap: ["RIVAL", "COSMOS77"],
+    series: ["ROLE-SWAP · 6", "ROLE-SWAP · 6"],
   };
+  const [ct, tt] = map[mode] || map.house;
+  $("cop-team").textContent = ct;
+  $("thief-team").textContent = tt;
+}
+
+/* ---------- comms ---------- */
+function addComms(role, message, flagged) {
+  const b = document.createElement("div");
+  b.className = "bubble " + (role === "cop" ? "cop" : "thief");
+  const who = document.createElement("b");
+  who.textContent = role === "cop" ? "🚔 DETECTIVE" : "🏃 ROGUE";
+  b.appendChild(who);
+  b.appendChild(document.createTextNode(message || ""));
+  if (flagged) {
+    const f = document.createElement("span");
+    f.className = "flag"; f.textContent = "⚠ COORD LEAK";
+    b.appendChild(f);
+  }
+  const feed = $("feed");
+  feed.appendChild(b);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+/* ---------- subgame pips ---------- */
+function buildPips(n) {
+  const p = $("subpips"); p.innerHTML = "";
+  for (let i = 0; i < n; i++) p.appendChild(document.createElement("i"));
+}
+function markPip(idx) {
+  const pips = $("subpips").children;
+  for (let i = 0; i < pips.length; i++) pips[i].classList.toggle("now", i === idx - 1);
+}
+
+/* ---------- status ---------- */
+function status(text, live) {
+  $("statustext").textContent = text;
+  $("ping").classList.toggle("live", !!live);
+}
+
+/* ---------- event handling ---------- */
+function onMeta(e) {
+  G.rows = e.grid[0]; G.cols = e.grid[1];
+  G.vision = e.vision_radius || 1; G.maxMoves = e.max_moves || 25;
+  $("arena").classList.remove("hidden");
+  $("verdict").classList.add("hidden"); $("newmatch").classList.add("hidden");
+  $("feed").innerHTML = ""; $("leakwarn").textContent = "";
+  $("cop-score").textContent = "0"; $("thief-score").textContent = "0";
+  buildGrid(); sizeBoard();
+  buildPips(e.mode === "series" ? 6 : 1);
+  place($("tok-cop"), G.rows - 1, G.cols - 1); place($("vis-cop"), G.rows - 1, G.cols - 1);
+  place($("tok-thief"), 0, 0); place($("vis-thief"), 0, 0);
+  $("movereadout").textContent = "move 0 / " + G.maxMoves;
+  status("● LIVE — agents engaging over MCP", true);
+  $("arena").scrollIntoView({ behavior: "smooth" });
+}
+let leaks = 0;
+function onTurn(e) {
+  const cop = $("tok-cop"), thief = $("tok-thief");
+  if (e.role === "cop") { trail("cop", +cop.dataset.r || G.rows - 1, +cop.dataset.c || G.cols - 1); }
+  else { trail("thief", +thief.dataset.r || 0, +thief.dataset.c || 0); }
+  place(cop, e.cop_pos[0], e.cop_pos[1]); place($("vis-cop"), e.cop_pos[0], e.cop_pos[1]);
+  place(thief, e.thief_pos[0], e.thief_pos[1]); place($("vis-thief"), e.thief_pos[0], e.thief_pos[1]);
+  cop.dataset.r = e.cop_pos[0]; cop.dataset.c = e.cop_pos[1];
+  thief.dataset.r = e.thief_pos[0]; thief.dataset.c = e.thief_pos[1];
+  document.querySelector(".agent.cop").classList.toggle("active", e.role === "cop");
+  document.querySelector(".agent.thief").classList.toggle("active", e.role === "thief");
+  $("vis-" + e.role).classList.remove("pulse"); void $("vis-" + e.role).offsetWidth;
+  $("vis-" + e.role).classList.add("pulse");
+  (e.barriers || []).forEach((b) => {
+    const cell = $("grid").children[b[0] * G.cols + b[1]];
+    if (cell) cell.classList.add("barrier");
+  });
+  addComms(e.role, e.message, e.coord_flagged);
+  if (e.coord_flagged) { leaks++; $("leakwarn").textContent = "· " + leaks + " flagged"; }
+  markPip(e.sub_game);
+  $("movereadout").textContent = "sub-game " + e.sub_game + " · move " + e.turn + " / " + G.maxMoves;
+  if (e.captured) { const l = $("lockon"); l.classList.remove("fire"); void l.offsetWidth; l.classList.add("fire"); }
+}
+function onEnd(e) {
+  const r = e.result || {};
+  const v = $("verdict");
+  if (e.mode === "series") {
+    const t = r.totals_by_group || {};
+    const parts = Object.keys(t).map((k) => k + " " + t[k]).join("  ·  ");
+    v.className = "verdict";
+    v.textContent = "SERIES COMPLETE";
+    const s = document.createElement("small"); s.textContent = parts + (r.path ? "  ·  record: " + r.path : "");
+    v.appendChild(s);
+    (r.sub_games || []).forEach((sg, i) => {
+      const pip = $("subpips").children[i];
+      if (pip) pip.classList.add(sg.result === "capture" ? "cop" : "thief");
+    });
+  } else {
+    const copWin = r.winner === "cop";
+    $("cop-score").textContent = r.cop_score; $("thief-score").textContent = r.thief_score;
+    const pip = $("subpips").children[0]; if (pip) pip.classList.add(copWin ? "cop" : "thief");
+    v.className = "verdict " + (copWin ? "cop" : "thief");
+    v.textContent = copWin ? "🚔 DETECTIVE CAPTURES THE ROGUE" : "🏃 ROGUE ESCAPES";
+    const s = document.createElement("small");
+    s.textContent = "cop " + r.cop_score + " · thief " + r.thief_score + " · " + r.moves + " moves";
+    v.appendChild(s);
+  }
+  v.classList.remove("hidden");
+}
+function handle(e) {
+  if (e.type === "meta") onMeta(e);
+  else if (e.type === "turn") onTurn(e);
+  else if (e.type === "game_end") onEnd(e);
+  else if (e.type === "error") status("⚠ " + e.message, false);
+  else if (e.type === "done") {
+    if (es) { es.close(); es = null; }
+    status("SYSTEM READY", false);
+    document.querySelectorAll(".agent").forEach((a) => a.classList.remove("active"));
+    $("engage").disabled = false; $("newmatch").classList.remove("hidden");
+  }
+}
+
+/* ---------- engage ---------- */
+async function engage() {
+  const mode = document.querySelector(".tab.active").dataset.mode;
+  let body = { passphrase: $("passphrase").value };
+  if (mode === "house") {
+    body.action = "solo"; setLabels("house"); leaks = 0;
+  } else {
+    const cmode = (document.querySelector("input[name=cmode]:checked") || {}).value || "match";
+    body.their_cop_url = $("their-cop").value.trim();
+    body.their_thief_url = $("their-thief").value.trim();
+    body.token = $("token").value;
+    body.action = cmode === "series" ? "series" : "exhibition";
+    if (cmode === "swap") body.role = "their_cop";
+    setLabels(cmode); leaks = 0;
+  }
+  $("err").textContent = ""; $("engage").disabled = true; status("authorizing…", false);
   let res;
   try {
     res = await (await fetch("/api/run", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     })).json();
-  } catch (e) { setStatus("Network error reaching the console.", "error"); return; }
-  if (res.error) { setStatus(res.error, "error"); return; }
-  evtSource = new EventSource("/api/events/" + res.run_id);
-  evtSource.onmessage = (m) => { try { handleEvent(JSON.parse(m.data)); } catch (e) { /* skip */ } };
+  } catch (err) { $("err").textContent = "Network error reaching control."; $("engage").disabled = false; return; }
+  if (res.error) { $("err").textContent = res.error; $("engage").disabled = false; status("SYSTEM READY", false); return; }
+  if (es) es.close();
+  es = new EventSource("/api/events/" + res.run_id);
+  es.onmessage = (m) => { try { handle(JSON.parse(m.data)); } catch (err) { /* skip */ } };
 }
-
-$("run-exhibition").addEventListener("click", () => startRun("exhibition"));
-$("run-series").addEventListener("click", () => startRun("series"));
+$("engage").addEventListener("click", engage);
+$("newmatch").addEventListener("click", () => {
+  $("arena").classList.add("hidden");
+  document.getElementById("setup").scrollIntoView({ behavior: "smooth" });
+});
 loadInfo();
+requestAnimationFrame(idleBoard);

@@ -35,45 +35,31 @@ async def our_info(request: Request) -> JSONResponse:
 
 
 async def run(request: Request) -> JSONResponse:
-    """Passphrase-gate, validate, and launch a run; return its ``run_id``."""
+    """Passphrase-gate, validate, and launch a run; return its ``run_id``.
+
+    Three actions: ``solo`` (our cop vs our thief, our own token), ``exhibition`` (our
+    side vs a rival's single game), ``series`` (the 6-game role-swap bonus).
+    """
     body = await request.json()
     state = request.app.state
-    if not security.passphrase_ok(str(body.get("passphrase", "")), state.config):
-        return JSONResponse({"error": "forbidden — wrong or missing passphrase"}, status_code=403)
+    cfg = state.config
+    if not security.passphrase_ok(str(body.get("passphrase", "")), cfg):
+        return JSONResponse({"error": "Wrong or missing passphrase."}, status_code=403)
     action = body.get("action")
-    if action not in ("exhibition", "series"):
+    if action not in ("solo", "exhibition", "series"):
         return JSONResponse({"error": "unknown action"}, status_code=400)
-    token = str(body.get("token", ""))
+    our_cop = str(cfg.get("mcp.cop_url", default=""))
+    our_thief = str(cfg.get("mcp.thief_url", default=""))
     their_cop = str(body.get("their_cop_url", ""))
     their_thief = str(body.get("their_thief_url", ""))
-    our_cop = str(state.config.get("mcp.cop_url", default=""))
-    our_thief = str(state.config.get("mcp.thief_url", default=""))
     run_id = uuid4().hex
-    if action == "exhibition":
-        cop, thief = (
-            (their_cop, our_thief) if body.get("role") == "their_cop" else (our_cop, their_thief)
-        )
-        if not _https_ok(cop, thief):
-            return JSONResponse({"error": "both URLs must be https://"}, status_code=400)
-        state.feed.register(run_id)
-        asyncio.create_task(
-            runner.run_exhibition(
-                state.config,
-                state.gatekeeper,
-                state.feed,
-                run_id,
-                cop_url=cop,
-                thief_url=thief,
-                token=token,
-            )
-        )
-    else:
+    if action == "series":
         if not _https_ok(our_cop, our_thief, their_cop, their_thief):
-            return JSONResponse({"error": "all four URLs must be https://"}, status_code=400)
+            return JSONResponse({"error": "All four URLs must be https://"}, status_code=400)
         state.feed.register(run_id)
         asyncio.create_task(
             runner.run_series(
-                state.config,
+                cfg,
                 state.gatekeeper,
                 state.reports_dir,
                 state.feed,
@@ -82,9 +68,26 @@ async def run(request: Request) -> JSONResponse:
                 our_thief=our_thief,
                 their_cop=their_cop,
                 their_thief=their_thief,
-                token=token,
+                token=str(body.get("token", "")),
             )
         )
+        return JSONResponse({"run_id": run_id})
+    if action == "solo":
+        cop, thief, token = our_cop, our_thief, str(cfg.env("ORCHESTRATOR_TOKEN") or "")
+    elif body.get("role") == "their_cop":
+        cop, thief, token = their_cop, our_thief, str(body.get("token", ""))
+    else:
+        cop, thief, token = our_cop, their_thief, str(body.get("token", ""))
+    if not _https_ok(cop, thief):
+        return JSONResponse(
+            {"error": "Both URLs must be https:// — are our servers live?"}, status_code=400
+        )
+    state.feed.register(run_id)
+    asyncio.create_task(
+        runner.run_exhibition(
+            cfg, state.gatekeeper, state.feed, run_id, cop_url=cop, thief_url=thief, token=token
+        )
+    )
     return JSONResponse({"run_id": run_id})
 
 
