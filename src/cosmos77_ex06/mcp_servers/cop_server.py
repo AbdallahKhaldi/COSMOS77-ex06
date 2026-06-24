@@ -8,6 +8,8 @@ Exposes the shared communication + perception + action tools **plus** the cop-on
 
 from __future__ import annotations
 
+import os
+
 from cosmos77_ex06.mcp_servers.server import build_server
 from cosmos77_ex06.mcp_servers.state_factory import make_state
 from cosmos77_ex06.shared.config import Config
@@ -21,7 +23,7 @@ mcp = build_server(ROLE, _state, _config)
 def main() -> None:  # pragma: no cover - HTTP boot, exercised by the live smoke test
     """Run the cop server over HTTP on the configured port."""
     host = str(_config.get("mcp.host", "0.0.0.0"))
-    port = int(_config.get("mcp.cop_port"))
+    port = int(os.environ.get("PORT", _config.get("mcp.cop_port")))
     mcp.run(transport="http", host=host, port=port)
 
 
