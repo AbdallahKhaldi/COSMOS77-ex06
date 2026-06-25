@@ -38,7 +38,7 @@ def test_oracle_is_deterministic() -> None:
 
 
 async def test_request_move_server_gates_on_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("OUR_BONUS_COP_TOKEN", "secret-cop")
+    monkeypatch.setenv("OUR_BONUS_TOKEN", "secret-cop")
     from fastmcp import Client
 
     srv = request_server.build("cop")

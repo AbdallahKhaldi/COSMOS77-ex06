@@ -2,10 +2,11 @@
 
 A tiny FastMCP server (one per role) exposing the single tool NajAmjad's orchestrator calls:
 ``request_move(observation, auth_token) -> "[INTENT: ...] prose"``. The ``auth_token`` is checked
-against our per-role bonus token (``OUR_BONUS_<ROLE>_TOKEN`` in the gitignored env); a mismatch
-returns a safe HOLD and reveals nothing. Kept SEPARATE from our prof-submission servers (which keep
-the tools-only contract). Deterministic, no LLM. Run one per role and expose over public HTTPS; the
-two module-level ``cop_mcp`` / ``thief_mcp`` objects are the deploy entry points.
+against our single shared match token (``OUR_BONUS_TOKEN`` in the gitignored env) so NajAmjad can
+call either server with one credential; a mismatch returns a safe HOLD and reveals nothing. Kept
+SEPARATE from our prof-submission servers (which keep the tools-only contract). Deterministic, no
+LLM. Run one per role and expose over public HTTPS; the module-level ``cop_mcp`` / ``thief_mcp``
+objects are the deploy entry points.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ _UNAUTH = "[INTENT: HOLD] unauthorized"
 def build(role: str, config: Config | None = None) -> FastMCP:
     """Build the bonus ``request_move`` server for ``role`` (``cop``|``thief``); token from env."""
     cfg = config or Config()
-    token = os.environ.get(f"OUR_BONUS_{role.upper()}_TOKEN", "")
+    token = os.environ.get("OUR_BONUS_TOKEN", "")
     mcp: FastMCP = FastMCP(f"cosmos77-bonus-{role}")
 
     @mcp.tool
