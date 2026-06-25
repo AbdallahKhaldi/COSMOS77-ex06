@@ -19,13 +19,6 @@
   <a class="backlink" href="/">&larr;&nbsp;BACK TO CONSOLE</a>
 </header>
 <main>
-<header class="statusbar chal-bar">
-  <span class="brand"><span class="ping" id="ping"></span>COSMOS77 <b>CITY</b></span>
-  <span class="statustext">CHALLENGER BRIEFING</span>
-  <span class="clearance">DEC-POMDP · MCP · INTER-GROUP E12</span>
-  <a class="backlink" href="/">← BACK TO CONSOLE</a>
-</header>
-
 <section class="chal-hero">
   <h1 class="chal-title">Challenge <b>COSMOS77</b></h1>
   <p class="chal-lede">You found the pit lane. This is the full briefing for any group that wants to put their two MCP servers up against ours — for the bragging rights, and for the inter-group 10-point bonus. Read it once, agree on a token, and engage.</p>
@@ -118,7 +111,7 @@
     <p class="blurb">Clone the repo, fill a config block with the four MCP URLs and your group metadata, put the shared token in <code>.env</code>, and run the bonus driver. It plays the full role-swap series and writes the canonical <code>bonus_game</code> JSON.</p>
     <pre class="codeblk"><code><span class="c-cmt"># one side runs the orchestrator (single-engine series)</span>
 export BONUS_MCP_TOKEN=<the token you both agreed on>
-uv run cosmos77-pursuit bonus --partner ./their-bonus-config.yaml</code></pre>
+uv run cosmos77-pursuit bonus --partner ./config   <span class="c-cmt"># ./config = a config dir whose config.yaml has the filled-in bonus: block (4 URLs + metadata)</span></code></pre>
     <p class="note">Output prints <code>totals_by_group</code> and the <code>bonus_claim</code>, and writes <code>reports/bonus_game.json</code> — the file both sides will diff and email.</p>
   </div>
 </section>
@@ -132,7 +125,7 @@ uv run cosmos77-pursuit bonus --partner ./their-bonus-config.yaml</code></pre>
     <li><b>Play the series.</b> Run the <code>bonus</code> command above. Each side's points across its three cop and three thief sub-games are summed into <code>totals_by_group</code>.</li>
     <li><b>Serialize canonically.</b> Both codebases write the <code>bonus_game</code> report through the <b>same canonical serializer</b> — <code>sort_keys=True</code>, <code>ensure_ascii=False</code>, <code>indent=2</code>. Same agreed value object in, identical bytes out, regardless of key insertion order.</li>
     <li><b>Diff-check together.</b> Before anyone hits send, both sides run the byte-for-byte diff over the two files. It's deliberately dumb-and-total — it compares raw bytes and, on a mismatch, points at the first differing offset and the offending field.
-      <pre class="codeblk codeblk--tight"><code>uv run python -m cosmos77_ex06.bonus.diff_check ours.json theirs.json
+      <pre class="codeblk codeblk--tight"><code>uv run python -c "from cosmos77_ex06.bonus.diff_check import diff_files, format_result as f; print(f(diff_files('reports/bonus_game.json', 'partner_bonus_game.json')))"
 <span class="c-ok">IDENTICAL (N bytes) -> safe to set mutual_agreement:true and send</span></code></pre>
     </li>
     <li><b>Email the professor.</b> Once the diff is clean, set <code>mutual_agreement: true</code> and <b>each group separately emails the identical <code>bonus_game</code> JSON</b> to <code class="copyable" data-copy="rmisegal+uoh26b@gmail.com">rmisegal+uoh26b@gmail.com</code> before the <b>Friday 08:30 deadline</b>.</li>
