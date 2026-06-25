@@ -9,12 +9,15 @@ threads. Logic-only; no LLM here.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
 
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
 from cosmos77_ex06.web import match, series
+
+_LOG = logging.getLogger("cosmos77_ex06.web")
 
 
 def _meta(config: Config, mode: str) -> dict[str, Any]:
@@ -38,6 +41,7 @@ async def run_solo(config: Config, gatekeeper: Gatekeeper, feed: Any, run_id: st
         )
         feed.publish(run_id, {"type": "game_end", "mode": "exhibition", "result": result})
     except Exception as exc:  # noqa: BLE001 - surface any failure to the browser, then end cleanly
+        _LOG.exception("web run %s failed", run_id)  # <-- shows the real cause in the server log
         feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
     finally:
         feed.publish(run_id, {"type": "done"})
@@ -67,6 +71,7 @@ async def run_exhibition(
         )
         feed.publish(run_id, {"type": "game_end", "mode": "exhibition", "result": result})
     except Exception as exc:  # noqa: BLE001 - surface any failure to the browser, then end cleanly
+        _LOG.exception("web run %s failed", run_id)  # <-- shows the real cause in the server log
         feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
     finally:
         feed.publish(run_id, {"type": "done"})
@@ -102,6 +107,7 @@ async def run_series(
         )
         feed.publish(run_id, {"type": "game_end", "mode": "series", "result": result})
     except Exception as exc:  # noqa: BLE001 - surface any failure to the browser, then end cleanly
+        _LOG.exception("web run %s failed", run_id)  # <-- shows the real cause in the server log
         feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
     finally:
         feed.publish(run_id, {"type": "done"})
