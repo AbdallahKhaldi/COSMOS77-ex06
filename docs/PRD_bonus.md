@@ -36,7 +36,7 @@ core engineering risk is not who wins the pursuit — it is whether two *indepen
 codebases can serialize the *same agreed result* to the *same bytes*. We solve this by:
 
 1. Reusing the **exact same canonical serializer** that the single-group report uses (see
-   `report/builder.py`, PRD_report.md), so our side is deterministic by construction.
+   `report/output.py`, PRD_report.md), so our side is deterministic by construction.
 2. Publishing that serializer's rules as a **public contract** (§5) the partner group can replicate
    in any language.
 3. Shipping a **`diff`-check** that both groups run *before sending* so a mismatch is caught while
@@ -230,9 +230,9 @@ before any email is sent.
 ## 5. The canonical serializer — the same one the single-group report uses
 
 Byte-identical output between two independent codebases is only possible if both sides serialize
-under the **same canonical rules**. We **reuse the exact serializer from `report/builder.py`**
+under the **same canonical rules**. We **reuse the exact serializer from `report/output.py`**
 (PRD_report.md, E7); the bonus does not invent a second one. `bonus/report.py` calls the shared
-`canonical_dumps(...)` helper.
+`canonical_json(...)` helper.
 
 ### 5.1 The canonical contract (publish this verbatim to the partner)
 
@@ -241,15 +241,15 @@ The serializer guarantees a single, reproducible byte string for a given result 
 1. **JSON, UTF-8, no BOM.**
 2. **Keys sorted** lexicographically at every level (`sort_keys=True`). Object key order is therefore
    *not* a degree of freedom — the order shown in §4 is illustrative; the bytes are sorted.
-3. **Compact separators** — `", "` and `": "` are **not** used; the canonical form uses
-   `separators=(",", ":")` (no insignificant whitespace). (If both groups instead prefer a
-   pretty-printed form, they must agree on `indent` *and* `separators` explicitly — but the default
-   contract is compact.)
+3. **Pretty-printed with `indent=2`** — the canonical form uses `json.dumps(..., indent=2)` (two-space
+   indentation, the default `", "` / `": "` item/key separators that `indent` implies). This is the
+   *only* formatting both groups use; do **not** substitute compact `separators=(",", ":")`.
 4. **`ensure_ascii=False`** — non-ASCII (e.g., the Hebrew name forms, if included) are emitted as raw
    UTF-8, not `\uXXXX` escapes. Both groups must use the *same* setting; the contract is
    `ensure_ascii=False`.
-5. **No trailing newline** appended by the serializer. (If the email body needs one, both groups must
-   add it identically — the contract is *no* trailing newline.)
+5. **One trailing newline** appended to the serialized text (`text + "\n"`) — the file ends in exactly
+   one `\n`. Both groups must write the file with this single trailing newline, since the file content
+   is the byte body both sides diff and email.
 6. **Numbers are integers** for all scores/totals/claims/indices/moves — no floats, no `20.0`.
 7. **Booleans lowercase** (`true`/`false`) per JSON.
 8. **Fixed value normalization:** group codes, repo URLs, MCP URLs, IDs, and names are agreed as
@@ -262,14 +262,16 @@ In code (shared helper, illustrative):
 ```python
 import json
 
-def canonical_dumps(obj: dict) -> str:
+def canonical_json(obj: dict) -> str:
     """Single canonical byte-string for a report dict (shared by E7 and E12)."""
     return json.dumps(
         obj,
         sort_keys=True,
         ensure_ascii=False,
-        separators=(",", ":"),
+        indent=2,
     )
+
+# The file written / emailed is `canonical_json(obj) + "\n"` (one trailing newline).
 ```
 
 ### 5.2 Why reuse, not re-implement
@@ -277,8 +279,8 @@ def canonical_dumps(obj: dict) -> str:
 - **Determinism by construction on our side.** The same function already passes the E7 report tests
   for byte-stability (same input → identical bytes); the bonus inherits that guarantee for free.
 - **One contract to communicate.** We hand the partner the eight rules above (and ideally the helper
-  itself). Any language that can produce sorted-key, compact, UTF-8 JSON of the agreed value object
-  will match us — the partner does not need our Python.
+  itself). Any language that can produce sorted-key, `indent=2`, UTF-8 JSON of the agreed value object
+  (plus the single trailing newline) will match us — the partner does not need our Python.
 - **The agreed *value object* is the real interface.** Two codebases match iff (a) they hold the
   *same dict* (same group orientation, same per-sub-game results, same totals, same claim, same
   ordering of lists) and (b) they apply the *same* canonical rules. §7 nails down (a); §5.1 nails
@@ -316,7 +318,7 @@ Builds and serializes the `bonus_game` JSON.
   (group codes, repos, students, the four URLs, timezone).
 - Computes `totals_by_group` (§3.2) and `bonus_claim` (§3.3) deterministically from config thresholds.
 - Validates against the `report/schema.py` pydantic model.
-- Serializes via the **shared `canonical_dumps`** (§5) — the *same* function as the single-group
+- Serializes via the **shared `canonical_json`** (§5) — the *same* function as the single-group
   report — guaranteeing byte-stability.
 - Hands the canonical string to the **same Gmail sender** (`report/gmail_sender.py`) used for E7: a
   JSON-only MIME body, base64url-encoded, `to = config.report.to` for the course target, and to the
@@ -408,14 +410,20 @@ group hits send. `bonus/diff_check.py` compares the two canonical JSON strings b
 exits non-zero on any difference, with a human-readable report of *where* they diverge.
 
 ```bash
-# Each group produces its canonical bonus_game JSON:
-uv run cosmos77-pursuit bonus build --out reports/bonus_group_1.json     # our side
+# Each group produces its canonical bonus_game JSON. Our side runs the engine, which
+# writes reports/bonus_game.json (canonical: sort_keys, ensure_ascii=False, indent=2,
+# one trailing newline):
+uv run cosmos77-pursuit bonus --partner config/                          # our side
 # (partner produces reports/bonus_group_2.json with their codebase)
 
-# Compare byte-for-byte before anyone emails:
-uv run cosmos77-pursuit bonus diff reports/bonus_group_1.json reports/bonus_group_2.json
-# -> "IDENTICAL (N bytes)"  ->  safe to set mutual_agreement:true and send
-# -> "MISMATCH at byte K ..."  ->  DO NOT SEND; reconcile the value object first
+# Compare byte-for-byte before anyone emails — the simple, total check:
+diff -q reports/bonus_game.json reports/bonus_group_2.json \
+  && echo "IDENTICAL -> safe to set mutual_agreement:true and send" \
+  || echo "MISMATCH -> DO NOT SEND; reconcile the value object first"
+
+# Or, with localization of the offending field (Python helper, same verdict):
+uv run python -c "from cosmos77_ex06.bonus.diff_check import diff_files, format_result; \
+print(format_result(diff_files('reports/bonus_game.json', 'reports/bonus_group_2.json')))"
 ```
 
 The check is intentionally dumb and total — a raw byte comparison of the two files, plus (on
@@ -425,10 +433,10 @@ surfaces, mapped to the §5.1 contract:
 | Symptom | Root cause | Fix |
 |---|---|---|
 | Same data, different byte order | one side didn't `sort_keys` | apply the canonical serializer |
-| Stray spaces around `:` / `,` | different `separators` | use `separators=(",", ":")` |
+| Different indentation / spacing | different `indent` | both use `indent=2` |
 | `ע...` vs raw Hebrew | different `ensure_ascii` | both use `ensure_ascii=False` |
 | `20.0` vs `20` | a score became a float | force ints |
-| One byte longer | trailing newline on one side | contract = no trailing newline |
+| One byte longer/shorter | trailing newline mismatch | contract = exactly one trailing `\n` |
 | `group_1` totals swapped | orientation disagreement | re-confirm §7-A orientation |
 | `sub_games`/`students_*` reordered | list order not agreed | re-confirm §7-A/C ordering |
 
@@ -467,7 +475,7 @@ identical bytes **and** explicit mutual agreement — are what protect the 10 po
 | **E2/E3** two FastMCP servers, LLM in client only (across the group boundary) | series wires foreign servers as tool-only endpoints; orchestrator owns the LLM |
 | **E4** free natural language under partial observability (now vs a foreign agent) | reuses the orchestrator NL loop; only transport + result schema are agreed, never message content |
 | **E6** public cloud HTTPS URLs + revocable token auth | four cloud URLs + shared `BONUS_MCP_TOKEN`; rotation revokes access |
-| **E7** canonical JSON report + Gmail sender | shared `canonical_dumps` + `report/gmail_sender.py`; JSON-only body |
+| **E7** canonical JSON report + Gmail sender | shared `canonical_json` + `report/gmail_sender.py`; JSON-only body |
 | **E13** Technical-Loss handling | series voids + reruns failed sub-games to reach 6 valid |
 | **Rules 1/4/6/9/15/16/17** | ≤150-line files, config-driven (`bonus` block), mocked deterministic tests, token in `.env`, docstrings + type hints |
 

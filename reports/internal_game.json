@@ -1,5 +1,5 @@
 {
-  "cop_mcp_url": "http://localhost:8001/mcp",
+  "cop_mcp_url": "https://cosmos77-cop.fastmcp.app/mcp",
   "github_repo": "https://github.com/AbdallahKhaldi/COSMOS77-ex06",
   "group_name": "COSMOS77",
   "students": [
@@ -64,7 +64,7 @@
       "winner": "cop"
     }
   ],
-  "thief_mcp_url": "http://localhost:8002/mcp",
+  "thief_mcp_url": "https://cosmos77-thief.fastmcp.app/mcp",
   "timezone": "Asia/Jerusalem",
   "totals": {
     "cop": 75,

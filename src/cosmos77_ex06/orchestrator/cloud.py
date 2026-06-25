@@ -50,7 +50,8 @@ def build_clients(
     token = config.env(ORCH_TOKEN_ENV)
     if not token:
         raise KeyError(f"{ORCH_TOKEN_ENV} must be set for a --cloud run")
-    factory = client_factory or (lambda url, auth: Client(url, auth=auth))
+    timeout = float(config.get("mcp.tool_timeout_seconds", default=10.0))
+    factory = client_factory or (lambda url, auth: Client(url, auth=auth, timeout=timeout))
     clients = {r: factory(urls[r], BearerAuth(token)) for r in ("cop", "thief")}
     return urls, clients
 

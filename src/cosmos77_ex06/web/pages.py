@@ -18,5 +18,16 @@ async def index(request: Request) -> Any:
 
 
 async def challenge(request: Request) -> Any:
-    """Serve the public challenger briefing — how to play / challenge COSMOS77 (E12)."""
-    return request.app.state.templates.TemplateResponse(request, "challenge.html")
+    """Serve the public challenger briefing — how to play / challenge COSMOS77 (E12).
+
+    The cop/thief URLs + console link are rendered from live config (never hardcoded), so
+    the page a challenger lands on always advertises our current MCP endpoints.
+    """
+    cfg = request.app.state.config
+    console = str(cfg.get("web.public_url", default="")) or str(request.base_url).rstrip("/")
+    ctx = {
+        "cop_url": str(cfg.get("mcp.cop_url", default="")),
+        "thief_url": str(cfg.get("mcp.thief_url", default="")),
+        "console_url": console,
+    }
+    return request.app.state.templates.TemplateResponse(request, "challenge.html", ctx)

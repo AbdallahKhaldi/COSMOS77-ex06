@@ -115,26 +115,29 @@ async def run_full_game(
     totals = {"cop": 0, "thief": 0}
     reruns = 0
     max_attempts = num_games + num_games * _MAX_ATTEMPTS_FACTOR
-    async with clients["cop"], clients["thief"]:
-        attempts = 0
-        while len(sub_games) < num_games and attempts < max_attempts:
-            attempts += 1
-            index = len(sub_games) + 1
-            mark = engine.transcript.mark()
-            try:
+    attempts = 0
+    while len(sub_games) < num_games and attempts < max_attempts:
+        attempts += 1
+        index = len(sub_games) + 1
+        mark = engine.transcript.mark()
+        try:
+            # Re-enter the client context PER attempt (FastMCP clients are reentrant) so a
+            # dropped/idle-timed-out session voids just this sub-game instead of wedging the
+            # whole game — mirrors bonus/series._play_one's per-attempt connect (E13).
+            async with clients["cop"], clients["thief"]:
                 result = await engine.play_sub_game(index)
-            except Exception as exc:  # noqa: BLE001 - any orchestration failure voids + reruns (E13)
-                engine.transcript.truncate(mark)
-                engine.transcript.note_void(index, f"{type(exc).__name__}: {exc}")
-                reruns += 1
-                continue
-            if _is_void(result):
-                engine.transcript.truncate(mark)
-                engine.transcript.note_void(index, "technical_loss")
-                reruns += 1
-                continue
-            sub_games.append(_sub_game_entry(index, result))
-            totals = {k: totals[k] + int(result.scores[k]) for k in totals}
+        except Exception as exc:  # noqa: BLE001 - any failure (incl. a dead session) voids + reruns (E13)
+            engine.transcript.truncate(mark)
+            engine.transcript.note_void(index, f"{type(exc).__name__}: {exc}")
+            reruns += 1
+            continue
+        if _is_void(result):
+            engine.transcript.truncate(mark)
+            engine.transcript.note_void(index, "technical_loss")
+            reruns += 1
+            continue
+        sub_games.append(_sub_game_entry(index, result))
+        totals = {k: totals[k] + int(result.scores[k]) for k in totals}
     if len(sub_games) != num_games:
         raise TechnicalLoss(
             f"only {len(sub_games)}/{num_games} valid sub-games after {attempts} attempts"

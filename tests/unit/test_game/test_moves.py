@@ -87,12 +87,13 @@ def test_barrier_rejects_out_of_bounds() -> None:
         place_barrier("cop", (3, 3), board, 0, 5, (2, 2), (0, 0))
 
 
-def test_barrier_rejects_occupied_cell() -> None:
+def test_barrier_rejects_thief_cell_but_allows_cop_own_cell() -> None:
+    """Spec §4.3: the cop walls the cell it STANDS on; it may never wall the thief's cell."""
     board = Board([3, 3], allow_diagonal=True)
     with pytest.raises(IllegalMoveError):
-        place_barrier("cop", (0, 0), board, 0, 5, (2, 2), (0, 0))
-    with pytest.raises(IllegalMoveError):
-        place_barrier("cop", (2, 2), board, 0, 5, (2, 2), (0, 0))
+        place_barrier("cop", (0, 0), board, 0, 5, (2, 2), (0, 0))  # thief's cell -> rejected
+    used = place_barrier("cop", (2, 2), board, 0, 5, (2, 2), (0, 0))  # cop's OWN cell -> allowed
+    assert used == 1 and (2, 2) in board.barriers
 
 
 def test_barrier_rejects_reblock() -> None:

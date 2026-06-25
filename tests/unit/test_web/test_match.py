@@ -78,7 +78,7 @@ def test_build_cloud_engine_attaches_state_sync(monkeypatch: Any) -> None:
     monkeypatch.setattr(cloud, "GeminiClient", lambda *a, **k: object())
     monkeypatch.setattr(cloud, "GameEngine", lambda *a, **k: type("E", (), {})())
     monkeypatch.setattr(cloud, "ClientStateSync", lambda clients, **k: ("sync", clients))
-    monkeypatch.setattr("fastmcp.Client", lambda url, auth=None: ("client", url))
+    monkeypatch.setattr("fastmcp.Client", lambda url, auth=None, timeout=None: ("client", url))
     cfg = type("C", (), {"get": lambda self, k, default=None: default})()
     engine, clients = cloud.build_cloud_engine(
         cfg, None, cop_url="https://c/mcp", thief_url="https://t/mcp", token="tok"

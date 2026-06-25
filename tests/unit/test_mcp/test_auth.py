@@ -57,3 +57,17 @@ def test_build_verifier_unknown_role() -> None:
     """An unknown role is rejected at construction."""
     with pytest.raises(ValueError, match="unknown role"):
         build_verifier("warden")
+
+
+async def test_unset_tokens_fall_back_to_random_and_reject_known_tokens(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """No env tokens -> random fallbacks, so the server REJECTS every known token (never accepts blank)."""
+    monkeypatch.delenv("COP_MCP_TOKEN", raising=False)
+    monkeypatch.delenv("ORCHESTRATOR_TOKEN", raising=False)
+    verifier = build_verifier("cop")  # both tokens fall back to secrets.token_hex(32)
+    assert (
+        await verifier.verify_token(GOOD_TOKEN) is None
+    )  # the real orchestrator token is NOT accepted
+    assert await verifier.verify_token(COP_TOKEN) is None
+    assert await verifier.verify_token("") is None

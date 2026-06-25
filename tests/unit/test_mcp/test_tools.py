@@ -65,6 +65,15 @@ def test_place_barrier_decrements_budget(cop_tools) -> None:
     assert (2, 2) in tools.state.barriers
 
 
+def test_thief_stepping_onto_cop_is_not_a_capture(make_state, mcp_config) -> None:
+    """Spec §4.3: capture is the COP landing on the thief; a thief move onto the cop is NOT a win."""
+    state = make_state(cop=(1, 1), thief=(0, 0))
+    state.current_role = "thief"
+    thief = GameTools(state, mcp_config, "thief")
+    res = thief.apply_move("thief", "SE")  # (0,0) -> (1,1): steps onto the cop's cell
+    assert res["ok"] is True and res["captured"] is False
+
+
 def test_place_barrier_blocks_subsequent_move(make_state, mcp_config) -> None:
     """A placed barrier is impassable to a later apply_move by either role."""
     state = make_state(cop=(4, 4), thief=(0, 0))

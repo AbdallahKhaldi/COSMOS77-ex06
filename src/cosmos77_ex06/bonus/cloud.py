@@ -44,16 +44,16 @@ def build_cloud_engine(
     from fastmcp import Client
 
     auth = token or config.env("BONUS_MCP_TOKEN")
+    timeout = float(config.get("mcp.tool_timeout_seconds", default=10.0))
     clients = {
-        "cop": Client(cop_url, auth=auth),
-        "thief": Client(thief_url, auth=auth),
+        "cop": Client(cop_url, auth=auth, timeout=timeout),
+        "thief": Client(thief_url, auth=auth, timeout=timeout),
     }
     kwargs = {} if client_factory is None else {"client_factory": client_factory}
     gemini = GeminiClient(config, gatekeeper, **kwargs)
     engine = GameEngine(
         config, clients, gemini, urls={"cop": cop_url, "thief": thief_url}, on_event=on_event
     )
-    timeout = float(config.get("mcp.tool_timeout_seconds", default=10.0))
     engine.state_sync = ClientStateSync(
         clients, timeout=timeout
     )  # verified mirror across processes

@@ -364,9 +364,9 @@ T-0323 [P8][git] Commit per deploy artifact and push; confirm CI green.
 
 ## Phase 9 — Automated Gmail JSON report
 
-T-0324 [P9][report] Create report/builder.py building the internal-game JSON from final GameState/totals (schema §9.1) (E7).
+T-0324 [P9][report] Create report/output.py building the internal-game JSON from final GameState/totals (schema §9.1) (E7).
 T-0325 [P9][report] Implement a CANONICAL serializer (sorted keys, fixed formatting) for byte-identical reports.
-T-0326 [P9][report] Keep builder.py <=120 lines.
+T-0326 [P9][report] Keep output.py <=120 lines.
 T-0327 [P9][report] Create report/schema.py pydantic models for the internal-game JSON.
 T-0328 [P9][report] Add pydantic models for the bonus_game JSON (schema §9.2) in schema.py.
 T-0329 [P9][report] Validate the report against the schema before sending.

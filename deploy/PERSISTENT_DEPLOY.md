@@ -34,10 +34,10 @@ create the two projects in the dashboard. After that, every redeploy rides on a 
   `thief_server:mcp` are built at import time, and the ASGI variants
   `mcp_servers.app:cop_app` / `:thief_app` also exist.
 - **`host` — ✅ ready.** Defaults to `0.0.0.0` (`config.yaml`).
-- **`fastmcp` version.** Resolved to **3.4.2**, pinned exactly in `uv.lock` — so any
-  builder that respects the lock is reproducible. `pyproject.toml` lists `fastmcp`
-  unpinned; pinning it is optional, and if you do, match 3.x (e.g. `fastmcp>=3.4,<4`)
-  — **not** the `<3` a generic guide might suggest.
+- **`fastmcp` version — ✅ pinned.** `pyproject.toml` constrains it to `fastmcp>=3.4,<4`
+  (the 3.x line), and `uv.lock` resolves it exactly to **3.4.2** — so any builder that
+  respects the lock is reproducible. Do **not** loosen it to the `<3` a generic guide
+  might suggest.
 
 ## Recommended path — Horizon, two projects, two URLs
 
@@ -60,19 +60,24 @@ Repeat as a **second** project from the same repo:
 - **Entrypoint:** `src/cosmos77_ex06/mcp_servers/thief_server.py:mcp`
 - Auth toggle **OFF**.
 
-### 4. Set the three token secrets — before the first deploy of each project
+### 4. Set the token secrets — before the first deploy of each project
 Importing either entrypoint reads the tokens from the environment at load
-(`mcp_servers/auth.py`); if absent, the build raises `KeyError`. Add the **same three**
-to **both** projects' environment variables (the `StaticTokenVerifier` tokens from your
-`.env`):
+(`mcp_servers/auth.py` `build_verifier`). A **missing** token does **not** crash the
+build: `build_verifier` falls back to a fresh unguessable `secrets.token_hex(32)` so the
+import succeeds, but the server then **rejects every call at runtime** (the real bearer
+no longer matches). So an absent secret yields a silently-dead server, not a `KeyError`
+— set the secrets correctly the first time.
 
-| Key | Value |
+Each server needs only its **own** role token plus the shared `ORCHESTRATOR_TOKEN` (this
+matches `deploy/horizon.md` §3 and `auth.py`, which maps the role token to `["read", role]`
+and the orchestrator token to both role scopes). Add to each project's environment:
+
+| Project | Keys |
 |---|---|
-| `COP_MCP_TOKEN` | your cop bearer token |
-| `THIEF_MCP_TOKEN` | your thief bearer token |
-| `ORCHESTRATOR_TOKEN` | your orchestrator bearer token |
+| `cosmos77-cop`   | `COP_MCP_TOKEN`, `ORCHESTRATOR_TOKEN` |
+| `cosmos77-thief` | `THIEF_MCP_TOKEN`, `ORCHESTRATOR_TOKEN` |
 
-> Changing an env var takes effect on the **next** deploy, so set all three correctly
+> Changing an env var takes effect on the **next** deploy, so set the tokens correctly
 > the first time.
 
 ### 5. Deploy → grab the two URLs
@@ -110,9 +115,10 @@ uv run cosmos77-pursuit run --cloud --log-file reports/cloud_run.log
 grep -iE "fastmcp\.app/mcp auth=ok" reports/cloud_run.log
 ```
 Every turn reading `url=https://cosmos77-*.fastmcp.app/mcp auth=ok` (no `401` /
-`Unauthorized` / `KeyError`) means the tokens are wired and the endpoints are live for
+`Unauthorized`) means the tokens are wired and the endpoints are live for
 your partner group and the professor. A `401` means the Horizon secret doesn't match the
-token your local orchestrator sends.
+token your local orchestrator sends — most often because a secret was left unset and the
+server fell back to a random token (§4), so it now rejects every call.
 
 ## Security — token revocation
 With Horizon auth OFF, the URLs are world-reachable; the **only** gate is the

@@ -21,13 +21,9 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
-      - key: GEMINI_API_KEY       # the orchestrator's LLM key
+      - key: GEMINI_API_KEY       # the orchestrator's LLM key (read by orchestrator/gemini_client.py)
         sync: false
-      - key: WEB_PASSPHRASE       # the gate to launch a game (e.g. 123go!)
+      - key: WEB_PASSPHRASE       # the gate to launch a game (e.g. 123go!) — read by web/security.py
         sync: false
-      - key: ORCHESTRATOR_TOKEN   # drives the MCP servers
-        sync: false
-      - key: COP_MCP_TOKEN
-        sync: false
-      - key: THIEF_MCP_TOKEN
-        sync: false
+      - key: BONUS_MCP_TOKEN      # default bearer for the inter-group challenge/bonus path (bonus/cloud.py);
+        sync: false               # a visitor-supplied token in the console UI overrides it at runtime

@@ -268,7 +268,7 @@ The project is successful when **all** of the following hold:
 | FR-4 Free natural-language comms + partial-obs inference | **E4** | 4 | `agents/` (BaseAgent → Cop/Thief), `orchestrator/`, recorded transcripts |
 | FR-5 Fully autonomous pipeline (init → 6 → email) | **E5** | 7 | `orchestrator/runner.py` |
 | FR-6 Local → cloud, public HTTPS URLs | **E6** | 8 | `deploy/` (Horizon notes + `tunnel.sh`), cloud CLI logs in `assets/` |
-| FR-7 Automated Gmail JSON report (cop, JSON-only body) | **E7** | 9 | `report/builder.py`, `report/gmail_sender.py`, `reports/internal_game.json` |
+| FR-7 Automated Gmail JSON report (cop, JSON-only body) | **E7** | 9 | `report/output.py`, `report/gmail_sender.py`, `reports/internal_game.json` |
 | FR-8 Config file, no hardcoding | **E8** | 0, 2 | `config/config.yaml`, `shared/config.py` |
 | FR-9 Decision mechanism (heuristic + optional Q-Table) | **E9** | 5 | `strategy/heuristic.py`, `strategy/qtable.py`, `strategy/plots.py` |
 | FR-10 GUI + CLI logs proving cloud-MCP comms | **E10** | 6 | `gui/viewer.py`, `gui/render.py`, `assets/`, structured logs |

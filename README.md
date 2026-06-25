@@ -485,8 +485,10 @@ uv run cosmos77-pursuit run --local --games 6             # full autonomous game
 uv run cosmos77-pursuit run --ladder                      # the 2x2->5x5 sanity ladder
 uv run cosmos77-pursuit run --cloud --games 1             # same pipeline, public HTTPS MCP URLs
 
-# 5. The automated Gmail JSON report (cop auto-sends at game end when report.auto_send=true).
-uv run cosmos77-pursuit report --send                     # first run opens Google consent; JSON-only body
+# 5. The automated Gmail JSON report (cop auto-sends at game end only when BOTH report.auto_send=true
+#    AND report.confirm_final=true; otherwise the professor address is never emailed).
+uv run cosmos77-pursuit report --send --to you@example.com   # self-test send to any address
+uv run cosmos77-pursuit report --send --final                # the REAL submission to the professor (report.to); --final required, else blocked
 
 # 6. The inter-group bonus series (after a partner is secured; E12).
 uv run cosmos77-pursuit bonus --partner path/to/partner/config
@@ -500,7 +502,9 @@ Everything tunable lives in [`config/config.yaml`](config/config.yaml) (grid, mo
 barriers, scoring, ports, URLs, model, report target) and is read through `shared/config.py`. The
 **automated Gmail report** (E7) builds the internal-game JSON via a **canonical serializer** (sorted
 keys, fixed formatting) and the cop agent auto-sends **one** JSON-only email to
-`rmisegal+uoh26b@gmail.com` at the end of 6 valid sub-games.
+`rmisegal+uoh26b@gmail.com` at the end of 6 valid sub-games — but only when both `report.auto_send`
+and `report.confirm_final` are `true` (the professor address is never emailed otherwise; for the CLI
+`report --send` path, the real submission requires the `--final` flag).
 
 ---
 

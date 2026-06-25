@@ -13,7 +13,7 @@ At the end of a full game — exactly **6 valid sub-games** of at most **25 move
 
 This module has two cleanly separated responsibilities, each in its own ≤150-line file (rule 1):
 
-1. **`report/builder.py`** — assemble and **canonically serialize** the internal-game JSON from the final `GameState`/totals.
+1. **`report/output.py`** — assemble and **canonically serialize** the internal-game JSON from the final `GameState`/totals.
 2. **`report/gmail_sender.py`** — authenticate via OAuth Desktop flow and send the raw JSON through the Gmail API.
 3. **`report/schema.py`** — pydantic models for the internal-game and bonus JSON; validate **before** any send.
 
@@ -65,7 +65,7 @@ The transcript itself (every free-natural-language message and tool call) is log
 
 ## 3. The canonical serializer (determinism is non-negotiable)
 
-`builder.py` exposes a single canonical serialization function used by **both** the internal-game report (Phase 9) and the `bonus_game` report (Phase 11). Determinism here is what makes the **bonus** payable: §9.2 requires that **both groups email a byte-identical report**; any mismatch scores **0 for both** groups. Two independently-run Python processes, possibly on different machines/OSes, must emit identical bytes for the same logical result.
+`output.py` exposes a single canonical serialization function (`canonical_json`) used by **both** the internal-game report (Phase 9) and the `bonus_game` report (Phase 11). Determinism here is what makes the **bonus** payable: §9.2 requires that **both groups email a byte-identical report**; any mismatch scores **0 for both** groups. Two independently-run Python processes, possibly on different machines/OSes, must emit identical bytes for the same logical result.
 
 Canonical rules:
 
@@ -189,7 +189,7 @@ All LLM/MCP/network/Gmail I/O is mocked; the report module targets the ≥85% co
 
 | File | Responsibility | Cap |
 |---|---|---|
-| `report/builder.py` | build internal-game dict from `GameState`/totals; `canonical_json` (shared with bonus) | ≤120 |
+| `report/output.py` | build internal-game dict from `GameState`/totals; `canonical_json` (shared with bonus) | ≤120 |
 | `report/gmail_sender.py` | OAuth (Desktop, `gmail.send`), MIME=raw-JSON, base64url, `messages().send` | ≤120 |
 | `report/schema.py` | pydantic models for internal-game **and** bonus JSON; validate-before-send | ≤100 |
 

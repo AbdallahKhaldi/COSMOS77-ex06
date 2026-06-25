@@ -14,12 +14,20 @@ class _GridCfg:
         return [3, 3] if key == "grid_size" else default
 
 
-def _types(feed: MatchFeed, run_id: str, n: int) -> list[str]:
-    return [feed._queues[run_id].get_nowait()["type"] for _ in range(n)]  # noqa: SLF001
+class _RecFeed(MatchFeed):
+    """Records every published event type — survives (and verifies) the runner's queue drop."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.types: list[str] = []
+
+    def publish(self, run_id: str, event: dict[str, Any]) -> None:
+        self.types.append(event["type"])
+        super().publish(run_id, event)
 
 
 def test_run_exhibition_streams_meta_turn_end_done(monkeypatch: Any) -> None:
-    feed = MatchFeed()
+    feed = _RecFeed()
     feed.register("r1")
 
     async def fake_cross(*a: Any, **k: Any) -> dict[str, Any]:
@@ -38,11 +46,12 @@ def test_run_exhibition_streams_meta_turn_end_done(monkeypatch: Any) -> None:
             token="t",
         )
     )
-    assert _types(feed, "r1", 4) == ["meta", "turn", "game_end", "done"]
+    assert feed.types == ["meta", "turn", "game_end", "done"]
+    assert not feed.has("r1")  # the runner released the slot — no orphaned-queue leak
 
 
 def test_run_series_streams_meta_turn_end_done(monkeypatch: Any) -> None:
-    feed = MatchFeed()
+    feed = _RecFeed()
     feed.register("r1")
 
     async def fake_series_live(*a: Any, **k: Any) -> dict[str, Any]:
@@ -69,11 +78,12 @@ def test_run_series_streams_meta_turn_end_done(monkeypatch: Any) -> None:
             token="t",
         )
     )
-    assert _types(feed, "r1", 4) == ["meta", "turn", "game_end", "done"]
+    assert feed.types == ["meta", "turn", "game_end", "done"]
+    assert not feed.has("r1")
 
 
 def test_run_exhibition_publishes_error_then_done(monkeypatch: Any) -> None:
-    feed = MatchFeed()
+    feed = _RecFeed()
     feed.register("r1")
 
     async def boom(*a: Any, **k: Any) -> dict[str, Any]:
@@ -91,4 +101,4 @@ def test_run_exhibition_publishes_error_then_done(monkeypatch: Any) -> None:
             token="t",
         )
     )
-    assert _types(feed, "r1", 3) == ["meta", "error", "done"]
+    assert feed.types == ["meta", "error", "done"]

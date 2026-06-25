@@ -100,7 +100,9 @@ class GameTools:
         self.state.current_role = rules.next_role(role, self.turn_order)
         if role == self.turn_order[-1]:
             self.state.move_number += 1
-        captured = rules.is_capture(self.state)
+        # Spec §4.3: capture is the COP landing on the thief — NOT the thief stepping
+        # onto the cop. Gate on the actor so a thief move onto the cop never scores a win.
+        captured = role == "cop" and rules.is_capture(self.state)
         return {
             "ok": True,
             "new_self": {"x": new_pos[0], "y": new_pos[1]},

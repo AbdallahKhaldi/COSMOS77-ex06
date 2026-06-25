@@ -5,7 +5,7 @@ from __future__ import annotations
 import base64
 from email import message_from_bytes
 
-from cosmos77_ex06.report.gmail_sender import GmailSender, credentials_path
+from cosmos77_ex06.report.gmail_sender import DEFAULT_SUBJECT, GmailSender, credentials_path
 from cosmos77_ex06.shared.config import Config
 
 
@@ -113,3 +113,21 @@ def test_to_override_beats_config_recipient(config: Config) -> None:
     """`--to` (a self-test recipient) overrides config report.to; default uses config."""
     assert GmailSender(config).to == "rmisegal+uoh26b@gmail.com"
     assert GmailSender(config, to="abdallahkh12@icloud.com").to == "abdallahkh12@icloud.com"
+
+
+def test_subject_defaults_then_honors_override(config: Config) -> None:
+    """The MIME Subject is the default report subject, or an explicit override (the bonus subject, E12)."""
+    svc, svc2 = _Caught(), _Caught()
+    _sender(config, svc).send("{}")
+    default = message_from_bytes(base64.urlsafe_b64decode(svc.args["raw"]))
+    assert default["Subject"] == str(config.get("report.subject", DEFAULT_SUBJECT))
+
+    GmailSender(
+        config,
+        subject="COSMOS77-ex06 bonus_game report",
+        service_factory=lambda _c: svc2,
+        creds_loader=lambda _p, _s: _Creds(valid=True),
+        consent=lambda _p, _s: _Creds(valid=True),
+    ).send("{}")
+    override = message_from_bytes(base64.urlsafe_b64decode(svc2.args["raw"]))
+    assert override["Subject"] == "COSMOS77-ex06 bonus_game report"

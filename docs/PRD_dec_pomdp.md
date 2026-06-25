@@ -405,7 +405,7 @@ HW6.
 | **{A_i}** moves (+ barrier for cop) | `game/moves.py: legal_moves / apply_move / place_barrier`; tools `apply_move`, `place_barrier`. | E1, E2 |
 | **{A_i}** message | tool `send_message(role, content)`; the LLM authors the free-language text. | E4 |
 | **P** (deterministic, no-op on blocked) | `game/moves.py` + `game/rules.py` (turn order, no-op rule). | E1 |
-| **R** (scoring table) | `game/rules.py` reads `scoring:` from config; totals in `report/builder.py`. | E1, E7, E8 |
+| **R** (scoring table) | `game/rules.py` reads `scoring:` from config; totals in `report/output.py`. | E1, E7, E8 |
 | **{Ω_i}, O** (partial obs, no leak) | tool `get_local_observation(role)` on the **server** (redaction enforced + tested). | E4, E2, E3 |
 | **γ = 1** (finite horizon) | `game/match.py` (sub-game ≤ 25 moves, terminal reward). Optional `γ_RL` in `strategy/qtable.py`. | E1, E9 |
 | **belief / NL interpretation** | the per-role LLM prompt in `orchestrator/` consumes `opponent_last_message` and reasons about position + credibility. | E3, E4 |

@@ -23,7 +23,7 @@
   <h1 class="chal-title">Challenge <b>COSMOS77</b></h1>
   <p class="chal-lede">You found the pit lane. This is the full briefing for any group that wants to put their two MCP servers up against ours — for the bragging rights, and for the inter-group 10-point bonus. Read it once, agree on a token, and engage.</p>
   <div class="chal-cta">
-    <a class="engage" href="https://mount-buttons-shut-tcp.trycloudflare.com">⚡ OPEN THE CONSOLE</a>
+    <a class="engage" href="/">⚡ OPEN THE CONSOLE</a>
     <a class="ghostbtn" href="https://github.com/AbdallahKhaldi/COSMOS77-ex06" target="_blank" rel="noopener">⚙ VIEW THE REPO</a>
   </div>
 </section>
@@ -61,10 +61,10 @@
   <h2 class="sec-h">Point your orchestrator at these</h2>
   <p class="blurb">These are our two live MCP endpoints. Copy whichever side you need — you'll usually pit your thief against our cop, or your cop against our thief.</p>
   <div class="coords">
-    <div class="coord"><span class="lbl c-cop">OUR COP</span><code class="copyable" data-copy="https://temporarily-realtors-sur-buttons.trycloudflare.com/mcp">https://temporarily-realtors-sur-buttons.trycloudflare.com/mcp</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
-    <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code class="copyable" data-copy="https://lamp-ips-providing-laws.trycloudflare.com/mcp">https://lamp-ips-providing-laws.trycloudflare.com/mcp</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+    <div class="coord"><span class="lbl c-cop">OUR COP</span><code class="copyable" data-copy="{{ cop_url }}">{{ cop_url }}</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+    <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code class="copyable" data-copy="{{ thief_url }}">{{ thief_url }}</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
   </div>
-  <p class="note"><b>Heads up:</b> these are ephemeral <code>trycloudflare.com</code> tunnels — they rotate. If a URL is dead, ping us and we'll send fresh ones (the live console always shows the current pair on its house-match panel).</p>
+  <p class="note"><b>Heads up:</b> these are our stable <code>fastmcp.app</code> cloud endpoints. If either is ever unreachable, ping us — the live console always shows the current pair on its house-match panel.</p>
 </section>
 
 <!-- ============ THE TOOL CONTRACT ============ -->
@@ -130,7 +130,7 @@ verify_position(role, x, y) -&gt; {known, result}   <span class="c-cmt"># confir
   <div class="howcard">
     <div class="howhead"><span class="howtag">WAY 1</span><h3 class="sub-h sub-h--flush">The console — no install</h3></div>
     <p class="blurb">Open our live console and switch to the <b>CHALLENGE</b> tab. Drop in your two server URLs and the shared token, then pick a mode and engage. You watch the whole chase render live — tokens gliding cell to cell, fog-of-war tint, intercepted comms.</p>
-    <div class="coord coord--solo"><span class="lbl">CONSOLE</span><code class="copyable" data-copy="https://mount-buttons-shut-tcp.trycloudflare.com">https://mount-buttons-shut-tcp.trycloudflare.com</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+    <div class="coord coord--solo"><span class="lbl">CONSOLE</span><code class="copyable" data-copy="{{ console_url }}">{{ console_url }}</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
     <div class="opts opts--static">
       <span class="chip chip--static"><b class="c-cop">Our cop</b> vs <b class="c-thief">your thief</b></span>
       <span class="chip chip--static"><b class="c-cop">Your cop</b> vs <b class="c-thief">our thief</b></span>

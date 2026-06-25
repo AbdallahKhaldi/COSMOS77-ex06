@@ -4,8 +4,9 @@
 included; the four diagonals only when ``allow_diagonal``). ``apply_move`` returns
 the new cell or raises :class:`IllegalMoveError` — it never silently clamps, so a
 bad action surfaces as a hard, deterministic error (used by Technical-Loss
-detection). ``place_barrier`` is **cop-only**, budget-bounded by ``max_barriers``,
-and rejects out-of-bounds, occupied, or already-blocked cells.
+detection). ``place_barrier`` is **cop-only**, budget-bounded by ``max_barriers``; per spec §4.3
+the cop walls the cell it STANDS on, so it rejects out-of-bounds, already-blocked, or
+the thief's cell — but the cop's OWN cell is the spec-mandated target, never rejected.
 """
 
 from __future__ import annotations
@@ -55,9 +56,11 @@ def place_barrier(
 ) -> int:
     """Place a barrier (cop-only) and return the new ``barriers_used`` count.
 
-    Raises :class:`IllegalMoveError` if the caller is not the cop, the budget is
-    exhausted, or ``cell`` is out-of-bounds, already blocked, or occupied by an
-    agent. On success the cell becomes impassable for *both* agents.
+    Per spec §4.3 the cop drops the barrier on the cell it stands on (``cop_pos``),
+    consuming its move that turn; the cell becomes impassable to *both* agents. Raises
+    :class:`IllegalMoveError` if the caller is not the cop, the budget is exhausted, or
+    ``cell`` is out-of-bounds, already blocked, or the THIEF's cell (the cop's own cell
+    is always allowed — it is the spec-mandated target).
     """
     if role != "cop":
         raise IllegalMoveError("only the cop may place barriers")
@@ -67,7 +70,8 @@ def place_barrier(
         raise IllegalMoveError(f"barrier out of bounds: {cell}")
     if board.is_blocked(cell):
         raise IllegalMoveError(f"cell already blocked: {cell}")
-    if cell in (cop_pos, thief_pos):
-        raise IllegalMoveError(f"cannot drop a barrier onto an agent: {cell}")
+    if cell == thief_pos:
+        raise IllegalMoveError(f"cannot drop a barrier onto the thief: {cell}")
+    _ = cop_pos  # §4.3 target is the cop's own cell; it is explicitly NOT rejected
     board.add_barrier(cell)
     return barriers_used + 1
