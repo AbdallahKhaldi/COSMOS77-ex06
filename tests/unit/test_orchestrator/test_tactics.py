@@ -48,11 +48,12 @@ def test_to_action_barrier() -> None:
 
 
 def test_target_is_opponent_when_seen() -> None:
-    assert tactics._target_cell(_State(), {"opponent_cell": [1, 2]}) == (1, 2)  # noqa: SLF001
+    assert tactics._target_cell(_State(), "cop", {"opponent_cell": [1, 2]}) == (1, 2)  # noqa: SLF001
 
 
-def test_target_is_board_centre_when_blind() -> None:
-    assert tactics._target_cell(_State((5, 5)), {"opponent_cell": None}) == (2, 2)  # noqa: SLF001
+def test_target_anchors_to_start_corners_when_blind() -> None:
+    assert tactics._target_cell(_State((5, 5)), "cop", {"opponent_cell": None}) == (0, 0)  # noqa: SLF001
+    assert tactics._target_cell(_State((5, 5)), "thief", {"opponent_cell": None}) == (4, 4)  # noqa: SLF001
 
 
 def test_cop_pursues_toward_centre_when_blind() -> None:

@@ -16,20 +16,25 @@ from cosmos77_ex06.game.board import Board
 from cosmos77_ex06.strategy import heuristic
 
 
-def _target_cell(state: Any, estimate: dict[str, Any] | None) -> tuple[int, int]:
-    """The cell the heuristic aims at: the opponent if in view, else the board centre."""
+def _target_cell(state: Any, role: str, estimate: dict[str, Any] | None) -> tuple[int, int]:
+    """The cell the heuristic aims at: the opponent if in view, else a search/flee anchor.
+
+    Blind, the COP heads for the thief's start corner (top-left) to hunt it down and the
+    THIEF flees the cop's start corner (bottom-right) — so the cop crosses the board to the
+    thief instead of idling at centre, turning a centre-stalemate into a real chase.
+    """
     seen = estimate.get("opponent_cell") if estimate else None
     if seen:
         return (int(seen[0]), int(seen[1]))
     grid = state.grid_size
-    return (grid[0] // 2, grid[1] // 2)
+    return (0, 0) if role == "cop" else (int(grid[0]) - 1, int(grid[1]) - 1)
 
 
 def suggest(engine: Any, role: str, estimate: dict[str, Any] | None) -> dict[str, Any]:
     """The heuristic's suggested action for ``role`` (pursue if cop, evade if thief)."""
     state = engine.state
     board = Board(list(state.grid_size), bool(state.allow_diagonal), set(state.barriers))
-    target = _target_cell(state, estimate)
+    target = _target_cell(state, role, estimate)
     if role == "cop":
         use_barriers = bool(engine.config.get("strategy.use_barriers", default=False))
         left = int(engine.config.get("max_barriers")) - int(state.barriers_used)
