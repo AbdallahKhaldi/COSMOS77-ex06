@@ -64,7 +64,13 @@ def suggest_cop_action(
     barrier = _barrier_cutoff(estimate, self_pos, board, config, barriers_left)
     if barrier is not None:
         return {"action": "place_barrier", "cell": barrier}
-    # ``legal_moves`` always contains STAY, so ``ranked`` is never empty.
+    if not board.barriers:
+        from cosmos77_ex06.strategy import pursuit
+
+        optimal = pursuit.best_move(tuple(self_pos), tuple(estimate), board)
+        if optimal is not None:  # open board -> retrograde-optimal pursuit forces the capture
+            return {"action": "move", "direction": optimal}
+    # ``legal_moves`` always contains STAY, so ``ranked`` is never empty (greedy fallback).
     ranked = _ranked_moves(self_pos, estimate, board)
     return {"action": "move", "direction": ranked[0][2]}
 
