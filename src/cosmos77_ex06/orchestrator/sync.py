@@ -15,16 +15,31 @@ Local runs share one in-process state via ``_StateProxy`` and so skip this entir
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Protocol
 
 from cosmos77_ex06.game import rules
 from cosmos77_ex06.game.state import GameState
 
 
+class StateSyncError(RuntimeError):
+    """A server would not accept the canonical mirror — the runner should void + rerun (E13)."""
+
+
 def _data(result: Any) -> dict[str, Any]:
     """Return a tool result's structured ``.data`` mapping (or empty)."""
     data = getattr(result, "data", None)
     return data if isinstance(data, dict) else {}
+
+
+def _matches(echo: dict[str, Any], payload: dict[str, Any]) -> bool:
+    """True when a server's read-back agrees with the pushed board on the live fields."""
+    for fld in ("current_role", "move_number", "cop_pos", "thief_pos"):
+        if echo.get(fld) != payload.get(fld):
+            return False
+    ec = {tuple(b) for b in echo.get("barriers", [])}
+    pc = {tuple(b) for b in payload.get("barriers", [])}
+    return ec == pc
 
 
 class StateSync(Protocol):
@@ -69,13 +84,30 @@ class ClientStateSync:
     ``get_local_observation`` (E4): these tools are orchestrator-only, never the LLM.
     """
 
-    def __init__(self, clients: dict[str, Any]) -> None:
+    def __init__(self, clients: dict[str, Any], *, timeout: float = 10.0, retries: int = 2) -> None:
         self._clients = clients
+        self._timeout = timeout
+        self._retries = retries
+
+    async def _call(self, client: Any, name: str, args: dict[str, Any]) -> Any:
+        """One cross-process tool call, time-bounded so a hung server can't freeze the game."""
+        return await asyncio.wait_for(client.call_tool(name, args), self._timeout)
+
+    async def _push_one(self, role: str, client: Any, payload: dict[str, Any]) -> None:
+        """Mirror to ONE server and confirm it took; retry, then raise on persistent drift."""
+        for _ in range(self._retries + 1):
+            await self._call(client, "sync_state", {"state": payload})
+            echo = _data(await self._call(client, "get_full_state", {}))
+            if _matches(echo, payload):
+                return
+        raise StateSyncError(
+            f"{role} server rejected the mirror after {self._retries + 1} attempts"
+        )
 
     async def _mirror(self, payload: dict[str, Any]) -> None:
-        """Push ``payload`` to every server via ``sync_state``."""
-        for client in self._clients.values():
-            await client.call_tool("sync_state", {"state": payload})
+        """Push ``payload`` to every server and verify each one adopted it (self-healing)."""
+        for role, client in self._clients.items():
+            await self._push_one(role, client, payload)
 
     async def push(self, state: GameState) -> None:
         """Mirror the canonical ``state`` to both servers (sub-game reset, E6)."""
@@ -92,7 +124,7 @@ class ClientStateSync:
         merged engine state is pushed to BOTH servers so every board agrees and the
         next role's ``apply_move`` turn-order gate passes (no deadlock, no divergence).
         """
-        result = await self._clients[acted_role].call_tool("get_full_state", {})
+        result = await self._call(self._clients[acted_role], "get_full_state", {})
         canonical = GameState.from_dict(_data(result))
         for fld in _SERVER_OWNED_FIELDS:
             setattr(engine_state, fld, getattr(canonical, fld))

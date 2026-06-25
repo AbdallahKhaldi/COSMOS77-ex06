@@ -72,7 +72,8 @@ def build_engine(
     kwargs = {} if genai_factory is None else {"client_factory": genai_factory}
     gemini = GeminiClient(config, gatekeeper, **kwargs)
     engine = GameEngine(config, clients, gemini, urls=urls)
-    engine.state_sync = ClientStateSync(clients)
+    timeout = float(config.get("mcp.tool_timeout_seconds", default=10.0))
+    engine.state_sync = ClientStateSync(clients, timeout=timeout)
     return engine, clients
 
 

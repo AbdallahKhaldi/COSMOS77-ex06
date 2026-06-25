@@ -78,6 +78,7 @@ mcp:
   thief_url: "http://localhost:8002/mcp"
   cop_port: 8001
   thief_port: 8002
+  tool_timeout_seconds: 10.0  # cloud state-sync bounds every cross-process call so a hung server voids+reruns rather than freezing the game (E6/E13)
 
 # --- Automated report (E7): the cop agent auto-emails the JSON body here ---
 report:

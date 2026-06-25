@@ -53,5 +53,8 @@ def build_cloud_engine(
     engine = GameEngine(
         config, clients, gemini, urls={"cop": cop_url, "thief": thief_url}, on_event=on_event
     )
-    engine.state_sync = ClientStateSync(clients)  # mirror canonical board across the 2 processes
+    timeout = float(config.get("mcp.tool_timeout_seconds", default=10.0))
+    engine.state_sync = ClientStateSync(
+        clients, timeout=timeout
+    )  # verified mirror across processes
     return engine, clients
