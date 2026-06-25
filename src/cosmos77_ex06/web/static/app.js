@@ -1,6 +1,6 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
-let es = null;
+let ws = null;
 const G = { rows: 5, cols: 5, vision: 1, maxMoves: 25, mode: "house" };
 
 /* ---------- our coordinates ---------- */
@@ -190,7 +190,7 @@ function handle(e) {
   else if (e.type === "game_end") onEnd(e);
   else if (e.type === "error") status("⚠ " + e.message, false);
   else if (e.type === "done") {
-    if (es) { es.close(); es = null; }
+    if (ws) { try { ws.close(); } catch (x) { /* */ } ws = null; }
     status("SYSTEM READY", false);
     document.querySelectorAll(".agent").forEach((a) => a.classList.remove("active"));
     $("engage").disabled = false; $("newmatch").classList.remove("hidden");
@@ -220,13 +220,24 @@ async function engage() {
     })).json();
   } catch (err) { $("err").textContent = "Network error reaching control."; $("engage").disabled = false; return; }
   if (res.error) { $("err").textContent = res.error; $("engage").disabled = false; status("SYSTEM READY", false); return; }
-  if (es) es.close();
-  es = new EventSource("/api/events/" + res.run_id);
-  es.onmessage = (m) => { try { handle(JSON.parse(m.data)); } catch (err) { /* skip */ } };
+  if (ws) { try { ws.close(); } catch (x) { /* */ } }
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(proto + "//" + location.host + "/api/ws/" + res.run_id);
+  ws.onmessage = (m) => { try { handle(JSON.parse(m.data)); } catch (err) { /* skip */ } };
+  ws.onerror = () => status("⚠ connection error", false);
 }
 $("engage").addEventListener("click", engage);
 $("newmatch").addEventListener("click", () => {
-  $("arena").classList.add("hidden");
+  if (es) { es.close(); es = null; }
+  $("verdict").classList.add("hidden");
+  $("newmatch").classList.add("hidden");
+  $("cop-score").textContent = "0"; $("thief-score").textContent = "0";
+  $("feed").innerHTML = "";
+  $("leakwarn").textContent = "";
+  document.querySelectorAll(".agent").forEach((a) => a.classList.remove("active"));
+  setLabels("house");
+  idleBoard();
+  status("SYSTEM READY", false);
   document.getElementById("setup").scrollIntoView({ behavior: "smooth" });
 });
 loadInfo();

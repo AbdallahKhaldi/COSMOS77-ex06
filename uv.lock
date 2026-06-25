@@ -234,6 +234,7 @@ dependencies = [
     { name = "sse-starlette" },
     { name = "starlette" },
     { name = "uvicorn" },
+    { name = "websockets" },
 ]
 
 [package.dev-dependencies]
@@ -265,6 +266,7 @@ requires-dist = [
     { name = "sse-starlette" },
     { name = "starlette" },
     { name = "uvicorn" },
+    { name = "websockets" },
 ]
 
 [package.metadata.requires-dev]

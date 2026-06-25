@@ -8,12 +8,14 @@ code is touched. Visitor URLs + token are used at runtime only, never persisted.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from typing import Any
 from uuid import uuid4
 
 from sse_starlette.sse import EventSourceResponse
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from starlette.websockets import WebSocket
 
 from cosmos77_ex06.web import runner, security
 
@@ -97,4 +99,22 @@ async def events(request: Request) -> Any:
     feed = request.app.state.feed
     if not feed.has(run_id):
         return JSONResponse({"error": "unknown run_id"}, status_code=404)
-    return EventSourceResponse(feed.stream(run_id))
+    return EventSourceResponse(
+        feed.stream(run_id),
+        headers={"X-Accel-Buffering": "no", "Cache-Control": "no-cache"},
+    )
+
+
+async def ws_events(websocket: WebSocket) -> None:
+    """WebSocket stream of a run's live events — the path that survives SSE-buffering tunnels."""
+    run_id = websocket.path_params["run_id"]
+    feed = websocket.app.state.feed
+    await websocket.accept()
+    if not feed.has(run_id):
+        await websocket.close()
+        return
+    with contextlib.suppress(Exception):  # client may vanish mid-stream
+        async for frame in feed.stream(run_id):
+            await websocket.send_text(frame["data"])
+    with contextlib.suppress(Exception):
+        await websocket.close()

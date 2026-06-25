@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from starlette.applications import Starlette
-from starlette.routing import Mount, Route
+from starlette.routing import Mount, Route, WebSocketRoute
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
@@ -34,6 +34,7 @@ def build_app(config: Config | None = None, feed: MatchFeed | None = None) -> St
             Route("/api/our-info", routes.our_info, methods=["GET"]),
             Route("/api/run", routes.run, methods=["POST"]),
             Route("/api/events/{run_id}", routes.events, methods=["GET"]),
+            WebSocketRoute("/api/ws/{run_id}", routes.ws_events),
             Mount("/static", StaticFiles(directory=str(_HERE / "static")), name="static"),
         ],
     )

@@ -43,6 +43,7 @@ dependencies = [
     "uvicorn",
     "jinja2",
     "sse-starlette",
+    "websockets",
 ]
 
 [project.scripts]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from starlette.testclient import TestClient
@@ -126,3 +127,15 @@ def test_run_solo_needs_no_visitor_inputs(
         "/api/run", json={"action": "solo", "passphrase": "open-sesame"}
     )
     assert response.status_code == 200 and "run_id" in response.json()
+
+
+def test_ws_streams_queued_events_in_order(app_and_feed: tuple[Any, Any, Any]) -> None:
+    """The WebSocket feed (used over SSE-buffering tunnels) pushes events live, in order."""
+    app, feed, _ = app_and_feed
+    feed.register("w1")
+    feed.publish("w1", {"type": "meta", "mode": "exhibition"})
+    feed.publish("w1", {"type": "done"})
+    with TestClient(app).websocket_connect("/api/ws/w1") as socket:
+        first = json.loads(socket.receive_text())
+        second = json.loads(socket.receive_text())
+    assert first["type"] == "meta" and second["type"] == "done"
