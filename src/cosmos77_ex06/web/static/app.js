@@ -49,7 +49,7 @@ function sizeBoard() {
   const cell = usable / G.cols;
   const tk = cell * 0.8;
   document.querySelectorAll(".token").forEach((t) => {
-    t.style.width = tk + "px"; t.style.height = tk + "px"; t.style.fontSize = tk * 0.6 + "px";
+    t.style.width = tk + "px"; t.style.height = tk * 1.18 + "px";
   });
   const vs = cell * (2 * G.vision + 1) * 0.92;
   ["vis-cop", "vis-thief"].forEach((id) => { $(id).style.width = vs + "px"; $(id).style.height = vs + "px"; });
@@ -113,7 +113,7 @@ function addComms(role, message, flagged) {
   const b = document.createElement("div");
   b.className = "bubble " + (role === "cop" ? "cop" : "thief");
   const who = document.createElement("b");
-  who.textContent = role === "cop" ? "🚔 DETECTIVE" : "🏃 ROGUE";
+  who.textContent = role === "cop" ? "🚓 DETECTIVE" : "🚗 ROGUE";
   b.appendChild(who);
   b.appendChild(document.createTextNode(message || ""));
   if (flagged) {
@@ -216,9 +216,9 @@ function onEnd(e) {
     });
     const win = r.winner, n = r.num_games || 1;
     v.className = "verdict " + (win === "tie" ? "" : win);
-    if (n > 1) v.textContent = win === "cop" ? "🚔 DETECTIVE TAKES THE MATCH" : win === "thief" ? "🏃 ROGUE TAKES THE MATCH" : "⚖ DEAD HEAT";
-    else v.textContent = win === "cop" ? "🚔 DETECTIVE CAPTURES THE ROGUE" : "🏃 ROGUE ESCAPES";
-    const tape = (r.games || []).map((g) => (g.winner === "cop" ? "🚔" : "🏃")).join(" ");
+    if (n > 1) v.textContent = win === "cop" ? "BUSTED" : win === "thief" ? "GETAWAY" : "DEAD HEAT";
+    else v.textContent = win === "cop" ? "BUSTED" : "ESCAPED";
+    const tape = (r.games || []).map((g) => (g.winner === "cop" ? "🚓" : "🚗")).join(" ");
     const s = document.createElement("small");
     s.textContent = tape + "   cop " + r.cop_score + " · thief " + r.thief_score;
     v.appendChild(s);

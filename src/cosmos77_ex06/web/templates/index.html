@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COSMOS77 · Pursuit Control</title>
+<title>COSMOS77 CITY · Top-Down Pursuit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#070b12">
 <meta name="description" content="COSMOS77 Pursuit Control — watch two autonomous AI agents play Cops & Robbers over MCP, live.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23070b12'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%232ee6a6' stroke-width='2'/%3E%3Cline x1='16' y1='3' x2='16' y2='8' stroke='%232ee6a6' stroke-width='2'/%3E%3Cline x1='16' y1='24' x2='16' y2='29' stroke='%232ee6a6' stroke-width='2'/%3E%3Cline x1='3' y1='16' x2='8' y2='16' stroke='%232ee6a6' stroke-width='2'/%3E%3Cline x1='24' y1='16' x2='29' y2='16' stroke='%232ee6a6' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23ff6a45'/%3E%3C/svg%3E">
@@ -16,7 +16,7 @@
 <div class="scanlines" aria-hidden="true"></div>
 
 <header class="statusbar">
-  <span class="brand"><span class="ping" id="ping"></span>COSMOS77&nbsp;·&nbsp;<b>PURSUIT&nbsp;CONTROL</b></span>
+  <span class="brand"><span class="ping" id="ping"></span>COSMOS77&nbsp;<b>CITY</b></span>
   <span class="statustext" id="statustext">SYSTEM READY</span>
   <span class="clearance">DEC-POMDP&nbsp;·&nbsp;MCP&nbsp;·&nbsp;GEMINI</span>
 </header>
@@ -42,8 +42,8 @@
       <div class="field"><label>YOUR THIEF URL</label><input id="their-thief" type="url" placeholder="https://….trycloudflare.com/mcp" autocomplete="off"></div>
       <div class="field"><label>SHARED CLEARANCE TOKEN</label><input id="token" type="password" placeholder="the bearer token we agreed on" autocomplete="off"></div>
       <div class="opts">
-        <label class="chip"><input type="radio" name="cmode" value="match" checked> Our cop 🚔 vs your thief 🏃</label>
-        <label class="chip"><input type="radio" name="cmode" value="swap"> Your cop 🚔 vs our thief 🏃</label>
+        <label class="chip"><input type="radio" name="cmode" value="match" checked> Our cop 🚓 vs your thief 🚗</label>
+        <label class="chip"><input type="radio" name="cmode" value="swap"> Your cop 🚓 vs our thief 🚗</label>
         <label class="chip"><input type="radio" name="cmode" value="series"> Full series · 6 games</label>
       </div>
     </div>
@@ -73,7 +73,7 @@
   <section class="arena" id="arena">
     <div class="matchup">
       <div class="agent cop">
-        <div class="badge">🚔</div>
+        <div class="badge">🚓</div>
         <div class="who"><span class="name" id="cop-name">THE DETECTIVE</span><span class="team" id="cop-team">COSMOS77</span></div>
         <div class="score" id="cop-score">0</div>
       </div>
@@ -83,7 +83,7 @@
         <div class="movereadout" id="movereadout">standby</div>
       </div>
       <div class="agent thief">
-        <div class="badge">🏃</div>
+        <div class="badge">🚗</div>
         <div class="who"><span class="name" id="thief-name">THE ROGUE</span><span class="team" id="thief-team">COSMOS77</span></div>
         <div class="score" id="thief-score">0</div>
       </div>
@@ -95,10 +95,10 @@
         <div class="overlay" id="overlay">
           <div class="vision cop" id="vis-cop"></div>
           <div class="vision thief" id="vis-thief"></div>
-          <div class="token cop" id="tok-cop">🚔</div>
-          <div class="token thief" id="tok-thief">🏃</div>
+          <div class="token cop" id="tok-cop"></div>
+          <div class="token thief" id="tok-thief"></div>
         </div>
-        <div class="lockon" id="lockon">LOCK-ON</div>
+        <div class="lockon" id="lockon">BUSTED!</div>
       </div>
     </div>
 
