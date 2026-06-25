@@ -76,8 +76,8 @@ llm:
 # --- MCP servers (E2/E6): two FastMCP servers on separate ports, token auth ---
 mcp:
   host: "0.0.0.0"          # bind interface for both FastMCP servers (override per deployment)
-  cop_url: "http://localhost:8001/mcp"
-  thief_url: "http://localhost:8002/mcp"
+  cop_url: "https://cosmos77-cop.fastmcp.app/mcp"
+  thief_url: "https://cosmos77-thief.fastmcp.app/mcp"
   cop_port: 8001
   thief_port: 8002
   tool_timeout_seconds: 10.0  # cloud state-sync bounds every cross-process call so a hung server voids+reruns rather than freezing the game (E6/E13)
@@ -162,7 +162,7 @@ bonus:
 web:
   host: "0.0.0.0"             # bind interface; $PORT overrides for hosted deploys
   port: 8080                  # local dev port
-  public_url: ""             # the page DISPLAYS this if set (optional, per-deployment)
+  public_url: ""
   max_concurrent_runs: 6     # reject new games past this many live runs (resource guard)
 
 # --- Output directories ---
