@@ -43,12 +43,14 @@ class GmailSender:
         config: Config,
         *,
         to: str | None = None,
+        subject: str | None = None,
         service_factory: Callable[[Any], Any] | None = None,
         creds_loader: Callable[[Path, str], Any] | None = None,
         consent: Callable[[Path, str], Any] | None = None,
     ) -> None:
         self.config = config
         self._to_override = to
+        self._subject_override = subject
         root = config.config_dir.parent
         self._credentials_path = root / str(
             config.get("report.credentials_file", "credentials.json")
@@ -72,7 +74,9 @@ class GmailSender:
         """
         mime = MIMEText(body, _charset="utf-8")
         mime["To"] = self.to
-        mime["Subject"] = str(self.config.get("report.subject", DEFAULT_SUBJECT))
+        mime["Subject"] = str(
+            self._subject_override or self.config.get("report.subject", DEFAULT_SUBJECT)
+        )
         return base64.urlsafe_b64encode(mime.as_bytes()).decode("ascii")
 
     def send(self, body: str) -> dict[str, Any]:

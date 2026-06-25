@@ -33,16 +33,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     rep = sub.add_parser("report", help="build / send the JSON report")
     rep.add_argument("--send", action="store_true", help="email the JSON report via Gmail")
+    rep.add_argument("--to", default=None, metavar="EMAIL", help="self-test recipient")
     rep.add_argument(
-        "--to",
-        default=None,
-        metavar="EMAIL",
-        help="override the recipient for a self-test (config report.to stays the submission address)",
-    )
-    rep.add_argument(
-        "--final",
-        action="store_true",
-        help="CONFIRM the real submission send to the professor (required to email report.to)",
+        "--final", action="store_true", help="CONFIRM the real submission to the professor"
     )
 
     bonus = sub.add_parser("bonus", help="run the inter-group bonus series (E12)")
@@ -52,6 +45,9 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="CONFIG",
         help="path to a config DIR (or config.yaml) holding the filled-in bonus block",
     )
+    bonus.add_argument("--send", action="store_true", help="email the existing bonus_game.json")
+    bonus.add_argument("--to", default=None, help="self-test recipient (non-professor sends)")
+    bonus.add_argument("--final", action="store_true", help="confirm the REAL bonus submission")
     serve = sub.add_parser("serve", help="launch the live web match console")
     serve.add_argument("--host", default=None, help="override web.host")
     serve.add_argument("--port", type=int, default=None, help="override web.port")
@@ -93,7 +89,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         out = sdk.report(send=args.send, to=args.to, final=args.final)
         print(out.get("blocked") or ("emailed" if out.get("sent") else "validated (not sent)"))
     elif args.command == "bonus":
-        _run_bonus(getattr(args, "partner", None))
+        _run_bonus(getattr(args, "partner", None), args.send, args.to, args.final)
     elif args.command == "serve":
         from cosmos77_ex06.web.server import main as serve_main
 
@@ -101,8 +97,8 @@ def _dispatch(args: argparse.Namespace) -> int:
     return 0
 
 
-def _run_bonus(partner: str | None) -> None:
-    """Run the bonus series against the (optionally partner-supplied) config (E12)."""
+def _run_bonus(partner: str | None, send: bool, to: str | None, final: bool) -> None:
+    """Run the bonus series, or (with ``--send``) email the existing bonus_game.json (E12)."""
     from pathlib import Path
 
     from cosmos77_ex06.sdk.sdk import SDK
@@ -113,6 +109,10 @@ def _run_bonus(partner: str | None) -> None:
         path = Path(partner).expanduser()
         config = Config(path if path.is_dir() else path.parent)
     sdk = SDK(config=config)
+    if send:
+        out = sdk.send_bonus(to=to, final=final)
+        print(out.get("blocked") or ("emailed" if out.get("sent") else "validated (not sent)"))
+        return
     out = sdk.bonus()
     report = out["report"]
     print(

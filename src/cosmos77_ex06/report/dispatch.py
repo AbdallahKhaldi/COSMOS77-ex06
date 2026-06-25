@@ -97,3 +97,45 @@ def send_latest(
     result["sent"] = True
     gatekeeper.record("report_send", {"sent": True, "to": active.to})
     return result
+
+
+def send_bonus(
+    config: Config,
+    gatekeeper: Gatekeeper,
+    reports_dir: Path,
+    *,
+    send: bool = False,
+    sender: Any = None,
+    to: str | None = None,
+    final: bool = False,
+) -> dict[str, Any]:
+    """Validate + Gmail-send ``bonus_game.json`` behind the SAME professor-safety guard (E12).
+
+    The body is the EXACT file content both groups diff + email, so the two submissions
+    are byte-identical. Sending to the professor (``report.to``) requires ``final=True``;
+    a ``to`` override self-tests. ``send=False`` validates only.
+    """
+    from cosmos77_ex06.bonus.schema import validate_bonus_game
+
+    path = reports_dir / "bonus_game.json"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"no bonus report at {path}; run `cosmos77-pursuit bonus --partner config/` first"
+        )
+    body = path.read_text(encoding="utf-8")
+    validate_bonus_game(json.loads(body))
+    result: dict[str, Any] = {"path": str(path), "sent": False, "blocked": None}
+    if not send:
+        return result
+    prof = str(config.get("report.to"))
+    recipient = to or prof
+    if recipient == prof and not final:
+        msg = _BLOCK_MSG.format(to=prof)
+        gatekeeper.record("bonus_send", {"sent": False, "blocked": msg})
+        result["blocked"] = msg
+        return result
+    active = sender or GmailSender(config, to=to, subject="COSMOS77-ex06 bonus_game report")
+    result["response"] = active.send(body)
+    result["sent"] = True
+    gatekeeper.record("bonus_send", {"sent": True, "to": active.to})
+    return result
