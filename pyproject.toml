@@ -27,8 +27,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "fastmcp",
-    "google-genai",
+    "fastmcp>=3.4,<4",
+    "google-genai>=2.9,<3",
     "pyyaml",
     "pydantic>=2.6",
     "rich",

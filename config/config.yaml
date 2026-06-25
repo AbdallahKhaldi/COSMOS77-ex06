@@ -161,6 +161,7 @@ web:
   host: "0.0.0.0"             # bind interface; $PORT overrides for hosted deploys
   port: 8080                  # local dev port
   public_url: ""             # the page DISPLAYS this if set (optional, per-deployment)
+  max_concurrent_runs: 6     # reject new games past this many live runs (resource guard)
 
 # --- Output directories ---
 paths:

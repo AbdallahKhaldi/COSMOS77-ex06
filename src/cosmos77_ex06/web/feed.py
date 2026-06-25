@@ -45,6 +45,10 @@ class MatchFeed:
         """True when ``run_id`` is currently registered."""
         return run_id in self._queues
 
+    def active_count(self) -> int:
+        """Number of runs currently registered (live games), for the concurrency guard."""
+        return len(self._queues)
+
     def publish(self, run_id: str, event: dict[str, Any]) -> None:
         """Push one event onto ``run_id``'s queue (the on_event target + lifecycle events)."""
         queue = self._queues.get(run_id)

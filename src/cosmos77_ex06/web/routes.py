@@ -67,6 +67,10 @@ async def run(request: Request) -> JSONResponse:
     state = request.app.state
     if not security.passphrase_ok(str(body.get("passphrase", "")), state.config):
         return JSONResponse({"error": "Wrong or missing passphrase."}, status_code=403)
+    cap = int(state.config.get("web.max_concurrent_runs", default=6))
+    if state.feed.active_count() >= cap:
+        msg = "Server busy — too many live matches. Try again shortly."
+        return JSONResponse({"error": msg}, status_code=429)
     cfg = _run_config(state.config, body)
     action = body.get("action")
     if action not in ("solo", "exhibition", "series"):

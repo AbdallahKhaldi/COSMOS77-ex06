@@ -250,11 +250,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastmcp" },
+    { name = "fastmcp", specifier = ">=3.4,<4" },
     { name = "google-api-python-client" },
     { name = "google-auth-httplib2" },
     { name = "google-auth-oauthlib" },
-    { name = "google-genai" },
+    { name = "google-genai", specifier = ">=2.9,<3" },
     { name = "jinja2" },
     { name = "matplotlib" },
     { name = "numpy" },

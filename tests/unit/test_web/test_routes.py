@@ -14,7 +14,7 @@ def test_index_returns_html(app_and_feed: tuple[Any, Any, Any]) -> None:
     app, _, _ = app_and_feed
     response = TestClient(app).get("/")
     assert response.status_code == 200
-    assert "Pursuit Control" in response.text
+    assert "COSMOS77" in response.text
 
 
 def test_our_info_returns_config_urls(app_and_feed: tuple[Any, Any, Any]) -> None:
