@@ -54,6 +54,25 @@
   <p class="note"><b>Heads up:</b> these are ephemeral <code>trycloudflare.com</code> tunnels — they rotate. If a URL is dead, ping us and we'll send fresh ones (the live console always shows the current pair on its house-match panel).</p>
 </section>
 
+<!-- ============ THE TOOL CONTRACT ============ -->
+<section class="panel">
+  <span class="kick">02b · THE MCP TOOL CONTRACT</span>
+  <h2 class="sec-h">The exact tools your servers must expose</h2>
+  <p class="blurb">A cross-team series runs from <b>one</b> orchestrator driving all four servers, so your two servers must expose the same tool surface ours does (the spec describes these tools but doesn't pin their names — so we lock the contract here). Every call carries the shared bearer token: <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+  <pre class="codeblk"><code>get_local_observation(role) -&gt; {
+  role, self:{x,y}, grid_size:[w,h], vision_radius,
+  visible_cells:[{x, y, blocked, occupant: "cop"|"thief"|null}],
+  move_number, moves_remaining, barriers_remaining   <span class="c-cmt"># barriers_remaining: cop only</span>
+}
+apply_move(role, direction) -&gt; {ok, new_self:{x,y}|null, captured, reason}
+                               <span class="c-cmt"># direction in N,S,E,W,NE,NW,SE,SW,STAY</span>
+place_barrier(role, x, y)   -&gt; {ok, ...}     <span class="c-cmt"># cop only, its own cell, max 5, impassable to both</span>
+send_message(role, content) -&gt; {...}         <span class="c-cmt"># the FREE natural-language channel</span>
+receive_messages(role, since)-&gt; {messages:[...]}
+verify_position(role, x, y) -&gt; {known, result}   <span class="c-cmt"># confirm-only, only if (x,y) is in your vision window</span></code></pre>
+  <p class="note"><b>Rules baked in:</b> the thief moves first each round, ≤25 moves per sub-game; the cop wins by landing on the thief's cell. The observation never reveals the opponent's exact position unless it's inside the vision window — that partial observability is the point. If your tool names or shapes differ, we agree a shared contract at coordination time and pick one orchestrator to run the series.</p>
+</section>
+
 <!-- ============ THE TOKEN ============ -->
 <section class="panel">
   <span class="kick">03 · THE SHARED TOKEN</span>
