@@ -75,18 +75,26 @@ def suggest_thief_action(
     board: Board,
     config: Config,
 ) -> dict[str, object]:
-    """Suggest the thief's action: maximize distance to the estimate, prefer open space.
+    """Suggest the thief's action: a 1-ply MAXIMIN evade (deterministic).
 
-    Returns ``{"action": "move", "direction": str}``. Among moves of equal (maximal)
-    distance to the estimated cop cell, the one with the most open neighbours wins
-    (open-space tie-break, PRD_strategy §3.3), so the thief avoids corners and traps.
+    Returns ``{"action": "move", "direction": str}``. For each legal move it measures how close
+    the cop could get on ITS next move (the cop closes ~1/turn with king moves) and keeps that
+    worst-case distance LARGEST, then hugs open space and prefers moving over idling. Looking one
+    step ahead stops the thief HOLDING while the cop bears down (the fatal flaw of a myopic
+    max-distance-to-current-cell pick). The cop's cell is NEVER entered, so 'capture =
+    cop-onto-thief' stays unambiguous across engines (no cross-engine 0/0, E12).
     """
-    # ``legal_moves`` always contains STAY, so ``ranked`` is never empty.
-    ranked = _ranked_moves(self_pos, estimate, board)
-    best = ranked[-1][0]
-    far = [r for r in ranked if r[0] == best]
-    far.sort(key=lambda r: (-len(board.neighbors(r[1])), r[1][0], r[1][1], r[2]))
-    return {"action": "move", "direction": far[0][2]}
+    diag = board.allow_diagonal
+    cop_next = [apply_move(estimate, name, board) for name in legal_moves(estimate, board)]
+    cands: list[tuple[int, int, bool, Cell, str]] = []
+    for name in legal_moves(self_pos, board):
+        landing = apply_move(self_pos, name, board)
+        if landing == estimate:
+            continue  # never enter the cop's cell (keeps capture unambiguous)
+        worst = min(distance(landing, c, diag) for c in cop_next)
+        cands.append((worst, len(board.neighbors(landing)), name != "STAY", landing, name))
+    cands.sort(key=lambda c: (-c[0], -c[1], not c[2], c[3][0], c[3][1], c[4]))
+    return {"action": "move", "direction": cands[0][4]}
 
 
 def _barrier_cutoff(
