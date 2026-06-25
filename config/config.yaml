@@ -35,14 +35,25 @@ nl_guard:
 # game logic are unaffected. Keep it clean (a professor reads the transcript) and on-topic.
 # Edit freely to dial the edginess up or down.
 persona:
-  thief: "Play a roguish, down-on-your-luck thief with gallows humour: wry, sympathetic one-liners (a man's gotta eat, just trying to feed my kids, the streets raised me) while taunting the cop about never catching you."
-  cop: "Play a wisecracking, world-weary noir detective: dry, witty, lightly sarcastic comebacks (heard that sob story a hundred times, pal) that stay clean and on the case."
+  # Hardboiled noir detective — dry, inevitable, a FRESH quotable comeback every turn.
+  cop: >-
+    You are a hardboiled noir detective on a long night shift: dry, unhurried, quietly
+    menacing, with the cadence of a 1940s film-noir voiceover. Trade cool one-liners and
+    gallows wit about the chase and the inevitability of the collar. Every line is a FRESH
+    quotable comeback to what the thief just said — never reuse a phrase, a nickname, or a
+    metaphor you have already used this game. Bone-dry, confident, and clean.
+  # Charming heist rogue — theatrical swagger, reinvented every turn.
+  thief: >-
+    You are a charming, silver-tongued heist rogue having the time of your life being
+    chased: cocky, theatrical, full of caper-movie swagger. Toss out witty, taunting
+    one-liners that dance around the cop's last line. Reinvent your bravado every turn —
+    never reuse a nickname, a boast, or a metaphor. Roguish and fun, but always clean.
 
 # --- Decision strategy (E9): heuristic core + optional tabular Q-Table ---
 strategy:
-  enabled: false          # DEFAULT-OFF: when true the heuristic's suggested action
-                          # is appended to the agent prompt as a HINT the LLM may
-                          # accept or override (Phase-4 behaviour is unchanged off).
+  enabled: true           # ON: the heuristic's legal pursuit/evasion direction (E9) is
+                          # offered to the LLM as a HINT it may accept or override; an
+                          # illegal LLM move always falls back to it (no frozen agents).
 
 # Tabular Q-Learning hyper-parameters (Bellman update; offline self-play only).
 qlearning:

@@ -76,6 +76,10 @@ async def run(request: Request) -> JSONResponse:
     their_cop = str(body.get("their_cop_url", ""))
     their_thief = str(body.get("their_thief_url", ""))
     run_id = uuid4().hex
+    if action == "solo":
+        state.feed.register(run_id)
+        asyncio.create_task(runner.run_solo(cfg, state.gatekeeper, state.feed, run_id))
+        return JSONResponse({"run_id": run_id})
     if action == "series":
         if not _https_ok(our_cop, our_thief, their_cop, their_thief):
             return JSONResponse({"error": "All four URLs must be https://"}, status_code=400)
@@ -95,12 +99,11 @@ async def run(request: Request) -> JSONResponse:
             )
         )
         return JSONResponse({"run_id": run_id})
-    if action == "solo":
-        cop, thief, token = our_cop, our_thief, str(cfg.env("ORCHESTRATOR_TOKEN") or "")
-    elif body.get("role") == "their_cop":
-        cop, thief, token = their_cop, our_thief, str(body.get("token", ""))
+    if body.get("role") == "their_cop":
+        cop, thief = their_cop, our_thief
     else:
-        cop, thief, token = our_cop, their_thief, str(body.get("token", ""))
+        cop, thief = our_cop, their_thief
+    token = str(body.get("token", ""))
     if not _https_ok(cop, thief):
         return JSONResponse(
             {"error": "Both URLs must be https:// — are our servers live?"}, status_code=400

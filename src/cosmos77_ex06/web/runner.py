@@ -14,7 +14,7 @@ from typing import Any
 
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
-from cosmos77_ex06.web import match
+from cosmos77_ex06.web import match, series
 
 
 def _meta(config: Config, mode: str) -> dict[str, Any]:
@@ -27,6 +27,20 @@ def _meta(config: Config, mode: str) -> dict[str, Any]:
         "max_moves": int(config.get("max_moves", default=25)),
         "num_games": 6 if mode == "series" else int(config.get("num_games", default=1)),
     }
+
+
+async def run_solo(config: Config, gatekeeper: Gatekeeper, feed: Any, run_id: str) -> None:
+    """House Match — our cop vs our thief on the freeze-proof local engine; stream it."""
+    feed.publish(run_id, _meta(config, "exhibition"))
+    try:
+        result = await match.local_game(
+            config, gatekeeper, on_event=lambda e: feed.publish(run_id, e)
+        )
+        feed.publish(run_id, {"type": "game_end", "mode": "exhibition", "result": result})
+    except Exception as exc:  # noqa: BLE001 - surface any failure to the browser, then end cleanly
+        feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
+    finally:
+        feed.publish(run_id, {"type": "done"})
 
 
 async def run_exhibition(
@@ -73,7 +87,7 @@ async def run_series(
     """Run the 6-game role-swap series live and stream it; publish the result, then ``done``."""
     feed.publish(run_id, _meta(config, "series"))
     try:
-        result = await match.bonus_series_live(
+        result = await series.bonus_series_live(
             config,
             gatekeeper,
             reports_dir,

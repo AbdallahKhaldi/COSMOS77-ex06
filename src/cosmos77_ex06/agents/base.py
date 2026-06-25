@@ -71,6 +71,7 @@ class BaseAgent(BeliefMixin):
             "observations, or a bluff). Use landmarks (walls, corners, center) — NEVER raw "
             "coordinates, rows, or columns.\n"
             f"3. 'action': choose exactly ONE action: a move ({self._move_vocab()}).\n"
+            f"4. MOVEMENT: {self._drive()}\n"
             f"{self._persona_line()}"
             f"{self._suggestion_line(suggestion)}"
         )
@@ -94,6 +95,10 @@ class BaseAgent(BeliefMixin):
         """The action vocabulary offered to this role (overridden by the cop)."""
         return _MOVE_VOCAB
 
+    def _drive(self) -> str:
+        """Role-specific MOVEMENT directive (keeps agents active, not idle)."""
+        return "Move with purpose every turn; STAY only if every direction is blocked."
+
     def parse_decision(
         self, message: str, tool_name: str, tool_args: dict[str, Any]
     ) -> dict[str, Any]:
@@ -116,12 +121,20 @@ class CopAgent(BaseAgent):
         """The cop may also place a barrier (impassable for both agents)."""
         return f"{_MOVE_VOCAB}, or place_barrier"
 
+    def _drive(self) -> str:
+        """Hunt: close the gap every turn; sweep to flush the thief out when blind."""
+        return "PURSUE — each turn move to CLOSE the gap to the thief's likely cell; a still cop never captures. When you cannot see the thief, sweep toward the centre and unscanned ground. Never idle."
+
 
 class ThiefAgent(BaseAgent):
     """The evader: maximize survival; cannot place barriers."""
 
     role = "thief"
     objective = "Your goal is to SURVIVE by evading the cop until the move limit is reached."
+
+    def _drive(self) -> str:
+        """Evade actively: break for open space, never get pinned in a corner."""
+        return "EVADE — break for OPEN space toward the centre and AWAY from walls; you start in a corner, so move out of it immediately (a cornered thief is easy prey). Pick a direction that stays ON the board, keep the cop guessing, and never sit still. A thief that lingers gets caught."
 
 
 def make_agent(role: str, config: Config) -> BaseAgent:

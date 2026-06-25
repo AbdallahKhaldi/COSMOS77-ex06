@@ -1,23 +1,18 @@
-"""Cross-team game logic for the live web console — kept out of sdk.py (Rule 1/2).
+"""Cross-team / solo game logic for the live web console — kept out of sdk.py (Rule 1/2).
 
-Two async entry points the web runner drives:
-* :func:`cross_game` — ONE live game over a cop URL + a thief URL (the "exhibition").
-* :func:`bonus_series_live` — the full 6-sub-game role-swap (E12), streamed live, also
-  writing the byte-identical ``bonus_game`` JSON.
+* :func:`cross_game` — N live games over a cop URL + a thief URL (the multiplayer match).
+* :func:`local_game` — N live games of OUR cop vs OUR thief on the freeze-proof local
+  in-memory engine (House Match). The bonus role-swap series lives in :mod:`web.series`.
 
-Both thread an optional per-turn ``on_event`` hook into the :class:`GameEngine` and pass
-the visitor-supplied token at RUNTIME (never written to config; Rule 9). No LLM here.
+Both thread an optional per-turn ``on_event`` hook into the :class:`GameEngine`; the
+multiplayer token is passed at RUNTIME (never written to config; Rule 9). No LLM here.
 """
 
 from __future__ import annotations
 
-import copy
-from pathlib import Path
 from typing import Any
 
-from cosmos77_ex06.bonus import report as bonus_report
 from cosmos77_ex06.bonus.cloud import build_cloud_engine
-from cosmos77_ex06.bonus.series import run_series
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
 
@@ -42,7 +37,13 @@ async def cross_game(
         on_event=on_event,
         client_factory=client_factory,
     )
-    num = int(config.get("num_games", default=1))
+    return await _play_games(engine, clients, int(config.get("num_games", default=1)), on_event)
+
+
+async def _play_games(
+    engine: Any, clients: dict[str, Any], num: int, on_event: Any
+) -> dict[str, Any]:
+    """Run ``num`` sub-games on an opened engine; accumulate totals + emit ``sub_game_end``."""
     totals = {"cop": 0, "thief": 0}
     games: list[dict[str, Any]] = []
     async with clients["cop"], clients["thief"]:
@@ -60,79 +61,26 @@ async def cross_game(
             games.append(game)
             if on_event is not None:
                 on_event({"type": "sub_game_end", **game, "totals": dict(totals)})
-    win = (
-        "cop"
-        if totals["cop"] > totals["thief"]
-        else "thief"
-        if totals["thief"] > totals["cop"]
-        else "tie"
-    )
-    return {
-        "winner": win,
-        "cop_score": totals["cop"],
-        "thief_score": totals["thief"],
-        "games": games,
-        "num_games": num,
-    }
+    return _tally(totals, games, num)
 
 
-def _series_config(config: Config, urls: dict[str, str]) -> Config:
-    """A per-run config copy with the four ``bonus.mcp.*`` URLs set (no shared mutation)."""
-    cfg = copy.copy(config)
-    cfg._data = copy.deepcopy(config._data)  # noqa: SLF001 - intentional per-run override
-    mcp = cfg._data.setdefault("bonus", {}).setdefault("mcp", {})
-    mcp.update(urls)
-    return cfg
+def _tally(totals: dict[str, int], games: list[dict[str, Any]], num: int) -> dict[str, Any]:
+    """Build the final match result from cumulative scores (cop takes a tie on the win edge)."""
+    cop, thief = totals["cop"], totals["thief"]
+    win = "cop" if cop > thief else "thief" if thief > cop else "tie"
+    return {"winner": win, "cop_score": cop, "thief_score": thief, "games": games, "num_games": num}
 
 
-async def bonus_series_live(
+async def local_game(
     config: Config,
     gatekeeper: Gatekeeper,
-    reports_dir: Path,
     *,
-    our_cop: str,
-    our_thief: str,
-    their_cop: str,
-    their_thief: str,
-    token: str | None,
     on_event: Any = None,
     client_factory: Any = None,
 ) -> dict[str, Any]:
-    """Run the 6-game role-swap series live; write the byte-identical JSON; return the result."""
-    cfg = _series_config(
-        config,
-        {
-            "group_1_cop": our_cop,
-            "group_1_thief": our_thief,
-            "group_2_cop": their_cop,
-            "group_2_thief": their_thief,
-        },
-    )
+    """Run ``num_games`` of OUR cop vs OUR thief on the freeze-proof local in-memory engine."""
+    from cosmos77_ex06.orchestrator.local import build_engine as build_local_engine
 
-    def factory(
-        c: Config, gk: Gatekeeper, *, cop_url: str, thief_url: str, client_factory: Any = None
-    ):
-        return build_cloud_engine(
-            c,
-            gk,
-            cop_url=cop_url,
-            thief_url=thief_url,
-            token=token,
-            on_event=on_event,
-            client_factory=client_factory,
-        )
-
-    series = await run_series(
-        cfg, gatekeeper, client_factory=client_factory, engine_factory=factory
-    )
-    report = bonus_report.build_report(cfg, series["sub_games"])
-    text = bonus_report.serialize(report)
-    reports_dir.mkdir(parents=True, exist_ok=True)
-    path = reports_dir / "bonus_game.json"
-    path.write_text(text + "\n", encoding="utf-8")
-    return {
-        "totals_by_group": report["totals_by_group"],
-        "bonus_claim": report.get("bonus_claim"),
-        "sub_games": report["sub_games"],
-        "path": str(path),
-    }
+    engine, clients = build_local_engine(config, gatekeeper, client_factory)
+    engine.on_event = on_event
+    return await _play_games(engine, clients, int(config.get("num_games", default=1)), on_event)

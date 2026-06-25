@@ -54,7 +54,7 @@ def test_run_series_streams_meta_turn_end_done(monkeypatch: Any) -> None:
             "path": "x",
         }
 
-    monkeypatch.setattr(runner.match, "bonus_series_live", fake_series_live)
+    monkeypatch.setattr(runner.series, "bonus_series_live", fake_series_live)
     asyncio.run(
         runner.run_series(
             _GridCfg(),

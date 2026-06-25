@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from cosmos77_ex06.orchestrator import turn_log
+from cosmos77_ex06.orchestrator import tactics, turn_log
 from cosmos77_ex06.shared.logging_setup import get_logger
 
 _MOVE_NAMES = {"N", "S", "E", "W", "NE", "NW", "SE", "SW", "STAY"}
@@ -103,12 +103,20 @@ async def play_turn(
     agent = engine.agent_for(role)
     observation = await _call_tool(client, "get_local_observation", {"role": role})
     estimate = agent.interpret(observation, opponent_message)
-    prompt = agent.build_prompt(observation, opponent_message)
+    suggestion = tactics.suggest(engine, role, estimate)
+    use_hint = bool(engine.config.get("strategy.enabled", default=False))
+    prompt = agent.build_prompt(
+        observation, opponent_message, suggestion=tactics.hint(suggestion) if use_hint else None
+    )
     decision = await engine.gemini.ask(role, prompt)
     message = decision.get("message") or f"({role} stays quiet)"
     coord_flagged = engine.guard.is_flagged(message)
     tool_name, tool_args = _normalize_action(decision, role)
     action_result = await _call_tool(client, tool_name, tool_args)
+    if not action_result.get("ok", True):
+        _LOG.warning("illegal move for %s; applying heuristic fallback", role)
+        tool_name, tool_args = tactics.to_action(role, suggestion)
+        action_result = await _call_tool(client, tool_name, tool_args)
     await _reconcile_state(engine, role)
     captured = bool(action_result.get("captured", False))
     board = engine.board_snapshot()

@@ -71,38 +71,6 @@ def test_cross_game_passes_token_and_callback(monkeypatch: Any) -> None:
     assert "turn" in types and "sub_game_end" in types
 
 
-def test_bonus_series_live_overrides_urls_and_writes(monkeypatch: Any, tmp_path: Any) -> None:
-    seen: dict[str, Any] = {}
-
-    async def fake_run_series(cfg: Any, *a: Any, **k: Any) -> Any:
-        seen["g1cop"] = cfg.get("bonus.mcp.group_1_cop")
-        seen["g2thief"] = cfg.get("bonus.mcp.group_2_thief")
-        return {"sub_games": [{"index": 1}], "reruns": 0}
-
-    monkeypatch.setattr(match, "run_series", fake_run_series)
-    monkeypatch.setattr(
-        match.bonus_report,
-        "build_report",
-        lambda cfg, sg: {"totals_by_group": {"COSMOS77": 60}, "bonus_claim": {}, "sub_games": sg},
-    )
-    monkeypatch.setattr(match.bonus_report, "serialize", lambda r: '{"ok":1}')
-    result = asyncio.run(
-        match.bonus_series_live(
-            _SeriesCfg(),
-            None,
-            tmp_path,
-            our_cop="https://oc/mcp",
-            our_thief="https://ot/mcp",
-            their_cop="https://tc/mcp",
-            their_thief="https://tt/mcp",
-            token="tok",
-        )
-    )
-    assert seen["g1cop"] == "https://oc/mcp" and seen["g2thief"] == "https://tt/mcp"
-    assert result["totals_by_group"] == {"COSMOS77": 60}
-    assert (tmp_path / "bonus_game.json").exists()
-
-
 def test_build_cloud_engine_attaches_state_sync(monkeypatch: Any) -> None:
     """Cross-process games need ClientStateSync or the canonical board never moves."""
     from cosmos77_ex06.bonus import cloud
@@ -116,3 +84,17 @@ def test_build_cloud_engine_attaches_state_sync(monkeypatch: Any) -> None:
     )
     assert engine.state_sync[0] == "sync"
     assert set(clients) == {"cop", "thief"}
+
+
+def test_local_game_runs_on_the_local_engine(monkeypatch: Any) -> None:
+    """House Match (solo) runs on the freeze-proof in-memory engine, not the cloud path."""
+    import cosmos77_ex06.orchestrator.local as local_mod
+
+    def fake_build(config: Any, gk: Any, cf: Any = None) -> Any:
+        return _FakeEngine(None), {"cop": _FakeClient(), "thief": _FakeClient()}
+
+    monkeypatch.setattr(local_mod, "build_engine", fake_build)
+    events: list[dict[str, Any]] = []
+    result = asyncio.run(match.local_game(_SeriesCfg(), None, on_event=events.append))
+    assert result["winner"] == "cop" and result["cop_score"] == 20
+    assert any(e.get("type") == "sub_game_end" for e in events)

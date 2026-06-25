@@ -122,7 +122,7 @@ def test_run_solo_needs_no_visitor_inputs(
     async def fake_exh(*a: Any, **k: Any) -> None:
         return None
 
-    monkeypatch.setattr(routes.runner, "run_exhibition", fake_exh)
+    monkeypatch.setattr(routes.runner, "run_solo", fake_exh)
     response = TestClient(app).post(
         "/api/run", json={"action": "solo", "passphrase": "open-sesame"}
     )
