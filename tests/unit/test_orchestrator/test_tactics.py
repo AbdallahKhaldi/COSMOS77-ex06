@@ -61,6 +61,13 @@ def test_cop_pursues_toward_centre_when_blind() -> None:
     assert sug["action"] == "move" and sug["direction"] == "NW"
 
 
+def test_cop_captures_instead_of_barriering_when_adjacent() -> None:
+    """With barriers off (default), an adjacent cop MOVES onto the thief — never walls it in."""
+    eng = _Engine(_State(grid=(4, 4), cop=(1, 1), thief=(1, 2)))
+    sug = tactics.suggest(eng, "cop", {"opponent_cell": [1, 2]})
+    assert sug["action"] == "move"  # pursues/captures, no place_barrier self-trap
+
+
 def test_thief_evades_off_its_corner() -> None:
     eng = _Engine(_State(cop=(2, 2), thief=(0, 0)))
     sug = tactics.suggest(eng, "thief", {"opponent_cell": [2, 2]})

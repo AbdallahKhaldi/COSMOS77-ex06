@@ -54,6 +54,8 @@ strategy:
   enabled: true           # ON: the heuristic's legal pursuit/evasion direction (E9) is
                           # offered to the LLM as a HINT it may accept or override; an
                           # illegal LLM move always falls back to it (no frozen agents).
+  use_barriers: false     # cop's heuristic drops roadblocks only when true; default OFF so
+                          # the cop is a pure hunter (captures beat walls; never self-traps).
 
 # Tabular Q-Learning hyper-parameters (Bellman update; offline self-play only).
 qlearning:

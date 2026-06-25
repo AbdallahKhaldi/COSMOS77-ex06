@@ -31,9 +31,10 @@ def suggest(engine: Any, role: str, estimate: dict[str, Any] | None) -> dict[str
     board = Board(list(state.grid_size), bool(state.allow_diagonal), set(state.barriers))
     target = _target_cell(state, estimate)
     if role == "cop":
+        use_barriers = bool(engine.config.get("strategy.use_barriers", default=False))
         left = int(engine.config.get("max_barriers")) - int(state.barriers_used)
         return heuristic.suggest_cop_action(
-            target, tuple(state.cop_pos), board, engine.config, left
+            target, tuple(state.cop_pos), board, engine.config, left if use_barriers else 0
         )
     return heuristic.suggest_thief_action(target, tuple(state.thief_pos), board, engine.config)
 
