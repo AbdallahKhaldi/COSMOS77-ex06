@@ -57,7 +57,7 @@ def test_cross_game_passes_token_and_callback(monkeypatch: Any) -> None:
     events: list[dict[str, Any]] = []
     result = asyncio.run(
         match.cross_game(
-            None,
+            _SeriesCfg(),
             None,
             cop_url="https://c/mcp",
             thief_url="https://t/mcp",
@@ -66,7 +66,9 @@ def test_cross_game_passes_token_and_callback(monkeypatch: Any) -> None:
         )
     )
     assert seen["token"] == "tok" and seen["cop_url"] == "https://c/mcp"
-    assert result["winner"] == "cop" and result["cop_score"] == 20 and len(events) == 1
+    assert result["winner"] == "cop" and result["cop_score"] == 20
+    types = [e.get("type") for e in events]
+    assert "turn" in types and "sub_game_end" in types
 
 
 def test_bonus_series_live_overrides_urls_and_writes(monkeypatch: Any, tmp_path: Any) -> None:

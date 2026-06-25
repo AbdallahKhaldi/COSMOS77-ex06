@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import copy
 from typing import Any
 from uuid import uuid4
 
@@ -23,6 +24,26 @@ from cosmos77_ex06.web import runner, security
 def _https_ok(*urls: str) -> bool:
     """True only when every URL is a non-empty ``https://`` URL (cloud-safe; E6)."""
     return all(bool(u) and u.lower().startswith("https://") for u in urls)
+
+
+def _clamp(value: int, lo: int, hi: int) -> int:
+    """Bound a user-supplied setting to a safe range (caps runtime + Gemini spend)."""
+    return max(lo, min(hi, value))
+
+
+def _run_config(base: Any, body: dict[str, Any]) -> Any:
+    """A per-run config copy with optional grid / moves / games overrides (clamped)."""
+    cfg = copy.copy(base)
+    cfg._data = copy.deepcopy(base._data)  # noqa: SLF001 - intentional per-run override
+    data = cfg._data  # noqa: SLF001
+    if body.get("grid"):
+        side = _clamp(int(body["grid"]), 3, 8)
+        data["grid_size"] = [side, side]
+    if body.get("moves"):
+        data["max_moves"] = _clamp(int(body["moves"]), 5, 40)
+    if body.get("games"):
+        data["num_games"] = _clamp(int(body["games"]), 1, 8)
+    return cfg
 
 
 async def index(request: Request) -> Any:
@@ -44,9 +65,9 @@ async def run(request: Request) -> JSONResponse:
     """
     body = await request.json()
     state = request.app.state
-    cfg = state.config
-    if not security.passphrase_ok(str(body.get("passphrase", "")), cfg):
+    if not security.passphrase_ok(str(body.get("passphrase", "")), state.config):
         return JSONResponse({"error": "Wrong or missing passphrase."}, status_code=403)
+    cfg = _run_config(state.config, body)
     action = body.get("action")
     if action not in ("solo", "exhibition", "series"):
         return JSONResponse({"error": "unknown action"}, status_code=400)

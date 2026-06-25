@@ -32,7 +32,7 @@ async def cross_game(
     on_event: Any = None,
     client_factory: Any = None,
 ) -> dict[str, Any]:
-    """Run ONE live game (``cop_url`` cop vs ``thief_url`` thief); return the scored result."""
+    """Run ``num_games`` live games (cop_url cop vs thief_url thief); stream + return the tally."""
     engine, clients = build_cloud_engine(
         config,
         gatekeeper,
@@ -42,13 +42,37 @@ async def cross_game(
         on_event=on_event,
         client_factory=client_factory,
     )
+    num = int(config.get("num_games", default=1))
+    totals = {"cop": 0, "thief": 0}
+    games: list[dict[str, Any]] = []
     async with clients["cop"], clients["thief"]:
-        result = await engine.play_sub_game(1)
+        for i in range(1, num + 1):
+            r = await engine.play_sub_game(i)
+            totals["cop"] += int(r.scores["cop"])
+            totals["thief"] += int(r.scores["thief"])
+            game = {
+                "sub_game": i,
+                "winner": r.winner,
+                "cop_score": int(r.scores["cop"]),
+                "thief_score": int(r.scores["thief"]),
+                "moves": int(r.move_count),
+            }
+            games.append(game)
+            if on_event is not None:
+                on_event({"type": "sub_game_end", **game, "totals": dict(totals)})
+    win = (
+        "cop"
+        if totals["cop"] > totals["thief"]
+        else "thief"
+        if totals["thief"] > totals["cop"]
+        else "tie"
+    )
     return {
-        "winner": result.winner,
-        "cop_score": int(result.scores["cop"]),
-        "thief_score": int(result.scores["thief"]),
-        "moves": int(result.move_count),
+        "winner": win,
+        "cop_score": totals["cop"],
+        "thief_score": totals["thief"],
+        "games": games,
+        "num_games": num,
     }
 
 

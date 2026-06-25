@@ -110,3 +110,27 @@ def test_cli_serve_dispatches_to_server_main(monkeypatch: Any) -> None:
     )
     assert main(["serve", "--port", "9999"]) == 0
     assert called["port"] == 9999
+
+
+# --- per-run game settings (grid / moves / games overrides) ------------------------------
+
+
+class _BaseCfg:
+    def __init__(self) -> None:
+        self._data = {"grid_size": [5, 5], "max_moves": 25, "num_games": 1}
+
+
+def test_run_config_applies_and_clamps_overrides() -> None:
+    from cosmos77_ex06.web.routes import _run_config
+
+    cfg = _run_config(_BaseCfg(), {"grid": 99, "moves": 2, "games": 50})
+    assert cfg._data["grid_size"] == [8, 8]  # grid clamped to 8
+    assert cfg._data["max_moves"] == 5  # moves clamped up to the floor of 5
+    assert cfg._data["num_games"] == 8  # games clamped to 8
+
+
+def test_run_config_no_overrides_keeps_defaults() -> None:
+    from cosmos77_ex06.web.routes import _run_config
+
+    cfg = _run_config(_BaseCfg(), {})
+    assert cfg._data == {"grid_size": [5, 5], "max_moves": 25, "num_games": 1}

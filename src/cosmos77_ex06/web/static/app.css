@@ -69,6 +69,13 @@ main{max-width:980px;margin:0 auto;padding:22px 18px 60px;position:relative;z-in
 .engage:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 12px 38px #3b9bff66}
 .engage:disabled{opacity:.5;cursor:not-allowed;filter:saturate(.4)}
 .err{color:var(--thief);font-family:var(--mono);font-size:13px;min-height:18px;margin:10px 2px 0}
+.settings{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;background:var(--panel);
+  border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:14px}
+.sett label{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--disp);
+  font-size:11px;letter-spacing:.12em;color:var(--muted);margin-bottom:9px}
+.sett label b{font-family:var(--mono);font-size:15px;color:var(--scan);letter-spacing:0}
+.sett input[type=range]{width:100%;accent-color:var(--cop);height:4px;cursor:pointer}
+@media(max-width:640px){.settings{grid-template-columns:1fr}}
 
 /* ---------- ARENA ---------- */
 .arena{animation:rise .4s ease}

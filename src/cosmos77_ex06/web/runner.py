@@ -25,6 +25,7 @@ def _meta(config: Config, mode: str) -> dict[str, Any]:
         "grid": list(config.get("grid_size")),
         "vision_radius": int(config.get("vision_radius", default=1)),
         "max_moves": int(config.get("max_moves", default=25)),
+        "num_games": 6 if mode == "series" else int(config.get("num_games", default=1)),
     }
 
 

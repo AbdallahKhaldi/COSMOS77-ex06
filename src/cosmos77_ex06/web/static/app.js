@@ -1,7 +1,7 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 let ws = null;
-const G = { rows: 5, cols: 5, vision: 1, maxMoves: 25, mode: "house" };
+const G = { rows: 5, cols: 5, vision: 1, maxMoves: 25, numGames: 1, mode: "house" };
 
 /* ---------- our coordinates ---------- */
 async function loadInfo() {
@@ -21,6 +21,16 @@ document.querySelectorAll(".tab").forEach((t) =>
     $("panel-house").classList.toggle("hidden", !house);
     $("panel-challenge").classList.toggle("hidden", house);
   }));
+
+/* ---------- settings sliders ---------- */
+function wireSlider(id, out, fmt) {
+  const el = $(id), o = $(out);
+  const upd = () => { o.textContent = fmt(el.value); };
+  el.addEventListener("input", upd); upd();
+}
+wireSlider("set-grid", "grid-val", (v) => v + "×" + v);
+wireSlider("set-moves", "moves-val", (v) => v);
+wireSlider("set-games", "games-val", (v) => v);
 
 /* ---------- board geometry ---------- */
 function buildGrid() {
@@ -128,10 +138,11 @@ function onMeta(e) {
   $("feed").innerHTML = ""; $("leakwarn").textContent = "";
   $("cop-score").textContent = "0"; $("thief-score").textContent = "0";
   buildGrid(); sizeBoard();
-  buildPips(e.mode === "series" ? 6 : 1);
+  G.numGames = e.num_games || (e.mode === "series" ? 6 : 1);
+  buildPips(G.numGames);
   place($("tok-cop"), G.rows - 1, G.cols - 1); place($("vis-cop"), G.rows - 1, G.cols - 1);
   place($("tok-thief"), 0, 0); place($("vis-thief"), 0, 0);
-  $("movereadout").textContent = "move 0 / " + G.maxMoves;
+  $("movereadout").textContent = "game 1 / " + G.numGames + " · move 0 / " + G.maxMoves;
   status("● LIVE — agents engaging over MCP", true);
   $("arena").scrollIntoView({ behavior: "smooth" });
 }
@@ -155,8 +166,13 @@ function onTurn(e) {
   addComms(e.role, e.message, e.coord_flagged);
   if (e.coord_flagged) { leaks++; $("leakwarn").textContent = "· " + leaks + " flagged"; }
   markPip(e.sub_game);
-  $("movereadout").textContent = "sub-game " + e.sub_game + " · move " + e.turn + " / " + G.maxMoves;
+  $("movereadout").textContent = "game " + e.sub_game + " / " + G.numGames + " · move " + e.turn + " / " + G.maxMoves;
   if (e.captured) { const l = $("lockon"); l.classList.remove("fire"); void l.offsetWidth; l.classList.add("fire"); }
+}
+function onSubGameEnd(e) {
+  if (e.totals) { $("cop-score").textContent = e.totals.cop; $("thief-score").textContent = e.totals.thief; }
+  const pip = $("subpips").children[e.sub_game - 1];
+  if (pip) { pip.classList.remove("now"); pip.classList.add(e.winner === "cop" ? "cop" : "thief"); }
 }
 function onEnd(e) {
   const r = e.result || {};
@@ -166,20 +182,25 @@ function onEnd(e) {
     const parts = Object.keys(t).map((k) => k + " " + t[k]).join("  ·  ");
     v.className = "verdict";
     v.textContent = "SERIES COMPLETE";
-    const s = document.createElement("small"); s.textContent = parts + (r.path ? "  ·  record: " + r.path : "");
+    const s = document.createElement("small"); s.textContent = parts + (r.path ? "  ·  record saved" : "");
     v.appendChild(s);
     (r.sub_games || []).forEach((sg, i) => {
       const pip = $("subpips").children[i];
       if (pip) pip.classList.add(sg.result === "capture" ? "cop" : "thief");
     });
   } else {
-    const copWin = r.winner === "cop";
     $("cop-score").textContent = r.cop_score; $("thief-score").textContent = r.thief_score;
-    const pip = $("subpips").children[0]; if (pip) pip.classList.add(copWin ? "cop" : "thief");
-    v.className = "verdict " + (copWin ? "cop" : "thief");
-    v.textContent = copWin ? "🚔 DETECTIVE CAPTURES THE ROGUE" : "🏃 ROGUE ESCAPES";
+    (r.games || []).forEach((g, i) => {
+      const pip = $("subpips").children[i];
+      if (pip) { pip.classList.remove("now"); pip.classList.add(g.winner === "cop" ? "cop" : "thief"); }
+    });
+    const win = r.winner, n = r.num_games || 1;
+    v.className = "verdict " + (win === "tie" ? "" : win);
+    if (n > 1) v.textContent = win === "cop" ? "🚔 DETECTIVE TAKES THE MATCH" : win === "thief" ? "🏃 ROGUE TAKES THE MATCH" : "⚖ DEAD HEAT";
+    else v.textContent = win === "cop" ? "🚔 DETECTIVE CAPTURES THE ROGUE" : "🏃 ROGUE ESCAPES";
+    const tape = (r.games || []).map((g) => (g.winner === "cop" ? "🚔" : "🏃")).join(" ");
     const s = document.createElement("small");
-    s.textContent = "cop " + r.cop_score + " · thief " + r.thief_score + " · " + r.moves + " moves";
+    s.textContent = tape + "   cop " + r.cop_score + " · thief " + r.thief_score;
     v.appendChild(s);
   }
   v.classList.remove("hidden");
@@ -187,6 +208,7 @@ function onEnd(e) {
 function handle(e) {
   if (e.type === "meta") onMeta(e);
   else if (e.type === "turn") onTurn(e);
+  else if (e.type === "sub_game_end") onSubGameEnd(e);
   else if (e.type === "game_end") onEnd(e);
   else if (e.type === "error") status("⚠ " + e.message, false);
   else if (e.type === "done") {
@@ -212,6 +234,7 @@ async function engage() {
     if (cmode === "swap") body.role = "their_cop";
     setLabels(cmode); leaks = 0;
   }
+  body.grid = +$("set-grid").value; body.moves = +$("set-moves").value; body.games = +$("set-games").value;
   $("err").textContent = ""; $("engage").disabled = true; status("authorizing…", false);
   let res;
   try {
@@ -228,7 +251,7 @@ async function engage() {
 }
 $("engage").addEventListener("click", engage);
 $("newmatch").addEventListener("click", () => {
-  if (es) { es.close(); es = null; }
+  if (ws) { try { ws.close(); } catch (x) { /* */ } ws = null; }
   $("verdict").classList.add("hidden");
   $("newmatch").classList.add("hidden");
   $("cop-score").textContent = "0"; $("thief-score").textContent = "0";
