@@ -70,8 +70,8 @@ llm:
   model: gemini-2.5-flash-lite  # spec §7.1 endorses free/basic models; lite is markedly less 503-congested than flash and billing lifts its cap
   temperature: 0.2
   max_retries: 6           # transient 429/5xx retries (Phase-7 full game makes hundreds of free-tier calls; raised for the long live run)
-  retry_base_seconds: 2.0  # exponential backoff base when the server suggests no delay
-  min_call_interval_seconds: 0.5  # paid tier (billing on): no free RPM cap, so pace lightly; retry handles transient 503s
+  retry_base_seconds: 1.0  # exponential backoff base when the server suggests no delay
+  min_call_interval_seconds: 0.15  # paid tier (billing on): no free RPM cap, so pace lightly; retry handles transient 503s
 
 # --- MCP servers (E2/E6): two FastMCP servers on separate ports, token auth ---
 mcp:
