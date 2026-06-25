@@ -47,7 +47,8 @@ def test_run_exhibition_streams_meta_turn_end_done(monkeypatch: Any) -> None:
         )
     )
     assert feed.types == ["meta", "turn", "game_end", "done"]
-    assert not feed.has("r1")  # the runner released the slot — no orphaned-queue leak
+    assert feed.active_count() == 0  # slot freed (no 429 leak)
+    assert feed.has("r1")  # queue KEPT so a late-connecting stream can still drain it
 
 
 def test_run_series_streams_meta_turn_end_done(monkeypatch: Any) -> None:
@@ -79,7 +80,7 @@ def test_run_series_streams_meta_turn_end_done(monkeypatch: Any) -> None:
         )
     )
     assert feed.types == ["meta", "turn", "game_end", "done"]
-    assert not feed.has("r1")
+    assert feed.active_count() == 0 and feed.has("r1")
 
 
 def test_run_exhibition_publishes_error_then_done(monkeypatch: Any) -> None:

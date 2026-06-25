@@ -22,6 +22,7 @@ class MatchFeed:
 
     def __init__(self) -> None:
         self._queues: dict[str, asyncio.Queue[dict[str, Any]]] = {}
+        self._active: set[str] = set()  # runs whose GAME TASK is still live (the 429 slot)
 
     def our_info(self, config: Config) -> dict[str, str]:
         """Public display info — our two live MCP URLs + the console URL (no secrets)."""
@@ -32,22 +33,29 @@ class MatchFeed:
         }
 
     def register(self, run_id: str) -> asyncio.Queue[dict[str, Any]]:
-        """Create + store a fresh queue for ``run_id``."""
+        """Create + store a fresh queue for ``run_id`` and mark its slot live."""
         queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
         self._queues[run_id] = queue
+        self._active.add(run_id)
         return queue
 
+    def finish(self, run_id: str) -> None:
+        """The game task ended: free its concurrency SLOT but KEEP the queue so a (possibly
+        late-connecting) stream can still drain the buffered events. The stream drops the queue."""
+        self._active.discard(run_id)
+
     def drop(self, run_id: str) -> None:
-        """Forget ``run_id``'s queue (after its stream ends)."""
+        """Forget ``run_id``'s queue entirely (the stream calls this once it has drained)."""
         self._queues.pop(run_id, None)
+        self._active.discard(run_id)
 
     def has(self, run_id: str) -> bool:
-        """True when ``run_id`` is currently registered."""
+        """True while ``run_id``'s queue still exists (drainable), even after the game ended."""
         return run_id in self._queues
 
     def active_count(self) -> int:
-        """Number of runs currently registered (live games), for the concurrency guard."""
-        return len(self._queues)
+        """Number of runs whose game task is still live, for the concurrency guard (429)."""
+        return len(self._active)
 
     def publish(self, run_id: str, event: dict[str, Any]) -> None:
         """Push one event onto ``run_id``'s queue (the on_event target + lifecycle events)."""

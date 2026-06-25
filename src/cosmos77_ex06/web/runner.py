@@ -41,7 +41,7 @@ async def run_solo(config: Config, gatekeeper: Gatekeeper, feed: Any, run_id: st
         feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
     finally:
         feed.publish(run_id, {"type": "done"})
-        feed.drop(run_id)  # release the concurrency slot even if no stream ever opened (no leak)
+        feed.finish(run_id)  # free the slot but KEEP the queue so a late stream still drains it
 
 
 async def run_exhibition(
@@ -70,7 +70,7 @@ async def run_exhibition(
         feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
     finally:
         feed.publish(run_id, {"type": "done"})
-        feed.drop(run_id)  # release the concurrency slot even if no stream ever opened (no leak)
+        feed.finish(run_id)  # free the slot but KEEP the queue so a late stream still drains it
 
 
 async def run_series(
@@ -105,4 +105,4 @@ async def run_series(
         feed.publish(run_id, {"type": "error", "message": f"{type(exc).__name__}: {exc}"})
     finally:
         feed.publish(run_id, {"type": "done"})
-        feed.drop(run_id)  # release the concurrency slot even if no stream ever opened (no leak)
+        feed.finish(run_id)  # free the slot but KEEP the queue so a late stream still drains it
