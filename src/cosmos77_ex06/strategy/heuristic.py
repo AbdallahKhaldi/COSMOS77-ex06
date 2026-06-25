@@ -53,24 +53,27 @@ def suggest_cop_action(
     board: Board,
     config: Config,
     barriers_left: int,
+    *,
+    optimal: bool = False,
 ) -> dict[str, object]:
     """Suggest the cop's action: minimize distance to the estimate, else cut off escape.
 
-    Returns ``{"action": "move", "direction": str}`` for the distance-minimizing legal
-    move, or ``{"action": "place_barrier", "cell": Cell}`` when the cop is adjacent to
-    the estimate, has budget, and a barrier measurably shrinks the thief's open area.
-    Operates only on ``estimate`` (the NL-inferred belief), never ground truth.
+    Returns ``{"action": "move", "direction": str}`` for the distance-minimizing legal move, or
+    ``{"action": "place_barrier", "cell": Cell}`` when adjacent with budget. ``optimal=True``
+    (the cross-group bonus) instead plays the retrograde-OPTIMAL pursuit that GUARANTEES capture
+    on an open board; the default greedy pursuit gives a livelier chase for the internal/house
+    game. Operates only on ``estimate`` (the NL-inferred belief), never ground truth.
     """
     barrier = _barrier_cutoff(estimate, self_pos, board, config, barriers_left)
     if barrier is not None:
         return {"action": "place_barrier", "cell": barrier}
-    if not board.barriers:
+    if optimal and not board.barriers:
         from cosmos77_ex06.strategy import pursuit
 
-        optimal = pursuit.best_move(tuple(self_pos), tuple(estimate), board)
-        if optimal is not None:  # open board -> retrograde-optimal pursuit forces the capture
-            return {"action": "move", "direction": optimal}
-    # ``legal_moves`` always contains STAY, so ``ranked`` is never empty (greedy fallback).
+        forced = pursuit.best_move(tuple(self_pos), tuple(estimate), board)
+        if forced is not None:  # open board -> retrograde-optimal pursuit forces the capture
+            return {"action": "move", "direction": forced}
+    # ``legal_moves`` always contains STAY, so ``ranked`` is never empty (greedy default).
     ranked = _ranked_moves(self_pos, estimate, board)
     return {"action": "move", "direction": ranked[0][2]}
 
@@ -80,22 +83,24 @@ def suggest_thief_action(
     self_pos: Cell,
     board: Board,
     config: Config,
+    *,
+    optimal: bool = False,
 ) -> dict[str, object]:
-    """Suggest the thief's action: optimal retrograde evasion, else a 1-ply maximin (deterministic).
+    """Suggest the thief's action: a 1-ply maximin evade, or optimal retrograde (deterministic).
 
-    Returns ``{"action": "move", "direction": str}``. On an open board it plays the retrograde
-    OPTIMAL evader (:func:`pursuit.best_evasion`) — maximal distance-to-capture, which survives an
-    optimal cop the longest and runs out the 25-move clock against a SUBOPTIMAL one. If the board
-    is barriered (solver assumes none) it falls back to a 1-ply maximin: keep the cop's worst-case
-    next-move distance largest, hug open space, prefer moving. Either way the cop's cell is NEVER
-    entered, so 'capture = cop-onto-thief' stays unambiguous across engines (no 0/0, E12).
+    Returns ``{"action": "move", "direction": str}``. ``optimal=True`` (the cross-group bonus) plays
+    the retrograde OPTIMAL evader (:func:`pursuit.best_evasion`) — maximal distance-to-capture,
+    which survives an optimal cop the longest and runs out the 25-move clock against a SUBOPTIMAL
+    one. The default is a 1-ply maximin (keep the cop's worst-case next-move distance largest, hug
+    open space, prefer moving). Either way the cop's cell is NEVER entered, so 'capture =
+    cop-onto-thief' stays unambiguous across engines (no 0/0, E12).
     """
-    if not board.barriers:
+    if optimal and not board.barriers:
         from cosmos77_ex06.strategy import pursuit
 
-        optimal = pursuit.best_evasion(tuple(estimate), tuple(self_pos), board)
-        if optimal is not None:
-            return {"action": "move", "direction": optimal}
+        forced = pursuit.best_evasion(tuple(estimate), tuple(self_pos), board)
+        if forced is not None:
+            return {"action": "move", "direction": forced}
     diag = board.allow_diagonal
     cop_next = [apply_move(estimate, name, board) for name in legal_moves(estimate, board)]
     cands: list[tuple[int, int, bool, Cell, str]] = []

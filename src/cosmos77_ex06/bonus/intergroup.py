@@ -42,8 +42,8 @@ def _our_direction(role: str, cop: tuple, thief: tuple, board: Board, config: Co
     from cosmos77_ex06.strategy import heuristic
 
     if role == "cop":
-        return heuristic.suggest_cop_action(thief, cop, board, config, 0)["direction"]
-    return heuristic.suggest_thief_action(cop, thief, board, config)["direction"]
+        return heuristic.suggest_cop_action(thief, cop, board, config, 0, optimal=True)["direction"]
+    return heuristic.suggest_thief_action(cop, thief, board, config, optimal=True)["direction"]
 
 
 def digest(sub_games: list[dict[str, Any]]) -> str:

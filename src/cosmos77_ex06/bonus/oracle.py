@@ -30,7 +30,11 @@ def decide(observation: dict[str, Any], config: Config) -> str:
     grid = list(observation.get("grid") or config.get("grid_size", default=[5, 5]))
     board = Board(grid, allow_diagonal=True)
     if role == "cop":
-        direction = heuristic.suggest_cop_action(thief, cop, board, config, 0)["direction"]
+        direction = heuristic.suggest_cop_action(thief, cop, board, config, 0, optimal=True)[
+            "direction"
+        ]
     else:
-        direction = heuristic.suggest_thief_action(cop, thief, board, config)["direction"]
+        direction = heuristic.suggest_thief_action(cop, thief, board, config, optimal=True)[
+            "direction"
+        ]
     return prose.format_move(role, "MOVE", str(direction))
