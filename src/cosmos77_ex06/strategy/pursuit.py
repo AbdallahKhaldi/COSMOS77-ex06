@@ -97,3 +97,27 @@ def best_move(cop: Cell, thief: Cell, board: Board) -> str | None:
         if best is None or cand < best:
             best = cand
     return best[3] if best else None
+
+
+def best_evasion(cop: Cell, thief: Cell, board: Board) -> str | None:
+    """The thief's optimal direction: maximise distance-to-capture (survive longest); never enter cop.
+
+    Against an optimal cop this delays capture as long as the board allows; against a SUBOPTIMAL cop
+    (e.g. a trained policy with a blind spot) maximal delay is exactly what runs out their 25 moves
+    and wins. Open board only; ``None`` falls the caller back to the maximin heuristic.
+    """
+    if board.barriers:
+        return None
+    tab = _solved(board)
+    rank, mv, dir_of = tab["rank"], tab["mv"], tab["dir_of"]
+    cop, thief = tuple(cop), tuple(thief)
+    best = None
+    for t2 in mv[thief]:
+        if t2 == cop:
+            continue  # never enter the cop's cell (keeps capture unambiguous)
+        r = rank.get((cop, t2, _COP))
+        dtc = 10**9 if r is None else r  # an escape (none on 5x5) ranks highest
+        cand = (-dtc, -len(board.neighbors(t2)), t2[0], t2[1], dir_of[(thief, t2)])
+        if best is None or cand < best:
+            best = cand
+    return best[4] if best else None

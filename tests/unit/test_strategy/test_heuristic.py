@@ -25,14 +25,17 @@ def test_cop_move_reduces_distance_to_estimate(config) -> None:
     assert distance(new_pos, est, board.allow_diagonal) < before
 
 
-def test_thief_move_increases_distance_to_estimate(config) -> None:
+def test_thief_move_never_approaches_or_enters_the_cop(config) -> None:
     board = Board.from_config(config)
     self_pos, est = (2, 2), (0, 0)
     before = distance(self_pos, est, board.allow_diagonal)
     action = heuristic.suggest_thief_action(est, self_pos, board, config)
     assert action["action"] == "move"
     new_pos = apply_move(self_pos, action["direction"], board)
-    assert distance(new_pos, est, board.allow_diagonal) > before
+    # The optimal evader never steps toward (or onto) the cop. It may KEEP distance rather than
+    # flee into a corner: maximal distance is a trap, maximal survival is not.
+    assert new_pos != est
+    assert distance(new_pos, est, board.allow_diagonal) >= before
 
 
 def test_manhattan_metric_used_when_diagonals_off(make_config) -> None:

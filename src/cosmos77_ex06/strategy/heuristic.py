@@ -81,15 +81,21 @@ def suggest_thief_action(
     board: Board,
     config: Config,
 ) -> dict[str, object]:
-    """Suggest the thief's action: a 1-ply MAXIMIN evade (deterministic).
+    """Suggest the thief's action: optimal retrograde evasion, else a 1-ply maximin (deterministic).
 
-    Returns ``{"action": "move", "direction": str}``. For each legal move it measures how close
-    the cop could get on ITS next move (the cop closes ~1/turn with king moves) and keeps that
-    worst-case distance LARGEST, then hugs open space and prefers moving over idling. Looking one
-    step ahead stops the thief HOLDING while the cop bears down (the fatal flaw of a myopic
-    max-distance-to-current-cell pick). The cop's cell is NEVER entered, so 'capture =
-    cop-onto-thief' stays unambiguous across engines (no cross-engine 0/0, E12).
+    Returns ``{"action": "move", "direction": str}``. On an open board it plays the retrograde
+    OPTIMAL evader (:func:`pursuit.best_evasion`) — maximal distance-to-capture, which survives an
+    optimal cop the longest and runs out the 25-move clock against a SUBOPTIMAL one. If the board
+    is barriered (solver assumes none) it falls back to a 1-ply maximin: keep the cop's worst-case
+    next-move distance largest, hug open space, prefer moving. Either way the cop's cell is NEVER
+    entered, so 'capture = cop-onto-thief' stays unambiguous across engines (no 0/0, E12).
     """
+    if not board.barriers:
+        from cosmos77_ex06.strategy import pursuit
+
+        optimal = pursuit.best_evasion(tuple(estimate), tuple(self_pos), board)
+        if optimal is not None:
+            return {"action": "move", "direction": optimal}
     diag = board.allow_diagonal
     cop_next = [apply_move(estimate, name, board) for name in legal_moves(estimate, board)]
     cands: list[tuple[int, int, bool, Cell, str]] = []
