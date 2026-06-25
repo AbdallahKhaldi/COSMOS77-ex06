@@ -112,6 +112,10 @@ async def play_turn(
     message = decision.get("message") or f"({role} stays quiet)"
     coord_flagged = engine.guard.is_flagged(message)
     tool_name, tool_args = _normalize_action(decision, role)
+    if use_hint and estimate.get("opponent_cell"):
+        # opponent IS in view — react tactically (cop pounces, thief breaks away) instead of
+        # risking an LLM step toward the opponent; the LLM still owns the NL message.
+        tool_name, tool_args = tactics.to_action(role, suggestion)
     action_result = await _call_tool(client, tool_name, tool_args)
     if not action_result.get("ok", True):
         _LOG.warning("illegal move for %s; applying heuristic fallback", role)

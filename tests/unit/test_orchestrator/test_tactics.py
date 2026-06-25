@@ -65,3 +65,17 @@ def test_thief_evades_off_its_corner() -> None:
     eng = _Engine(_State(cop=(2, 2), thief=(0, 0)))
     sug = tactics.suggest(eng, "thief", {"opponent_cell": [2, 2]})
     assert sug["action"] == "move" and sug["direction"] != "STAY"
+
+
+def test_thief_flees_when_cop_is_adjacent() -> None:
+    """Realism: a thief right next to the cop must not move toward it."""
+    from cosmos77_ex06.game.board import Board
+    from cosmos77_ex06.game.moves import apply_move
+    from cosmos77_ex06.strategy.heuristic import distance
+
+    cop, thief = (2, 2), (2, 3)
+    sug = tactics.suggest(
+        _Engine(_State(grid=(5, 5), cop=cop, thief=thief)), "thief", {"opponent_cell": list(cop)}
+    )
+    new_pos = apply_move(thief, sug["direction"], Board([5, 5], True, set()))
+    assert distance(new_pos, cop, True) >= distance(thief, cop, True)  # never closer to the cop
