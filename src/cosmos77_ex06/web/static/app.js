@@ -5,11 +5,14 @@ const G = { rows: 5, cols: 5, vision: 1, maxMoves: 25, numGames: 1, mode: "house
 
 /* ---------- our coordinates ---------- */
 async function loadInfo() {
+  const set = (ids, txt) => ids.forEach((id) => { const e = $(id); if (e) e.textContent = txt; });
   try {
     const d = await (await fetch("/api/our-info")).json();
-    $("our-cop").textContent = d.cop_url || "(servers offline — run deploy/live_tunnels.sh)";
-    $("our-thief").textContent = d.thief_url || "(servers offline)";
-  } catch (e) { /* keep placeholder */ }
+    set(["our-cop", "our-cop-2"], d.cop_url || "(servers offline — start the MCP tunnels)");
+    set(["our-thief", "our-thief-2"], d.thief_url || "(servers offline — start the MCP tunnels)");
+  } catch (e) {
+    set(["our-cop", "our-cop-2", "our-thief", "our-thief-2"], "(offline — could not reach control)");
+  }
 }
 
 /* ---------- mode tabs ---------- */
@@ -33,6 +36,107 @@ wireSlider("set-moves", "moves-val", (v) => v);
 wireSlider("set-games", "games-val", (v) => v);
 
 /* ---------- board geometry ---------- */
+/* procedural top-down GTA city behind #grid — roads on cell centres; cars drive the streets */
+function _mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};}
+
+/* Build/refresh the top-down city SVG behind #grid for current G.rows x G.cols. */
+function buildCity(){
+  const board=$("board"), grid=$("grid");
+  if(!board||!grid) return;
+  let city=board.querySelector(".city");
+  if(!city){ city=document.createElement("div"); city.className="city"; board.insertBefore(city,grid); }
+  const rows=G.rows,cols=G.cols,V=1000;
+  const rand=_mulberry32(rows*131+cols*17+101);
+  const cx=(i)=>((i+0.5)/cols)*V, cy=(i)=>((i+0.5)/rows)*V;   // cell centres == road centres (matches place())
+  const roadW=Math.max(30,Math.min(118,(V/Math.max(rows,cols))*0.40)), half=roadW/2;
+  const s=[];
+  const R=(x,y,w,h,f,ex="")=>s.push(`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${f}" ${ex}/>`);
+  s.push(`<svg viewBox="0 0 ${V} ${V}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`);
+  R(0,0,V,V,"#0b0e1a");                                       // ground
+
+  const colE=[];for(let c=0;c<cols;c++)colE.push([cx(c)-half,cx(c)+half]);
+  const rowE=[];for(let r=0;r<rows;r++)rowE.push([cy(r)-half,cy(r)+half]);
+
+  // city blocks = rectangles BETWEEN the roads (plus outer margins)
+  const blocks=[];
+  for(let bc=0;bc<=cols;bc++){
+    const x0=bc===0?0:colE[bc-1][1], x1=bc===cols?V:colE[bc][0]; if(x1-x0<6)continue;
+    for(let br=0;br<=rows;br++){
+      const y0=br===0?0:rowE[br-1][1], y1=br===rows?V:rowE[br][0]; if(y1-y0<6)continue;
+      blocks.push({x:x0,y:y0,w:x1-x0,h:y1-y0,bc,br});
+    }
+  }
+  // one park + one water block (prefer interior so they read clearly)
+  const interior=blocks.filter(b=>b.bc>0&&b.bc<cols&&b.br>0&&b.br<rows);
+  const pool=interior.length?interior:blocks;
+  const park=pool[Math.floor(rand()*pool.length)];
+  let water=pool[Math.floor(rand()*pool.length)];
+  if(water===park)water=pool[(pool.indexOf(park)+1)%pool.length];
+
+  const browns=["#3b3024","#342a20","#2f2922","#403428"];
+  const greys=["#2b2e39","#262a35","#31353f","#222530","#363a45"];
+  for(const b of blocks){
+    if(b===park){                                            // PARK + tree canopies
+      R(b.x,b.y,b.w,b.h,"#13351d"); R(b.x,b.y,b.w,b.h,"none",'stroke="#0006" stroke-width="2"');
+      const n=3+Math.floor(rand()*5);
+      for(let k=0;k<n;k++){const tx=b.x+8+rand()*Math.max(1,b.w-16),ty=b.y+8+rand()*Math.max(1,b.h-16),rr=4+rand()*8;
+        s.push(`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${rr.toFixed(1)}" fill="#1f5a30"/>`);
+        s.push(`<circle cx="${(tx-rr*0.3).toFixed(1)}" cy="${(ty-rr*0.3).toFixed(1)}" r="${(rr*0.55).toFixed(1)}" fill="#2c7a42"/>`);}
+      continue;
+    }
+    if(b===water){                                           // WATER + ripples
+      R(b.x,b.y,b.w,b.h,"#103b54"); R(b.x,b.y,b.w,b.h,"#1d6f96",'opacity="0.35"');
+      for(let k=0;k<3;k++){const wy=b.y+b.h*(0.25+0.22*k);
+        s.push(`<line x1="${(b.x+6).toFixed(1)}" y1="${wy.toFixed(1)}" x2="${(b.x+b.w-6).toFixed(1)}" y2="${wy.toFixed(1)}" stroke="#9fd8ef" stroke-width="1.5" opacity="0.25"/>`);}
+      continue;
+    }
+    // BUILDING footprint inset within the block
+    const pal=rand()<0.42?browns:greys, fill=pal[Math.floor(rand()*pal.length)];
+    const pad=Math.min(b.w,b.h)*(0.05+rand()*0.07);
+    const x=b.x+pad,y=b.y+pad,w=b.w-2*pad,h=b.h-2*pad;
+    if(w<8||h<8){R(b.x,b.y,b.w,b.h,"#1a1a22");continue;}
+    R(x,y,w,h,fill,'rx="2"');
+    R(x,y,w,h,"none",'rx="2" stroke="#0007" stroke-width="2"');           // dark edge = building height
+    R(x+2,y+2,w-4,h-4,"none",'rx="1" stroke="#ffffff10" stroke-width="1.5"'); // roof rim highlight
+    const nAC=Math.floor(rand()*3);                          // rooftop AC units / vents
+    for(let k=0;k<nAC;k++){const aw=4+rand()*8,ah=4+rand()*8;
+      const ax=x+4+rand()*Math.max(1,w-aw-8),ay=y+4+rand()*Math.max(1,h-ah-8);
+      R(ax,ay,aw,ah,"#00000038"); R(ax,ay,aw,ah,"none",'stroke="#ffffff14" stroke-width="1"');}
+    if(rand()<0.5){const sy=y+h*(0.3+rand()*0.4);            // roof seam
+      s.push(`<line x1="${(x+3).toFixed(1)}" y1="${sy.toFixed(1)}" x2="${(x+w-3).toFixed(1)}" y2="${sy.toFixed(1)}" stroke="#ffffff0c" stroke-width="1"/>`);}
+  }
+
+  // ROADS (asphalt) over the blocks so junctions stay clean
+  for(let r=0;r<rows;r++)R(0,cy(r)-half,V,roadW,"#191b21");
+  for(let c=0;c<cols;c++)R(cx(c)-half,0,roadW,V,"#191b21");
+  const ce=Math.max(1.5,roadW*0.035);                        // curbs
+  for(let r=0;r<rows;r++){R(0,cy(r)-half,V,ce,"#0a0b10");R(0,cy(r)+half-ce,V,ce,"#0a0b10");}
+  for(let c=0;c<cols;c++){R(cx(c)-half,0,ce,V,"#0a0b10");R(cx(c)+half-ce,0,ce,V,"#0a0b10");}
+
+  // yellow centre dashes down every street
+  const dash=roadW*0.55,gap=roadW*0.75,lw=Math.max(2,roadW*0.05);
+  for(let r=0;r<rows;r++)s.push(`<line x1="0" y1="${cy(r).toFixed(1)}" x2="${V}" y2="${cy(r).toFixed(1)}" stroke="#ffd400" stroke-width="${lw.toFixed(1)}" stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}" opacity="0.85"/>`);
+  for(let c=0;c<cols;c++)s.push(`<line x1="${cx(c).toFixed(1)}" y1="0" x2="${cx(c).toFixed(1)}" y2="${V}" stroke="#ffd400" stroke-width="${lw.toFixed(1)}" stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}" opacity="0.85"/>`);
+
+  // crosswalks: zebra stripes on all 4 approaches of every intersection
+  const nS=4, sw=Math.max(2.5,roadW*0.085), pitch=roadW/(nS+0.5);
+  const cwLen=roadW*0.5, near=half+roadW*0.06, far=near+cwLen;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const ix=cx(c),iy=cy(r);
+    for(let k=0;k<nS;k++){const off=(k-(nS-1)/2)*pitch;
+      s.push(`<line x1="${(ix+off).toFixed(1)}" y1="${(iy-far).toFixed(1)}" x2="${(ix+off).toFixed(1)}" y2="${(iy-near).toFixed(1)}" stroke="#dfe5f0" stroke-width="${sw.toFixed(1)}" opacity="0.5"/>`);
+      s.push(`<line x1="${(ix+off).toFixed(1)}" y1="${(iy+near).toFixed(1)}" x2="${(ix+off).toFixed(1)}" y2="${(iy+far).toFixed(1)}" stroke="#dfe5f0" stroke-width="${sw.toFixed(1)}" opacity="0.5"/>`);
+      s.push(`<line x1="${(ix-far).toFixed(1)}" y1="${(iy+off).toFixed(1)}" x2="${(ix-near).toFixed(1)}" y2="${(iy+off).toFixed(1)}" stroke="#dfe5f0" stroke-width="${sw.toFixed(1)}" opacity="0.5"/>`);
+      s.push(`<line x1="${(ix+near).toFixed(1)}" y1="${(iy+off).toFixed(1)}" x2="${(ix+far).toFixed(1)}" y2="${(iy+off).toFixed(1)}" stroke="#dfe5f0" stroke-width="${sw.toFixed(1)}" opacity="0.5"/>`);
+    }
+  }
+  // vignette so the play area pops
+  s.push(`<radialGradient id="cv" cx="50%" cy="46%" r="62%"><stop offset="62%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.45"/></radialGradient>`);
+  R(0,0,V,V,"url(#cv)");
+  s.push(`</svg>`);
+  city.innerHTML=s.join("");   // fully machine-generated from numeric N -> no untrusted input
+}
+
 function buildGrid() {
   const grid = $("grid");
   grid.style.gridTemplateColumns = `repeat(${G.cols},1fr)`;
@@ -82,7 +186,7 @@ function markVision(role, row, col) {
 
 function idleBoard() {
   G.rows = 5; G.cols = 5; G.vision = 1; G.maxMoves = 25;
-  buildGrid(); sizeBoard(); buildPips(1);
+  buildGrid(); buildCity(); sizeBoard(); buildPips(1);
   place($("tok-cop"), 4, 4); markVision("cop", 4, 4);
   place($("tok-thief"), 0, 0); markVision("thief", 0, 0);
   $("movereadout").textContent = "standby";
@@ -150,7 +254,7 @@ function onMeta(e) {
   $("verdict").classList.add("hidden"); $("newmatch").classList.add("hidden");
   $("feed").innerHTML = ""; $("leakwarn").textContent = "";
   $("cop-score").textContent = "0"; $("thief-score").textContent = "0";
-  buildGrid(); sizeBoard();
+  buildGrid(); buildCity(); sizeBoard();
   G.numGames = e.num_games || (e.mode === "series" ? 6 : 1);
   buildPips(G.numGames);
   place($("tok-cop"), G.rows - 1, G.cols - 1); markVision("cop", G.rows - 1, G.cols - 1);
@@ -293,6 +397,16 @@ $("newmatch").addEventListener("click", () => {
   idleBoard();
   status("SYSTEM READY", false);
   document.getElementById("setup").scrollIntoView({ behavior: "smooth" });
+});
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".copy");
+  if (!btn) return;
+  const code = $(btn.dataset.copy);
+  if (!code) return;
+  navigator.clipboard.writeText((code.textContent || "").trim()).then(() => {
+    const prev = btn.textContent; btn.textContent = "✓";
+    setTimeout(() => { btn.textContent = prev; }, 1200);
+  }).catch(() => {});
 });
 loadInfo();
 requestAnimationFrame(idleBoard);

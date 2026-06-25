@@ -19,6 +19,7 @@
   <span class="brand"><span class="ping" id="ping"></span>COSMOS77&nbsp;<b>CITY</b></span>
   <span class="statustext" id="statustext">SYSTEM READY</span>
   <span class="clearance">DEC-POMDP&nbsp;·&nbsp;MCP&nbsp;·&nbsp;GEMINI</span>
+  <a class="backlink" href="/challenge">CHALLENGE&nbsp;US&nbsp;→</a>
 </header>
 
 <main>
@@ -31,13 +32,17 @@
     <div class="panel" id="panel-house">
       <p class="blurb">Watch our two autonomous agents hunt each other — <b class="c-cop">the Detective</b> stalking <b class="c-thief">the Rogue</b> across a fog-of-war grid, trading threats over the wire. No setup. Press engage.</p>
       <div class="coords">
-        <div class="coord"><span class="lbl c-cop">OUR COP</span><code id="our-cop">connecting…</code></div>
-        <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code id="our-thief">connecting…</code></div>
+        <div class="coord"><span class="lbl c-cop">OUR COP</span><code id="our-cop">connecting…</code><button class="copy" data-copy="our-cop" title="Copy URL" aria-label="Copy cop URL">⧉</button></div>
+        <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code id="our-thief">connecting…</code><button class="copy" data-copy="our-thief" title="Copy URL" aria-label="Copy thief URL">⧉</button></div>
       </div>
     </div>
 
     <div class="panel hidden" id="panel-challenge">
-      <p class="blurb">Pit your two MCP servers against ours. Drop your coordinates and the shared clearance token, then choose a single match or the full 6-game role-swap series.</p>
+      <p class="blurb">Pit your two MCP servers against ours. Grab our live server URLs below, drop your own two URLs + the shared clearance token, then pick a single match or the full 6-game role-swap series. <a class="inlink" href="/challenge">Full briefing &rarr;</a></p>
+      <div class="coords ours">
+        <div class="coord"><span class="lbl c-cop">OUR COP</span><code id="our-cop-2">connecting…</code><button class="copy" data-copy="our-cop-2" title="Copy URL" aria-label="Copy our cop URL">⧉</button></div>
+        <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code id="our-thief-2">connecting…</code><button class="copy" data-copy="our-thief-2" title="Copy URL" aria-label="Copy our thief URL">⧉</button></div>
+      </div>
       <div class="field"><label>YOUR COP URL</label><input id="their-cop" type="url" placeholder="https://….trycloudflare.com/mcp" autocomplete="off"></div>
       <div class="field"><label>YOUR THIEF URL</label><input id="their-thief" type="url" placeholder="https://….trycloudflare.com/mcp" autocomplete="off"></div>
       <div class="field"><label>SHARED CLEARANCE TOKEN</label><input id="token" type="password" placeholder="the bearer token we agreed on" autocomplete="off"></div>

@@ -17,7 +17,7 @@ from starlette.templating import Jinja2Templates
 
 from cosmos77_ex06.shared.config import Config
 from cosmos77_ex06.shared.gatekeeper import Gatekeeper
-from cosmos77_ex06.web import routes
+from cosmos77_ex06.web import pages, routes
 from cosmos77_ex06.web.feed import MatchFeed
 
 _HERE = Path(__file__).resolve().parent
@@ -30,7 +30,8 @@ def build_app(config: Config | None = None, feed: MatchFeed | None = None) -> St
     repo_root = config.config_dir.parent
     app = Starlette(
         routes=[
-            Route("/", routes.index, methods=["GET"]),
+            Route("/", pages.index, methods=["GET"]),
+            Route("/challenge", pages.challenge, methods=["GET"]),
             Route("/api/our-info", routes.our_info, methods=["GET"]),
             Route("/api/run", routes.run, methods=["POST"]),
             Route("/api/events/{run_id}", routes.events, methods=["GET"]),

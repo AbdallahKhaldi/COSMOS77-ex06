@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSMOS77 CITY · Challenge Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#08090e">
+<meta name="description" content="How to challenge COSMOS77 in the MCP Cops & Robbers game — live server URLs, config, and the bonus role-swap series.">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="scanlines" aria-hidden="true"></div>
+<header class="statusbar">
+  <span class="brand">COSMOS77&nbsp;<b>CITY</b></span>
+  <span class="statustext">CHALLENGER BRIEFING</span>
+  <a class="backlink" href="/">&larr;&nbsp;BACK TO CONSOLE</a>
+</header>
+<main>
+<header class="statusbar chal-bar">
+  <span class="brand"><span class="ping" id="ping"></span>COSMOS77 <b>CITY</b></span>
+  <span class="statustext">CHALLENGER BRIEFING</span>
+  <span class="clearance">DEC-POMDP · MCP · INTER-GROUP E12</span>
+  <a class="backlink" href="/">← BACK TO CONSOLE</a>
+</header>
+
+<section class="chal-hero">
+  <h1 class="chal-title">Challenge <b>COSMOS77</b></h1>
+  <p class="chal-lede">You found the pit lane. This is the full briefing for any group that wants to put their two MCP servers up against ours — for the bragging rights, and for the inter-group 10-point bonus. Read it once, agree on a token, and engage.</p>
+  <div class="chal-cta">
+    <a class="engage" href="https://mount-buttons-shut-tcp.trycloudflare.com">⚡ OPEN THE CONSOLE</a>
+    <a class="ghostbtn" href="https://github.com/AbdallahKhaldi/COSMOS77-ex06" target="_blank" rel="noopener">⚙ VIEW THE REPO</a>
+  </div>
+</section>
+
+<!-- ============ WHAT THE GAME IS ============ -->
+<section class="panel">
+  <span class="kick">01 · THE GAME</span>
+  <h2 class="sec-h">A pursuit two autonomous agents play in plain English</h2>
+  <p class="blurb">This is a top-down Cops & Robbers chase formalized as a <b>Dec-POMDP</b>: a decentralized, partially-observable game. The <b class="c-cop">cop</b> hunts; the <b class="c-thief">thief</b> evades. Neither agent sees the whole board — each gets only a vision-radius window around itself, so both must reason and bluff under uncertainty.</p>
+  <p class="blurb">Each side is a <b>FastMCP server</b> that exposes <i>tools only</i> — <code>look</code>, <code>move</code>, <code>place_barrier</code>, <code>say</code> — and holds no intelligence of its own. The LLM lives <b>exclusively in the orchestrator</b> (the MCP client). The orchestrator pulls each agent's observation, asks the model for a move plus one line of trash talk, and pushes it back over the wire. Agents coordinate and taunt in <b>free natural language</b>, never a rigid numeric protocol — a coordinate-leak guard flags any message that smells like raw grid math.</p>
+  <div class="featrow">
+    <div class="feat"><span class="feat-k">Two servers</span><span class="feat-v">cop + thief, separate processes, token-gated</span></div>
+    <div class="feat"><span class="feat-k">One brain</span><span class="feat-v">the LLM only ever runs in the orchestrator</span></div>
+    <div class="feat"><span class="feat-k">Fog of war</span><span class="feat-v">vision radius 1 — Chebyshev window</span></div>
+    <div class="feat"><span class="feat-k">Free NL</span><span class="feat-v">prose comms, no numeric channel</span></div>
+  </div>
+</section>
+
+<!-- ============ OUR LIVE SERVERS ============ -->
+<section class="panel">
+  <span class="kick">02 · OUR LIVE SERVERS</span>
+  <h2 class="sec-h">Point your orchestrator at these</h2>
+  <p class="blurb">These are our two live MCP endpoints. Copy whichever side you need — you'll usually pit your thief against our cop, or your cop against our thief.</p>
+  <div class="coords">
+    <div class="coord"><span class="lbl c-cop">OUR COP</span><code class="copyable" data-copy="https://temporarily-realtors-sur-buttons.trycloudflare.com/mcp">https://temporarily-realtors-sur-buttons.trycloudflare.com/mcp</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+    <div class="coord"><span class="lbl c-thief">OUR THIEF</span><code class="copyable" data-copy="https://lamp-ips-providing-laws.trycloudflare.com/mcp">https://lamp-ips-providing-laws.trycloudflare.com/mcp</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+  </div>
+  <p class="note"><b>Heads up:</b> these are ephemeral <code>trycloudflare.com</code> tunnels — they rotate. If a URL is dead, ping us and we'll send fresh ones (the live console always shows the current pair on its house-match panel).</p>
+</section>
+
+<!-- ============ THE TOKEN ============ -->
+<section class="panel">
+  <span class="kick">03 · THE SHARED TOKEN</span>
+  <h2 class="sec-h">One bearer token, agreed by both sides</h2>
+  <p class="blurb">Every tool call into either server carries a bearer token. A challenge only runs if both teams agree on the <b>same</b> token at coordination time — it's the handshake that proves the match was set up by humans on both ends, not a drive-by.</p>
+  <ol class="steps">
+    <li><b>Agree out-of-band.</b> Pick one shared secret together over chat/email — any high-entropy string (e.g. <code>openssl rand -hex 16</code>). Whoever runs the orchestrator must use the exact same value the other side loaded into its servers.</li>
+    <li><b>Keep it out of the repo.</b> Each side stores it in <code>.env</code> as <code>BONUS_MCP_TOKEN=…</code> (gitignored, per our Rule 9). It never gets committed; rotating it instantly revokes old access.</li>
+    <li><b>Hand it to the run.</b> In the console, paste it into the <b>shared clearance token</b> field. On the CLI it's read from your environment / the partner config. If the token mismatches, calls are rejected and the game won't start.</li>
+  </ol>
+</section>
+
+<!-- ============ THE CONFIG ============ -->
+<section class="panel">
+  <span class="kick">04 · AGREE ON THE CONFIG</span>
+  <h2 class="sec-h">The tunables both sides must match</h2>
+  <p class="blurb">For a result to count, both teams run with identical rules. These are our defaults — the canonical set for a challenge. Confirm them before you engage.</p>
+  <div class="cfg-grid">
+    <div class="cfg"><span class="cfg-k">Grid</span><b class="cfg-v">5 × 5</b><span class="cfg-n">square board</span></div>
+    <div class="cfg"><span class="cfg-k">Moves / game</span><b class="cfg-v">25</b><span class="cfg-n">cap before the thief survives</span></div>
+    <div class="cfg"><span class="cfg-k">Vision radius</span><b class="cfg-v">1</b><span class="cfg-n">partial observability</span></div>
+    <div class="cfg"><span class="cfg-k">Turn order</span><b class="cfg-v">thief first</b><span class="cfg-n">then cop, each round</span></div>
+    <div class="cfg"><span class="cfg-k">Games / series</span><b class="cfg-v">6</b><span class="cfg-n">role-swap series</span></div>
+    <div class="cfg"><span class="cfg-k">Diagonals</span><b class="cfg-v">allowed</b><span class="cfg-n">8-way movement</span></div>
+  </div>
+  <h3 class="sub-h">Scoring</h3>
+  <table class="scoretab">
+    <thead><tr><th>Outcome</th><th>Cop</th><th>Thief</th></tr></thead>
+    <tbody>
+      <tr><td>Cop captures the thief</td><td class="c-cop">20</td><td>5</td></tr>
+      <tr><td>Thief survives all moves</td><td>5</td><td class="c-thief">10</td></tr>
+    </tbody>
+  </table>
+  <p class="note">In short: <b>cop win 20 / thief win 10 / loss 5</b> for the side that lost the round. A group's series total spans its three cop sub-games plus its three thief sub-games.</p>
+</section>
+
+<!-- ============ HOW TO RUN ============ -->
+<section class="panel">
+  <span class="kick">05 · RUN A CHALLENGE</span>
+  <h2 class="sec-h">Two ways to engage</h2>
+
+  <div class="howcard">
+    <div class="howhead"><span class="howtag">WAY 1</span><h3 class="sub-h sub-h--flush">The console — no install</h3></div>
+    <p class="blurb">Open our live console and switch to the <b>CHALLENGE</b> tab. Drop in your two server URLs and the shared token, then pick a mode and engage. You watch the whole chase render live — tokens gliding cell to cell, fog-of-war tint, intercepted comms.</p>
+    <div class="coord coord--solo"><span class="lbl">CONSOLE</span><code class="copyable" data-copy="https://mount-buttons-shut-tcp.trycloudflare.com">https://mount-buttons-shut-tcp.trycloudflare.com</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+    <div class="opts opts--static">
+      <span class="chip chip--static"><b class="c-cop">Our cop</b> vs <b class="c-thief">your thief</b></span>
+      <span class="chip chip--static"><b class="c-cop">Your cop</b> vs <b class="c-thief">our thief</b></span>
+      <span class="chip chip--static">Full series · 6 games</span>
+    </div>
+  </div>
+
+  <div class="howcard">
+    <div class="howhead"><span class="howtag">WAY 2</span><h3 class="sub-h sub-h--flush">The CLI — the bonus command</h3></div>
+    <p class="blurb">Clone the repo, fill a config block with the four MCP URLs and your group metadata, put the shared token in <code>.env</code>, and run the bonus driver. It plays the full role-swap series and writes the canonical <code>bonus_game</code> JSON.</p>
+    <pre class="codeblk"><code><span class="c-cmt"># one side runs the orchestrator (single-engine series)</span>
+export BONUS_MCP_TOKEN=<the token you both agreed on>
+uv run cosmos77-pursuit bonus --partner ./their-bonus-config.yaml</code></pre>
+    <p class="note">Output prints <code>totals_by_group</code> and the <code>bonus_claim</code>, and writes <code>reports/bonus_game.json</code> — the file both sides will diff and email.</p>
+  </div>
+</section>
+
+<!-- ============ THE BONUS ============ -->
+<section class="panel panel--gold">
+  <span class="kick kick--gold">06 · THE INTER-GROUP BONUS (E12)</span>
+  <h2 class="sec-h">10 points on the table — if the JSON matches to the byte</h2>
+  <p class="blurb">The headline prize. Two groups play a <b>6-game role-swap series</b>: three sub-games with our cop vs your thief, three with your cop vs our thief, so neither side is advantaged by a role. A single orchestrator engine runs all six.</p>
+  <ol class="steps">
+    <li><b>Play the series.</b> Run the <code>bonus</code> command above. Each side's points across its three cop and three thief sub-games are summed into <code>totals_by_group</code>.</li>
+    <li><b>Serialize canonically.</b> Both codebases write the <code>bonus_game</code> report through the <b>same canonical serializer</b> — <code>sort_keys=True</code>, <code>ensure_ascii=False</code>, <code>indent=2</code>. Same agreed value object in, identical bytes out, regardless of key insertion order.</li>
+    <li><b>Diff-check together.</b> Before anyone hits send, both sides run the byte-for-byte diff over the two files. It's deliberately dumb-and-total — it compares raw bytes and, on a mismatch, points at the first differing offset and the offending field.
+      <pre class="codeblk codeblk--tight"><code>uv run python -m cosmos77_ex06.bonus.diff_check ours.json theirs.json
+<span class="c-ok">IDENTICAL (N bytes) -> safe to set mutual_agreement:true and send</span></code></pre>
+    </li>
+    <li><b>Email the professor.</b> Once the diff is clean, set <code>mutual_agreement: true</code> and <b>each group separately emails the identical <code>bonus_game</code> JSON</b> to <code class="copyable" data-copy="rmisegal+uoh26b@gmail.com">rmisegal+uoh26b@gmail.com</code> before the <b>Friday 08:30 deadline</b>.</li>
+  </ol>
+  <div class="warn"><b>⚠ Mismatch = zero for both.</b> If the two files differ by a single byte — a float score, a reordered list, a flipped orientation, a missing <code>sort_keys</code> — neither group scores. The diff-check is the precondition for sending; do not skip it.</div>
+  <h3 class="sub-h">Bonus claim</h3>
+  <table class="scoretab">
+    <thead><tr><th>Series result</th><th>Points</th></tr></thead>
+    <tbody>
+      <tr><td>Higher cumulative total</td><td class="c-cop">10</td></tr>
+      <tr><td>Lower total</td><td>7</td></tr>
+      <tr><td>Exact tie</td><td>5 each</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="panel">
+  <span class="kick">07 · REPO & CONTACT</span>
+  <h2 class="sec-h">Ready when you are</h2>
+  <p class="blurb">Everything — the FastMCP servers, the orchestrator, the bonus harness, and this console — is open. Read the code, then message us to agree on a token, a config, and a time.</p>
+  <div class="coords">
+    <div class="coord coord--solo"><span class="lbl">REPO</span><code class="copyable" data-copy="https://github.com/AbdallahKhaldi/COSMOS77-ex06">github.com/AbdallahKhaldi/COSMOS77-ex06</code><button class="copybtn" type="button" aria-label="copy">COPY</button></div>
+    <div class="coord coord--solo"><span class="lbl">GROUP</span><code>COSMOS77 · Abdallah Khaldi & Tasneem Natour</code></div>
+  </div>
+  <p class="note">Bring a clean diff and good trash talk. See you on the grid.</p>
+</section>
+
+<script>
+document.querySelectorAll(".copybtn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const code = btn.parentElement.querySelector(".copyable");
+    const text = code ? (code.dataset.copy || code.textContent) : "";
+    navigator.clipboard.writeText(text).then(() => {
+      const prev = btn.textContent;
+      btn.textContent = "COPIED";
+      btn.classList.add("ok");
+      setTimeout(() => { btn.textContent = prev; btn.classList.remove("ok"); }, 1200);
+    }).catch(() => { btn.textContent = "ERR"; });
+  });
+});
+</script>
+</main>
+</body>
+</html>

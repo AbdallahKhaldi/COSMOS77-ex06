@@ -46,11 +46,6 @@ def _run_config(base: Any, body: dict[str, Any]) -> Any:
     return cfg
 
 
-async def index(request: Request) -> Any:
-    """Serve the single-page console (no passphrase needed to VIEW)."""
-    return request.app.state.templates.TemplateResponse(request, "index.html")
-
-
 async def our_info(request: Request) -> JSONResponse:
     """Return our two live MCP URLs + the console URL for display (no secrets)."""
     feed = request.app.state.feed
