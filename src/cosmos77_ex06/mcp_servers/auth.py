@@ -10,6 +10,7 @@ rotating ``COP_MCP_TOKEN`` / ``THIEF_MCP_TOKEN`` revokes that role immediately.
 from __future__ import annotations
 
 import os
+import secrets
 from typing import Any
 
 from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
@@ -35,13 +36,18 @@ def token_map(role: str, role_token: str, orch_token: str) -> dict[str, dict[str
 def build_verifier(role: str) -> StaticTokenVerifier:
     """Build a static-token verifier for ``role`` from env tokens (no secrets in code).
 
-    Reads ``COP_MCP_TOKEN`` / ``THIEF_MCP_TOKEN`` and ``ORCHESTRATOR_TOKEN`` from
-    the environment. Raises :class:`KeyError` if a required token is missing.
+    Reads ``COP_MCP_TOKEN`` / ``THIEF_MCP_TOKEN`` and ``ORCHESTRATOR_TOKEN`` from the
+    environment. When a token is ABSENT — e.g. a cloud platform's build-time
+    ``fastmcp inspect`` runs before runtime secrets are injected — it falls back to a
+    fresh unguessable random token so the module import never crashes (the real env
+    tokens are read again when the server actually boots at runtime). A genuinely unset
+    token therefore yields a server that safely REJECTS every call, never one that
+    crashes the build or accepts a blank/known token.
     """
     if role not in ROLE_ENV:
         raise ValueError(f"unknown role: {role!r}")
-    role_token = os.environ[ROLE_ENV[role]]
-    orch_token = os.environ[ORCH_ENV]
+    role_token = os.environ.get(ROLE_ENV[role]) or secrets.token_hex(32)
+    orch_token = os.environ.get(ORCH_ENV) or secrets.token_hex(32)
     return StaticTokenVerifier(
         tokens=token_map(role, role_token, orch_token),
         required_scopes=[READ_SCOPE],
