@@ -1,0 +1,33 @@
+# Render blueprint — deploy the COSMOS77 live console (the browser UI) as a persistent
+# Python web service. The two MCP servers live on FastMCP Cloud; THIS is the web UI that
+# runs the orchestrator (Gemini) and streams games to the browser over WebSockets.
+#
+# Deploy: render.com -> New -> Blueprint -> pick this repo -> set the secrets below
+# (the ones marked `sync: false`) in the dashboard -> Apply. You get a stable URL like
+# https://cosmos77-console.onrender.com (always reachable — not your laptop, not uni wifi).
+#
+# The Free plan sleeps after ~15 min idle (≈50 s cold start on the next visit); bump
+# `plan` to `starter` (~$7/mo) for always-on.  WebSockets work on every plan.
+services:
+  - type: web
+    name: cosmos77-console
+    runtime: python
+    plan: free
+    region: frankfurt            # closest Render region to Israel
+    buildCommand: pip install .
+    startCommand: cosmos77-web    # honors $PORT; binds 0.0.0.0
+    healthCheckPath: /            # the index page is public (no passphrase to VIEW)
+    autoDeploy: true              # redeploy on every push to the default branch
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: GEMINI_API_KEY       # the orchestrator's LLM key
+        sync: false
+      - key: WEB_PASSPHRASE       # the gate to launch a game (e.g. 123go!)
+        sync: false
+      - key: ORCHESTRATOR_TOKEN   # drives the MCP servers
+        sync: false
+      - key: COP_MCP_TOKEN
+        sync: false
+      - key: THIEF_MCP_TOKEN
+        sync: false
