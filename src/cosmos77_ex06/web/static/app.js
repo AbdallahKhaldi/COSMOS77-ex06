@@ -274,7 +274,7 @@ function resetWatchdog() {
   if (watchdog) clearTimeout(watchdog);
   watchdog = setTimeout(() => {
     if (runActive) status("⚠ no activity for a while — an agent may be stalled", false);
-  }, 25000);
+  }, 45000);
 }
 function onTurn(e) {
   const cop = $("tok-cop"), thief = $("tok-thief");

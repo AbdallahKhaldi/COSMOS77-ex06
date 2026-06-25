@@ -67,8 +67,9 @@ qlearning:
 # --- LLM (orchestrator only — never inside the MCP servers; E3) ---
 llm:
   provider: gemini
-  model: gemini-2.5-flash-lite  # spec §7.1 endorses free/basic models; lite is markedly less 503-congested than flash and billing lifts its cap
+  model: gemini-2.5-flash-lite  # fast (~1s/call); paid tier lifts the RPM/quota cap so no more 429 retry-stalls
   temperature: 0.2
+  thinking_budget: 0  # 0 = no "thinking" latency; the LLM only writes a taunt (the heuristic decides the move)
   max_retries: 6           # transient 429/5xx retries (Phase-7 full game makes hundreds of free-tier calls; raised for the long live run)
   retry_base_seconds: 1.0  # exponential backoff base when the server suggests no delay
   min_call_interval_seconds: 0.15  # paid tier (billing on): no free RPM cap, so pace lightly; retry handles transient 503s

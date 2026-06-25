@@ -87,10 +87,12 @@ class GeminiClient:
             properties={"message": s(type=t.STRING), "action": action},
             required=["message", "action"],
         )
+        budget = int(self.config.get("llm.thinking_budget", default=0))
         return types.GenerateContentConfig(
             temperature=self.temperature,
             response_mime_type="application/json",
             response_schema=schema,
+            thinking_config=types.ThinkingConfig(thinking_budget=budget),
         )
 
     async def ask(self, role: str, prompt: str) -> dict[str, Any]:
