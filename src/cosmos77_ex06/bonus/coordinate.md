@@ -8,6 +8,12 @@
 Work top-to-bottom with the partner group **before** the engine runs. Everything
 here feeds the *agreed value object* that must serialize identically on both sides.
 
+> **Minimal-dependence path (recommended):** **COSMOS77 runs the single engine** and
+> produces the one canonical `bonus_game` JSON. The partner's whole job is: deploy two
+> servers (§B), send us the two URLs + a shared token (§A/§B), then **email the exact
+> JSON file we send back** (§E). No orchestrator, no scoring, no byte-matching on their
+> side — steps D and most of E are ours.
+
 ## A. Pairing & orientation
 - [ ] Secure a partner group; exchange group codes. **Agree the orientation:** who
       is `group_1` (= COSMOS77, by default OUR group) and who is `group_2`. Both
@@ -35,8 +41,9 @@ here feeds the *agreed value object* that must serialize identically on both sid
 - [ ] Agree the **role-swap**: sub-games **1-3** group_1 cop vs group_2 thief;
       sub-games **4-6** group_2 cop vs group_1 thief.
 - [ ] Agree the `bonus.claim` schedule: win 10 / lose 7 / tie 5.
-- [ ] Agree **who runs the engine** (single-engine, recommended) — `engine_runner`
-      in the `bonus` config block.
+- [ ] Agree **who runs the engine** — default **COSMOS77** (single-engine, recommended;
+      `engine_runner` in the `bonus` config block). Whoever runs it produces the one
+      canonical JSON both groups email — so the other group never runs the engine.
 
 ## D. Fill the config & run
 - [ ] Fill the `bonus` block in `config/config.yaml` (group_2 code + repo + students,

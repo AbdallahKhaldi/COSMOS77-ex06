@@ -17,16 +17,16 @@
 
 <header class="statusbar">
   <span class="brand"><span class="ping" id="ping"></span>COSMOS77&nbsp;<b>CITY</b></span>
-  <span class="statustext" id="statustext">SYSTEM READY</span>
+  <span class="statustext" id="statustext" role="status" aria-live="polite">SYSTEM READY</span>
   <span class="clearance">DEC-POMDP&nbsp;·&nbsp;MCP&nbsp;·&nbsp;GEMINI</span>
   <a class="backlink" href="/challenge">CHALLENGE&nbsp;US&nbsp;→</a>
 </header>
 
 <main>
   <section class="setup" id="setup">
-    <div class="modetabs">
-      <button class="tab active" data-mode="house">⊙ &nbsp;HOUSE MATCH</button>
-      <button class="tab" data-mode="challenge">⚔ &nbsp;CHALLENGE</button>
+    <div class="modetabs" role="tablist" aria-label="Match mode">
+      <button class="tab active" data-mode="house" role="tab" aria-selected="true">⊙ &nbsp;HOUSE MATCH</button>
+      <button class="tab" data-mode="challenge" role="tab" aria-selected="false">⚔ &nbsp;CHALLENGE</button>
     </div>
 
     <div class="panel" id="panel-house">
@@ -109,10 +109,10 @@
 
     <div class="comms">
       <div class="comms-head">⦿ INTERCEPTED COMMS<span class="leakwarn" id="leakwarn"></span></div>
-      <div class="feed" id="feed"></div>
+      <div class="feed" id="feed" role="log" aria-live="polite" aria-label="Intercepted agent messages"></div>
     </div>
 
-    <div class="verdict hidden" id="verdict"></div>
+    <div class="verdict hidden" id="verdict" role="status" aria-live="assertive"></div>
     <button class="newmatch hidden" id="newmatch">↻ &nbsp;NEW MATCH</button>
   </section>
 </main>

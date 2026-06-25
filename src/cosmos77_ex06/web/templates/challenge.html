@@ -28,6 +28,19 @@
   </div>
 </section>
 
+<!-- ============ YOUR JOB IS TINY ============ -->
+<section class="panel panel--gold">
+  <span class="kick kick--gold">START HERE · YOUR JOB IS TINY</span>
+  <h2 class="sec-h">We run the engine — you do three things</h2>
+  <p class="blurb">To keep this painless, <b>COSMOS77 runs the orchestrator</b> for the whole series, scores it, and produces the canonical <code>bonus_game</code> JSON. Your side is minimal:</p>
+  <ol class="steps">
+    <li><b>Deploy your two MCP servers</b> (cop + thief) to public HTTPS URLs, exposing the <a class="inlink" href="#contract">tool contract below</a>. Built to the spec already? You're likely done. If a name or shape differs, the contract lists exactly what to match — and if matching is any hassle, you can deploy our open-source reference servers instead (same tool surface, your own token + branding), so there's nothing to change on your end.</li>
+    <li><b>Send us two links + one token.</b> Your two URLs, and a shared bearer token we both agree on over chat (e.g. <code>openssl rand -hex 16</code>).</li>
+    <li><b>We run the 6-game series, diff-check, and send you the final JSON.</b> You email that exact file to the professor. Done.</li>
+  </ol>
+  <p class="note">No orchestrator to write, no scoring to compute, no byte-matching to chase. You deploy two servers and send two links; we handle the rest.</p>
+</section>
+
 <!-- ============ WHAT THE GAME IS ============ -->
 <section class="panel">
   <span class="kick">01 · THE GAME</span>
@@ -55,7 +68,7 @@
 </section>
 
 <!-- ============ THE TOOL CONTRACT ============ -->
-<section class="panel">
+<section class="panel" id="contract">
   <span class="kick">02b · THE MCP TOOL CONTRACT</span>
   <h2 class="sec-h">The exact tools your servers must expose</h2>
   <p class="blurb">A cross-team series runs from <b>one</b> orchestrator driving all four servers, so your two servers must expose the same tool surface ours does (the spec describes these tools but doesn't pin their names — so we lock the contract here). Every call carries the shared bearer token: <code>Authorization: Bearer &lt;token&gt;</code>.</p>

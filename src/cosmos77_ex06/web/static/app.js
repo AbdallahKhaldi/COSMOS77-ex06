@@ -18,8 +18,12 @@ async function loadInfo() {
 /* ---------- mode tabs ---------- */
 document.querySelectorAll(".tab").forEach((t) =>
   t.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach((x) => {
+      x.classList.remove("active");
+      x.setAttribute("aria-selected", "false");
+    });
     t.classList.add("active");
+    t.setAttribute("aria-selected", "true");
     const house = t.dataset.mode === "house";
     $("panel-house").classList.toggle("hidden", !house);
     $("panel-challenge").classList.toggle("hidden", house);
