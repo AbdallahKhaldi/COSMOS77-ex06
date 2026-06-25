@@ -67,11 +67,24 @@ function trail(role, row, col) {
 }
 window.addEventListener("resize", sizeBoard);
 
+/* fog-of-war: tint the cells an agent can actually see (Chebyshev vision footprint) */
+function markVision(role, row, col) {
+  const cls = "scan-" + role;
+  document.querySelectorAll(".cell." + cls).forEach((c) => c.classList.remove(cls));
+  const cells = $("grid").children;
+  for (let r = Math.max(0, row - G.vision); r <= Math.min(G.rows - 1, row + G.vision); r++) {
+    for (let c = Math.max(0, col - G.vision); c <= Math.min(G.cols - 1, col + G.vision); c++) {
+      const cell = cells[r * G.cols + c];
+      if (cell && !cell.classList.contains("barrier")) cell.classList.add(cls);
+    }
+  }
+}
+
 function idleBoard() {
   G.rows = 5; G.cols = 5; G.vision = 1; G.maxMoves = 25;
   buildGrid(); sizeBoard(); buildPips(1);
-  place($("tok-cop"), 4, 4); place($("vis-cop"), 4, 4);
-  place($("tok-thief"), 0, 0); place($("vis-thief"), 0, 0);
+  place($("tok-cop"), 4, 4); markVision("cop", 4, 4);
+  place($("tok-thief"), 0, 0); markVision("thief", 0, 0);
   $("movereadout").textContent = "standby";
   const f = $("feed");
   if (!f.children.length) {
@@ -140,29 +153,36 @@ function onMeta(e) {
   buildGrid(); sizeBoard();
   G.numGames = e.num_games || (e.mode === "series" ? 6 : 1);
   buildPips(G.numGames);
-  place($("tok-cop"), G.rows - 1, G.cols - 1); place($("vis-cop"), G.rows - 1, G.cols - 1);
-  place($("tok-thief"), 0, 0); place($("vis-thief"), 0, 0);
+  place($("tok-cop"), G.rows - 1, G.cols - 1); markVision("cop", G.rows - 1, G.cols - 1);
+  place($("tok-thief"), 0, 0); markVision("thief", 0, 0);
   $("movereadout").textContent = "game 1 / " + G.numGames + " · move 0 / " + G.maxMoves;
   status("● LIVE — agents engaging over MCP", true);
   $("arena").scrollIntoView({ behavior: "smooth" });
 }
 let leaks = 0;
+let runActive = false;
+let watchdog = null;
+function resetWatchdog() {
+  if (watchdog) clearTimeout(watchdog);
+  watchdog = setTimeout(() => {
+    if (runActive) status("⚠ no activity for a while — an agent may be stalled", false);
+  }, 25000);
+}
 function onTurn(e) {
   const cop = $("tok-cop"), thief = $("tok-thief");
   if (e.role === "cop") { trail("cop", +cop.dataset.r || G.rows - 1, +cop.dataset.c || G.cols - 1); }
   else { trail("thief", +thief.dataset.r || 0, +thief.dataset.c || 0); }
-  place(cop, e.cop_pos[0], e.cop_pos[1]); place($("vis-cop"), e.cop_pos[0], e.cop_pos[1]);
-  place(thief, e.thief_pos[0], e.thief_pos[1]); place($("vis-thief"), e.thief_pos[0], e.thief_pos[1]);
+  place(cop, e.cop_pos[0], e.cop_pos[1]); place(thief, e.thief_pos[0], e.thief_pos[1]);
   cop.dataset.r = e.cop_pos[0]; cop.dataset.c = e.cop_pos[1];
   thief.dataset.r = e.thief_pos[0]; thief.dataset.c = e.thief_pos[1];
   document.querySelector(".agent.cop").classList.toggle("active", e.role === "cop");
   document.querySelector(".agent.thief").classList.toggle("active", e.role === "thief");
-  $("vis-" + e.role).classList.remove("pulse"); void $("vis-" + e.role).offsetWidth;
-  $("vis-" + e.role).classList.add("pulse");
   (e.barriers || []).forEach((b) => {
     const cell = $("grid").children[b[0] * G.cols + b[1]];
     if (cell) cell.classList.add("barrier");
   });
+  markVision("cop", e.cop_pos[0], e.cop_pos[1]);
+  markVision("thief", e.thief_pos[0], e.thief_pos[1]);
   addComms(e.role, e.message, e.coord_flagged);
   if (e.coord_flagged) { leaks++; $("leakwarn").textContent = "· " + leaks + " flagged"; }
   markPip(e.sub_game);
@@ -206,12 +226,15 @@ function onEnd(e) {
   v.classList.remove("hidden");
 }
 function handle(e) {
+  resetWatchdog();
   if (e.type === "meta") onMeta(e);
   else if (e.type === "turn") onTurn(e);
   else if (e.type === "sub_game_end") onSubGameEnd(e);
   else if (e.type === "game_end") onEnd(e);
   else if (e.type === "error") status("⚠ " + e.message, false);
   else if (e.type === "done") {
+    runActive = false;
+    if (watchdog) clearTimeout(watchdog);
     if (ws) { try { ws.close(); } catch (x) { /* */ } ws = null; }
     status("SYSTEM READY", false);
     document.querySelectorAll(".agent").forEach((a) => a.classList.remove("active"));
@@ -244,10 +267,18 @@ async function engage() {
   } catch (err) { $("err").textContent = "Network error reaching control."; $("engage").disabled = false; return; }
   if (res.error) { $("err").textContent = res.error; $("engage").disabled = false; status("SYSTEM READY", false); return; }
   if (ws) { try { ws.close(); } catch (x) { /* */ } }
+  runActive = true; status("● establishing secure link…", true); resetWatchdog();
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
   ws = new WebSocket(proto + "//" + location.host + "/api/ws/" + res.run_id);
   ws.onmessage = (m) => { try { handle(JSON.parse(m.data)); } catch (err) { /* skip */ } };
   ws.onerror = () => status("⚠ connection error", false);
+  ws.onclose = () => {
+    if (!runActive) return;
+    runActive = false;
+    if (watchdog) clearTimeout(watchdog);
+    status("⚠ link lost — press engage to retry", false);
+    $("engage").disabled = false; $("newmatch").classList.remove("hidden");
+  };
 }
 $("engage").addEventListener("click", engage);
 $("newmatch").addEventListener("click", () => {
